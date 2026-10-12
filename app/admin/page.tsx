@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DiffBadge, TypeBadge } from "@/components/Badges";
 import CategoryManager from "@/components/CategoryManager";
 import QuestionForm from "@/components/QuestionForm";
-import { subjectName } from "@/lib/data";
+import { DIFF, subjectName } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
@@ -18,6 +18,7 @@ export default function AdminPage() {
   const [pending, setPending] = useState<Pending[]>([]);
   const [stats, setStats] = useState<Stat[]>([]);
   const [armed, setArmed] = useState(false);
+  const [diffFix, setDiffFix] = useState<Record<string, number>>({});
 
   const emailUser = user && !user.is_anonymous && user.email;
 
@@ -105,8 +106,13 @@ export default function AdminPage() {
             )}
             {q.explanation && <p className="small muted" style={{ marginTop: 0 }}>해설: {q.explanation}</p>}
             <div className="row">
-              <button className="btn" onClick={async () => { const { error } = await sb().rpc("admin_review", { p_question: q.id, p_approve: true }); if (error) setMsg(friendly(error)); loadAll(); }}>승인 (+5점 지급)</button>
-              <button className="btn line" onClick={async () => { const { error } = await sb().rpc("admin_review", { p_question: q.id, p_approve: false }); if (error) setMsg(friendly(error)); loadAll(); }}>반려</button>
+              <label className="small muted" style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>난이도
+                <select className="input" style={{ width: "auto" }} value={diffFix[q.id] ?? q.difficulty} onChange={(e) => setDiffFix({ ...diffFix, [q.id]: +e.target.value })}>
+                  {DIFF.map((d) => <option key={d.level} value={d.level}>{d.label} · {d.points}점</option>)}
+                </select>
+              </label>
+              <button className="btn" onClick={async () => { const { error } = await sb().rpc("admin_review", { p_question: q.id, p_approve: true, p_difficulty: diffFix[q.id] ?? q.difficulty }); if (error) setMsg(friendly(error)); loadAll(); }}>승인 (+5점 지급)</button>
+              <button className="btn line" onClick={async () => { const { error } = await sb().rpc("admin_review", { p_question: q.id, p_approve: false, p_difficulty: null }); if (error) setMsg(friendly(error)); loadAll(); }}>반려</button>
             </div>
           </article>
         ))}

@@ -21,11 +21,14 @@ export type QuestionInput = {
 /** 학생 제안과 관리자 직접 추가에 같이 쓰는 문제 입력 폼 */
 export default function QuestionForm({
   maxDifficulty,
+  explainFrom,
   submitLabel,
   showSource,
   onSubmit,
 }: {
   maxDifficulty: number;
+  /** 이 난이도 이상이면 해설을 꼭 쓰게 한다 (관리자가 정답을 검토할 수 있게) */
+  explainFrom?: number;
   submitLabel: string;
   showSource?: boolean;
   onSubmit: (q: QuestionInput) => Promise<string>;
@@ -68,6 +71,8 @@ export default function QuestionForm({
     } else {
       choices = [];
     }
+    if (explainFrom && diff >= explainFrom && exp.trim().length < 10)
+      return setMsg("어려움·최상위 문제는 풀이 과정을 해설에 꼭 써 줘. 관리자가 정답이 맞는지 확인해야 해.");
     setBusy(true);
     try {
       const done = await onSubmit({
@@ -136,8 +141,8 @@ export default function QuestionForm({
           <span className="faint">맞다고 인정할 답이 여러 개면 | 로 구분해. 띄어쓰기·마침표는 자동으로 무시돼.</span>
         </label>
       )}
-      <label className="field" htmlFor="fExp">해설 (선택)
-        <textarea id="fExp" maxLength={500} value={exp} onChange={(e) => setExp(e.target.value)} placeholder="왜 그게 답인지 짧게" />
+      <label className="field" htmlFor="fExp">{explainFrom && diff >= explainFrom ? "해설 (필수: 풀이 과정까지)" : "해설 (선택)"}
+        <textarea id="fExp" maxLength={1000} value={exp} onChange={(e) => setExp(e.target.value)} placeholder="왜 그게 답인지 짧게" />
       </label>
       <div className="row">
         <button className="btn" disabled={busy}>{busy ? "올리는 중…" : submitLabel}</button>

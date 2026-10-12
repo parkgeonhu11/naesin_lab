@@ -350,6 +350,7 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- 문제 제안 (관리자가 승인해야 공개, 승인되면 출제 보너스 +5점, 최대 20문제)
+-- 난이도는 1~5 모두 가능. 어려움(4)·최상위(5)는 관리자가 검토할 수 있게 해설(풀이)을 꼭 써야 한다.
 drop function if exists public.suggest_question(text,text,smallint,text,jsonb,smallint,text);
 create or replace function public.suggest_question(
   p_subject text, p_unit text, p_topic text, p_qtype text, p_difficulty smallint, p_body text,
@@ -358,7 +359,9 @@ returns uuid language plpgsql security definer set search_path = public as $$
 declare uid uuid := auth.uid(); nid uuid; pend int; nick text;
 begin
   if uid is null then raise exception '로그인 세션이 없어'; end if;
-  if p_difficulty not between 1 and 3 then raise exception '난이도는 1~3만 가능'; end if;
+  if p_difficulty not between 1 and 5 then raise exception '난이도는 1~5만 가능'; end if;
+  if p_difficulty >= 4 and length(trim(coalesce(p_explanation,''))) < 10 then
+    raise exception '어려움·최상위 문제는 풀이 과정을 해설에 꼭 써 줘'; end if;
   if p_qtype = 'mc' and (p_answer is null or p_answer < 0 or p_answer >= jsonb_array_length(p_choices)) then
     raise exception '정답 번호가 보기 범위를 벗어났어'; end if;
   if p_qtype = 'short' and norm_answer(p_answer_text) = '' then raise exception '단답형 정답을 입력해 줘'; end if;
@@ -368,7 +371,7 @@ begin
   insert into questions(subject, unit, topic, qtype, difficulty, body, choices, explanation, source, status, author, author_nick, sort)
   values (p_subject, left(coalesce(p_unit,''),40), left(coalesce(p_topic,''),40), p_qtype, p_difficulty, p_body,
           case when p_qtype = 'short' then '[]'::jsonb else p_choices end,
-          left(coalesce(p_explanation,''),500), '학생 제안', 'pending', uid, coalesce(nick,''), 100000)
+          left(coalesce(p_explanation,''),1000), '학생 제안', 'pending', uid, coalesce(nick,''), 100000)
   returning id into nid;
   insert into question_answers(question_id, answer, answer_text)
   values (nid, case when p_qtype = 'mc' then p_answer end, case when p_qtype = 'short' then left(p_answer_text, 200) end);
@@ -390,14 +393,19 @@ begin
     where q.status = 'pending' order by q.created_at;
 end $$;
 
-create or replace function public.admin_review(p_question uuid, p_approve boolean)
+-- 승인할 때 관리자가 난이도를 고칠 수 있다 (p_difficulty, 비우면 그대로)
+drop function if exists public.admin_review(uuid, boolean);
+create or replace function public.admin_review(p_question uuid, p_approve boolean, p_difficulty smallint default null)
 returns void language plpgsql security definer set search_path = public as $$
 declare q questions%rowtype; bonus_count int;
 begin
   if not is_admin() then raise exception '관리자만 가능해'; end if;
+  if p_difficulty is not null and p_difficulty not between 1 and 5 then raise exception '난이도는 1~5만 가능'; end if;
   select * into q from questions where id = p_question for update;
   if not found then raise exception '문제를 찾을 수 없어'; end if;
-  update questions set status = case when p_approve then 'published' else 'rejected' end where id = p_question;
+  update questions set status = case when p_approve then 'published' else 'rejected' end,
+                       difficulty = case when p_approve and p_difficulty is not null then p_difficulty else difficulty end
+  where id = p_question;
   if p_approve then perform ensure_category(q.subject, q.unit, q.topic); end if;
   if p_approve and q.author is not null then
     select count(*) into bonus_count from score_events where user_id = q.author and reason = 'author';
@@ -482,14 +490,14 @@ end $$;
 
 -- ---------- 실행 권한 ----------
 revoke all on function public.admin_pending()           from public, anon;
-revoke all on function public.admin_review(uuid,boolean) from public, anon;
+revoke all on function public.admin_review(uuid,boolean,smallint) from public, anon;
 revoke all on function public.admin_add_question(text,text,text,text,smallint,text,jsonb,smallint,text,text,text) from public, anon;
 revoke all on function public.admin_hide_question(uuid)  from public, anon;
 revoke all on function public.admin_stats()             from public, anon;
 revoke all on function public.admin_reset_all()         from public, anon;
 revoke all on function public.admin_add_category(text,text,text)    from public, anon;
 revoke all on function public.admin_remove_category(text,text,text) from public, anon;
-grant execute on function public.admin_pending(), public.admin_review(uuid,boolean),
+grant execute on function public.admin_pending(), public.admin_review(uuid,boolean,smallint),
   public.admin_add_question(text,text,text,text,smallint,text,jsonb,smallint,text,text,text), public.admin_hide_question(uuid),
   public.admin_stats(), public.admin_reset_all(),
   public.admin_add_category(text,text,text), public.admin_remove_category(text,text,text) to authenticated;
