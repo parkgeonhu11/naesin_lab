@@ -1,4 +1,4 @@
-import { diffOf, subjectName, type MyState } from "@/lib/data";
+import { diffOf, qtypeName, subjectName, type MyState } from "@/lib/data";
 
 export function DiffBadge({ level }: { level: number }) {
   const d = diffOf(level);
@@ -11,6 +11,10 @@ export function DiffBadge({ level }: { level: number }) {
 
 export function SubjBadge({ code }: { code: string }) {
   return <span className="badge subj">{subjectName(code)}</span>;
+}
+
+export function TypeBadge({ type }: { type: string }) {
+  return <span className={`badge ${type === "short" ? "type-short" : "type-mc"}`}>{qtypeName(type)}</span>;
 }
 
 /** 채점 결과 표시 (온라인 저지처럼 "맞았습니다!!" / "틀렸습니다") */

@@ -36,8 +36,8 @@ export default function SuggestPage() {
         submitLabel="제안하기"
         onSubmit={async (q) => {
           const { error } = await sb().rpc("suggest_question", {
-            p_subject: q.subject, p_unit: q.unit, p_difficulty: q.difficulty, p_body: q.body,
-            p_choices: q.choices, p_answer: q.answer, p_explanation: q.explanation,
+            p_subject: q.subject, p_unit: q.unit, p_topic: q.topic, p_qtype: q.qtype, p_difficulty: q.difficulty, p_body: q.body,
+            p_choices: q.choices, p_answer: q.answer, p_answer_text: q.answerText, p_explanation: q.explanation,
           });
           if (error) throw error;
           await load();

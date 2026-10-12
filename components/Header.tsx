@@ -5,6 +5,8 @@ import { useMe } from "@/lib/useMe";
 
 const NAV = [
   { href: "/problems", label: "문제" },
+  { href: "/exam", label: "시험지" },
+  { href: "/review", label: "오답 노트" },
   { href: "/status", label: "채점 현황" },
   { href: "/ranking", label: "랭킹" },
   { href: "/suggest", label: "문제 제안" },

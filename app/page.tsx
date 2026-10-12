@@ -47,11 +47,12 @@ export default function Home() {
       <div className="home-grid">
         <div style={{ display: "grid", gap: 20 }}>
           <section className="panel intro">
-            <h1>내신 문제 풀고, 랭킹 올리기</h1>
-            <p>회원가입 없이 바로 시작해. 문제를 고르고, 답을 제출하면 바로 채점돼. 어려운 문제일수록 점수가 커.</p>
+            <h1>단원별로 풀고, 틀린 건 다시, 랭킹까지</h1>
+            <p>회원가입 없이 바로 시작해. 과목 → 대단원 → 세부 유형별로 문제를 고르거나, 범위를 정해 시험지를 만들어 풀 수 있어. 틀린 문제는 오답 노트에 모여.</p>
             <div className="row">
               <Link href="/problems" className="btn">문제 풀러 가기</Link>
-              <Link href="/ranking" className="btn line">랭킹 보기</Link>
+              <Link href="/exam" className="btn line">시험지 만들기</Link>
+              <Link href="/review" className="btn line">오답 노트</Link>
               <span className="small faint">전체 {total}문제</span>
             </div>
           </section>
@@ -124,8 +125,9 @@ export default function Home() {
             <div className="panel-head"><h2>이용 방법</h2></div>
             <div className="panel-body">
               <ol className="howto">
-                <li><b>문제</b> 메뉴에서 과목·단원을 골라.</li>
-                <li>보기를 고르고 <b>제출</b>. 바로 채점돼.</li>
+                <li><b>문제</b>에서 과목 → 단원 → 유형을 골라 풀거나, <b>시험지</b>로 한 번에 풀어.</li>
+                <li>객관식은 보기를, 단답형은 답을 써서 <b>제출</b>. 바로 채점돼.</li>
+                <li>틀린 문제는 <b>오답 노트</b>에, 약한 유형은 <b>내 정보</b>에 보여.</li>
                 <li>처음 맞히면 <b>만점</b>, 틀린 뒤 맞히면 <b>절반</b>.</li>
                 <li>점수: 매우 쉬움 5 · 쉬움 10 · 보통 20 · 어려움 35 · 최상위 50</li>
                 <li>직접 만든 문제를 <b>제안</b>해서 승인되면 +5점.</li>

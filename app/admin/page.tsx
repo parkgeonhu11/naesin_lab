@@ -1,11 +1,12 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { DiffBadge, TypeBadge } from "@/components/Badges";
 import QuestionForm from "@/components/QuestionForm";
-import { diffOf, subjectName } from "@/lib/data";
+import { subjectName } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
-type Pending = { id: string; subject: string; unit: string; difficulty: number; body: string; choices: string[]; answer: number; explanation: string; author_nick: string };
+type Pending = { id: string; subject: string; unit: string; topic: string; qtype: string; difficulty: number; body: string; choices: string[]; answer: number | null; answer_text: string | null; explanation: string; author_nick: string };
 type Stat = { user_id: string; nickname: string; total: number; week: number; answered: number; correct: number; gave_up: number; wrong_tries: number };
 
 export default function AdminPage() {
@@ -86,16 +87,21 @@ export default function AdminPage() {
           <article key={q.id} className="panel panel-body" style={{ background: "var(--head)" }}>
             <div className="row small muted" style={{ gap: 6, marginBottom: 6 }}>
               <span className="badge subj">{subjectName(q.subject)}</span>
-              <span className="badge lv3">{diffOf(q.difficulty).label} · {diffOf(q.difficulty).points}점</span>
-              {q.unit && <span>{q.unit}</span>}
+              <TypeBadge type={q.qtype} />
+              <DiffBadge level={q.difficulty} />
+              <span>{[q.unit, q.topic].filter(Boolean).join(" › ")}</span>
               <span>{q.author_nick || "익명"} 제안</span>
             </div>
             <p className="statement" style={{ fontSize: 15, marginBottom: 8 }}>{q.body}</p>
-            <ol style={{ margin: "0 0 8px", paddingLeft: 20 }}>
-              {q.choices.map((c, i) => (
-                <li key={i} style={i === q.answer ? { color: "var(--ac)", fontWeight: 700 } : undefined}>{c}{i === q.answer ? " ← 정답" : ""}</li>
-              ))}
-            </ol>
+            {q.qtype === "short" ? (
+              <p style={{ margin: "0 0 8px" }}>정답: <span className="answer-box">{q.answer_text}</span> <span className="small faint">(| 로 나눈 답은 모두 정답 처리)</span></p>
+            ) : (
+              <ol style={{ margin: "0 0 8px", paddingLeft: 20 }}>
+                {q.choices.map((c, i) => (
+                  <li key={i} style={i === q.answer ? { color: "var(--ac)", fontWeight: 700 } : undefined}>{c}{i === q.answer ? " ← 정답" : ""}</li>
+                ))}
+              </ol>
+            )}
             {q.explanation && <p className="small muted" style={{ marginTop: 0 }}>해설: {q.explanation}</p>}
             <div className="row">
               <button className="btn" onClick={async () => { const { error } = await sb().rpc("admin_review", { p_question: q.id, p_approve: true }); if (error) setMsg(friendly(error)); loadAll(); }}>승인 (+5점 지급)</button>
@@ -111,11 +117,12 @@ export default function AdminPage() {
         <h2 style={{ fontSize: 16, margin: 0 }}>문제 직접 추가 (바로 공개)</h2>
         <QuestionForm
           maxDifficulty={5}
+          showSource
           submitLabel="공개하기"
           onSubmit={async (q) => {
             const { error } = await sb().rpc("admin_add_question", {
-              p_subject: q.subject, p_unit: q.unit, p_difficulty: q.difficulty, p_body: q.body,
-              p_choices: q.choices, p_answer: q.answer, p_explanation: q.explanation,
+              p_subject: q.subject, p_unit: q.unit, p_topic: q.topic, p_qtype: q.qtype, p_difficulty: q.difficulty, p_body: q.body,
+              p_choices: q.choices, p_answer: q.answer, p_answer_text: q.answerText, p_explanation: q.explanation, p_source: q.source,
             });
             if (error) throw error;
             return "공개했어.";
