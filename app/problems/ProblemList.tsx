@@ -6,6 +6,7 @@ import { DiffBadge, StateIcon, SubjBadge, TypeBadge } from "@/components/Badges"
 import { DIFF, QTYPES, stateOf, SUBJECTS, subjectName } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 import { buildTree, useProblems } from "@/lib/useProblems";
+import { useRowLink } from "@/lib/useRowLink";
 
 /** 주소에 쓸 분류 링크 (?subject=ma&unit=...&topic=...) */
 const href = (subject?: string, unit?: string, topic?: string) => {
@@ -22,6 +23,7 @@ export default function ProblemList() {
   const params = useSearchParams();
   const router = useRouter();
   const path = usePathname();
+  const rowLink = useRowLink();
   const subject = params.get("subject") ?? "";
   const unit = params.get("unit") ?? "";
   const topic = params.get("topic") ?? "";
@@ -163,9 +165,9 @@ export default function ProblemList() {
                   </td></tr>
                 )}
                 {shown.map((r) => (
-                  <tr key={r.id}>
+                  <tr key={r.id} {...rowLink(`/problem/${r.no}`)}>
                     <td className="c n"><Link className="link" href={`/problem/${r.no}`}>{r.no}</Link></td>
-                    <td className="title-cell"><Link href={`/problem/${r.no}`}>{r.title}</Link></td>
+                    <td className="title-cell"><Link className="cell-link" href={`/problem/${r.no}`}>{r.title}</Link></td>
                     <td className="unit-cell hide-m">
                       {!subject && <><SubjBadge code={r.subject} /> </>}
                       <span className="small muted">{topic ? r.topic : unit ? r.topic : r.unit}</span>

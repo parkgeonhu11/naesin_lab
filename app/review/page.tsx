@@ -5,10 +5,12 @@ import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
 import { stateOf, type ProblemRow, type Progress } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 import { useProblems } from "@/lib/useProblems";
+import { useRowLink } from "@/lib/useRowLink";
 
 type Row = ProblemRow & { p: Progress };
 
 function Table({ rows, empty, showRetry }: { rows: Row[]; empty: string; showRetry?: boolean }) {
+  const rowLink = useRowLink();
   return (
     <div className="table-wrap">
       <table className="tbl">
@@ -21,9 +23,9 @@ function Table({ rows, empty, showRetry }: { rows: Row[]; empty: string; showRet
         <tbody>
           {rows.length === 0 && <tr><td colSpan={7} className="empty-cell">{empty}</td></tr>}
           {rows.map((r) => (
-            <tr key={r.id}>
+            <tr key={r.id} {...rowLink(`/problem/${r.no}`)}>
               <td className="c n"><Link className="link" href={`/problem/${r.no}`}>{r.no}</Link></td>
-              <td className="title-cell"><Link href={`/problem/${r.no}`}>{r.title}</Link></td>
+              <td className="title-cell"><Link className="cell-link" href={`/problem/${r.no}`}>{r.title}</Link></td>
               <td className="unit-cell hide-m"><SubjBadge code={r.subject} /> <span className="small muted">{r.topic || r.unit}</span></td>
               <td className="c hide-m"><TypeBadge type={r.qtype} /></td>
               <td className="c nowrap"><DiffBadge level={r.difficulty} /></td>

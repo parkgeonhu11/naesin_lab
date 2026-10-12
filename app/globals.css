@@ -254,3 +254,39 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .weak-item { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border: 1px solid var(--wa); background: var(--wa-soft); border-radius: 6px; padding: 10px 14px; }
 .weak-item b { flex: 1 1 180px; }
 .group-row td { background: var(--head); font-weight: 700; }
+
+/* ---------- 휴대폰 터치 ---------- */
+/* 두 번 눌러 확대 대기(약 0.3초)를 없애고, 누른 곳이 살짝 표시되게 */
+a, button, select, label, summary, .row-link { touch-action: manipulation; -webkit-tap-highlight-color: rgba(31, 79, 163, .14); }
+.tbl tr.row-link { cursor: pointer; }
+.tbl .cell-link { display: block; overflow: hidden; text-overflow: ellipsis; }
+@media (hover: none) {
+  /* 터치 화면에서는 hover 색이 눌린 뒤에도 남아 헷갈리니 끈다 */
+  .tbl tbody tr:hover td { background: inherit; }
+  .tbl tr.mine:hover td { background: var(--brand-soft); }
+  .choice:hover:not(:disabled) { border-color: var(--line); background: var(--surface); }
+  .choice[aria-pressed="true"]:hover:not(:disabled) { border-color: var(--brand); background: var(--brand-soft); }
+  .tbl tr.row-link:active td { background: var(--head); }
+}
+@media (max-width: 640px) {
+  /* iOS는 16px보다 작은 입력 칸을 누르면 화면을 확대해 버려서 16px로 */
+  input, select, textarea, .filters select, .filters input, .field input, .field select, .field textarea { font-size: 16px; }
+  .filters select, .filters input { min-height: 42px; padding: 8px 10px; }
+  .filters select { flex: 1 1 calc(50% - 4px); min-width: 0; }
+  .btn { min-height: 44px; padding: 10px 16px; justify-content: center; }
+  .gnb-nav a { padding: 13px 12px 11px; }
+  .tabs { overflow-x: auto; flex-wrap: nowrap; }
+  .tabs button, .tabs a { padding: 13px 14px 11px; white-space: nowrap; }
+  .tbl td { padding-block: 13px; }
+  .choice { padding: 14px 12px; font-size: 16px; }
+  .choice .cn { width: 26px; height: 26px; font-size: 13px; }
+  .checks label { padding: 10px 12px; font-size: 15px; }
+  .checks input { width: 18px; height: 18px; }
+  .subj-cell { padding: 16px; }
+  .filters select.cat-mobile { display: block; }
+  .filters input { flex-basis: 100%; }
+  .exam-bar .btn { flex: 1 1 auto; }
+  .panel-head .more { padding: 10px 6px; margin-block: -10px; }
+  .prob-head .crumb a { display: inline-block; padding: 8px 2px; margin-block: -8px; }
+  .prob-head .crumb { line-height: 2.2; }
+}

@@ -6,9 +6,11 @@ import { ResultText } from "@/components/Badges";
 import { ago, SUBJECTS, type BoardRow, type ProblemRow, type Submission } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
+import { useRowLink } from "@/lib/useRowLink";
 
 export default function Home() {
   const { user, nickname, error, ready, saveNickname } = useMe();
+  const rowLink = useRowLink();
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [total, setTotal] = useState(0);
   const [top, setTop] = useState<BoardRow[] | null>(null);
@@ -86,7 +88,7 @@ export default function Home() {
                   {recent === null && <tr><td colSpan={4} className="empty-cell">불러오는 중…</td></tr>}
                   {recent?.length === 0 && <tr><td colSpan={4} className="empty-cell">아직 제출이 없어. 첫 번째로 풀어 봐!</td></tr>}
                   {recent?.map((s) => (
-                    <tr key={s.id} className={s.is_me ? "mine" : ""}>
+                    <tr key={s.id} {...rowLink(`/problem/${s.problem_no}`, s.is_me ? "mine" : "")}>
                       <td>{s.nickname}</td>
                       <td><Link className="link" href={`/problem/${s.problem_no}`}>{s.problem_no}</Link></td>
                       <td><ResultText correct={s.is_correct} /></td>

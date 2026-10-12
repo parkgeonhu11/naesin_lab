@@ -5,9 +5,11 @@ import { ResultText, SubjBadge } from "@/components/Badges";
 import { ago, type Submission } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
+import { useRowLink } from "@/lib/useRowLink";
 
 export default function StatusPage() {
   const { user } = useMe();
+  const rowLink = useRowLink();
   const [onlyMe, setOnlyMe] = useState(false);
   const [rows, setRows] = useState<Submission[] | null>(null);
 
@@ -49,7 +51,7 @@ export default function StatusPage() {
               {rows === null && <tr><td colSpan={7} className="empty-cell">불러오는 중…</td></tr>}
               {rows?.length === 0 && <tr><td colSpan={7} className="empty-cell">아직 제출이 없어.</td></tr>}
               {rows?.map((s) => (
-                <tr key={s.id} className={s.is_me ? "mine" : ""}>
+                <tr key={s.id} {...rowLink(`/problem/${s.problem_no}`, s.is_me ? "mine" : "")}>
                   <td className="c n faint hide-m">{s.id}</td>
                   <td>{s.nickname}</td>
                   <td className="c n"><Link className="link" href={`/problem/${s.problem_no}`}>{s.problem_no}</Link></td>
