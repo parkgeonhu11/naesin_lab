@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { DIFF, QTYPES, SUBJECTS, type QType } from "@/lib/data";
 import { friendly } from "@/lib/supabase";
+import { useCategories } from "@/lib/useProblems";
 
 export type QuestionInput = {
   subject: string;
@@ -42,6 +43,10 @@ export default function QuestionForm({
   const [source, setSource] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const { cats } = useCategories();
+  // 고른 과목의 기존 분류를 입력 칸 추천 목록으로 보여 준다
+  const unitOptions = Array.from(new Set(cats.filter((c) => c.subject === subject).map((c) => c.unit)));
+  const topicOptions = Array.from(new Set(cats.filter((c) => c.subject === subject && (!unit || c.unit === unit)).map((c) => c.topic).filter(Boolean)));
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,10 +91,12 @@ export default function QuestionForm({
           </select>
         </label>
         <label className="field" htmlFor="fUnit">대단원
-          <input id="fUnit" maxLength={40} value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="삼각비" />
+          <input id="fUnit" list="unit-options" maxLength={40} value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="목록에서 고르거나 직접 입력" />
+          <datalist id="unit-options">{unitOptions.map((u) => <option key={u} value={u} />)}</datalist>
         </label>
         <label className="field" htmlFor="fTopic">세부 유형 (선택)
-          <input id="fTopic" maxLength={40} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="특수각의 삼각비" />
+          <input id="fTopic" list="topic-options" maxLength={40} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="목록에서 고르거나 직접 입력" />
+          <datalist id="topic-options">{topicOptions.map((t) => <option key={t} value={t} />)}</datalist>
         </label>
       </div>
       <div className="row">

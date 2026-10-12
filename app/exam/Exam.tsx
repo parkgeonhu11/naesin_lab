@@ -18,8 +18,8 @@ const COUNTS = [5, 10, 15, 20, 30];
 export default function Exam() {
   const params = useSearchParams();
   const { user, refreshScore } = useMe();
-  const { rows, prog } = useProblems();
-  const tree = useMemo(() => buildTree(rows ?? []), [rows]);
+  const { rows, prog, cats } = useProblems();
+  const tree = useMemo(() => buildTree(rows ?? [], cats), [rows, cats]);
 
   // ---------- 1단계: 시험지 설정 ----------
   const [subject, setSubject] = useState(params.get("subject") ?? "ma");
@@ -272,7 +272,7 @@ export default function Exam() {
                   {u} <span className="faint small">{uv.count}</span>
                 </label>
               ))}
-              {!Object.keys(tree[subject]?.units ?? {}).length && <span className="faint small">아직 문제가 없어.</span>}
+              {!Object.keys(tree[subject]?.units ?? {}).length && <span className="faint small">아직 분류가 없어.</span>}
             </div>
           </div>
           {topicChoices.length > 0 && (
@@ -319,7 +319,7 @@ export default function Exam() {
             <button className="btn" disabled={!pool.length} onClick={makePaper}>
               시험지 만들기 ({Math.min(count, pool.length)}문항)
             </button>
-            <span className="small muted">조건에 맞는 문제 {pool.length}개 중에서 무작위로 골라.</span>
+            <span className="small muted">{pool.length ? `조건에 맞는 문제 ${pool.length}개 중에서 무작위로 골라.` : "이 범위에는 아직 문제가 없어. 다른 범위를 고르거나 문제가 올라오면 다시 와 줘."}</span>
           </div>
           {err && <span className="res-wa small">{err}</span>}
         </section>

@@ -18,7 +18,7 @@ const href = (subject?: string, unit?: string, topic?: string) => {
 
 export default function ProblemList() {
   const { error } = useMe();
-  const { rows, prog } = useProblems();
+  const { rows, prog, cats } = useProblems();
   const params = useSearchParams();
   const router = useRouter();
   const path = usePathname();
@@ -37,7 +37,7 @@ export default function ProblemList() {
     router.replace(`${path}${next.toString() ? "?" + next : ""}`, { scroll: false });
   };
 
-  const tree = useMemo(() => buildTree(rows ?? []), [rows]);
+  const tree = useMemo(() => buildTree(rows ?? [], cats), [rows, cats]);
 
   const shown = useMemo(() => {
     const kw = q.trim().toLowerCase();
@@ -157,7 +157,11 @@ export default function ProblemList() {
               </thead>
               <tbody>
                 {rows === null && <tr><td colSpan={7} className="empty-cell">불러오는 중…</td></tr>}
-                {rows && shown.length === 0 && <tr><td colSpan={7} className="empty-cell">조건에 맞는 문제가 없어.</td></tr>}
+                {rows && shown.length === 0 && (
+                  <tr><td colSpan={7} className="empty-cell">
+                    {rows.length === 0 || (!diff && !type && !mine && !q) ? <>이 분류에는 아직 문제가 없어. <Link className="link" href="/suggest">문제를 제안</Link>하면 관리자가 확인하고 올려 줘.</> : "조건에 맞는 문제가 없어."}
+                  </td></tr>
+                )}
                 {shown.map((r) => (
                   <tr key={r.id}>
                     <td className="c n"><Link className="link" href={`/problem/${r.no}`}>{r.no}</Link></td>

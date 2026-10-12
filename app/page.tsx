@@ -53,7 +53,7 @@ export default function Home() {
               <Link href="/problems" className="btn">문제 풀러 가기</Link>
               <Link href="/exam" className="btn line">시험지 만들기</Link>
               <Link href="/review" className="btn line">오답 노트</Link>
-              <span className="small faint">전체 {total}문제</span>
+              <span className="small faint">{total ? `전체 ${total}문제` : "아직 문제가 없어. 문제가 올라오면 여기서 바로 풀 수 있어."}</span>
             </div>
           </section>
 

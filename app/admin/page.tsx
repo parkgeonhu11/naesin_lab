@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { DiffBadge, TypeBadge } from "@/components/Badges";
+import CategoryManager from "@/components/CategoryManager";
 import QuestionForm from "@/components/QuestionForm";
 import { subjectName } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
@@ -129,6 +130,8 @@ export default function AdminPage() {
           }}
         />
       </section>
+
+      <CategoryManager />
 
       <section className="panel">
         <div className="panel-head"><h2>참가자 현황 <span className="num muted">{stats.length}명</span></h2></div>
