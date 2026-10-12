@@ -37,14 +37,14 @@ export default function AdminPage() {
 
   if (!emailUser) {
     return (
-      <div className="stack" style={{ maxWidth: 560 }}>
-        <h1 className="h2" style={{ fontSize: 28 }}>관리자 로그인</h1>
+      <div style={{ display: "grid", gap: 16, maxWidth: 560 }}>
+        <div className="page-title"><h1>관리자 로그인</h1></div>
         <p className="muted small" style={{ margin: 0 }}>
           관리자 이메일을 입력하면 로그인 링크가 메일로 와. 메일의 링크를 이 기기에서 누르면 관리자 화면이 열려.
           이 브라우저에서 풀던 학생용 익명 기록은 로그인하면 이 기기에서 더 이상 이어지지 않으니, 관리용 브라우저를 따로 쓰는 걸 추천해.
         </p>
         <form
-          className="card row"
+          className="panel panel-body row"
           onSubmit={async (e) => {
             e.preventDefault();
             setMsg("메일 보내는 중…");
@@ -63,50 +63,52 @@ export default function AdminPage() {
   if (isAdmin === null) return <p className="muted">권한 확인 중…</p>;
   if (!isAdmin) {
     return (
-      <div className="stack">
-        <div className="notice">{user?.email} 계정은 관리자로 등록돼 있지 않아. 설치 안내서 3단계(관리자 이메일 등록)를 확인해 줘.</div>
-        <button className="btn ghost" onClick={() => sb().auth.signOut().then(() => location.assign("/"))}>로그아웃</button>
+      <div style={{ display: "grid", gap: 16 }}>
+        <div className="notice warn">{user?.email} 계정은 관리자로 등록돼 있지 않아. 설치 안내서 3단계(관리자 이메일 등록)를 확인해 줘.</div>
+        <button className="btn line" onClick={() => sb().auth.signOut().then(() => location.assign("/"))}>로그아웃</button>
       </div>
     );
   }
 
   return (
-    <div className="stack">
-      <div className="row">
-        <h1 className="h2" style={{ fontSize: 28 }}>관리자</h1>
+    <>
+      <div className="page-title">
+        <h1>관리자</h1>
         <span className="small muted">{user?.email}</span>
-        <button className="btn ghost" style={{ marginLeft: "auto" }} onClick={() => sb().auth.signOut().then(() => location.assign("/"))}>로그아웃</button>
+        <button className="btn line" style={{ marginLeft: "auto" }} onClick={() => sb().auth.signOut().then(() => location.assign("/"))}>로그아웃</button>
       </div>
 
-      <section className="card stack" style={{ gap: 10 }}>
-        <h2 className="h2" style={{ fontSize: 18 }}>검토 대기 문제 <span className="num muted">{pending.length}</span></h2>
+      <section className="panel">
+        <div className="panel-head"><h2>검토 대기 문제 <span className="num muted">{pending.length}</span></h2></div>
+        <div className="panel-body" style={{ display: "grid", gap: 10 }}>
         {pending.length === 0 && <p className="muted small" style={{ margin: 0 }}>검토할 문제가 없어.</p>}
         {pending.map((q) => (
-          <article key={q.id} className="card" style={{ background: "var(--paper)" }}>
-            <div className="q-meta">
-              <span className="chip">{subjectName(q.subject)}</span>
-              <span className="chip pts">{diffOf(q.difficulty).points}점</span>
-              {q.unit && <span className="chip">{q.unit}</span>}
+          <article key={q.id} className="panel panel-body" style={{ background: "var(--head)" }}>
+            <div className="row small muted" style={{ gap: 6, marginBottom: 6 }}>
+              <span className="badge subj">{subjectName(q.subject)}</span>
+              <span className="badge lv3">{diffOf(q.difficulty).label} · {diffOf(q.difficulty).points}점</span>
+              {q.unit && <span>{q.unit}</span>}
               <span>{q.author_nick || "익명"} 제안</span>
             </div>
-            <p className="q-text" style={{ fontSize: 15 }}>{q.body}</p>
+            <p className="statement" style={{ fontSize: 15, marginBottom: 8 }}>{q.body}</p>
             <ol style={{ margin: "0 0 8px", paddingLeft: 20 }}>
               {q.choices.map((c, i) => (
-                <li key={i} style={i === q.answer ? { color: "var(--ok)", fontWeight: 700 } : undefined}>{c}{i === q.answer ? " ← 정답" : ""}</li>
+                <li key={i} style={i === q.answer ? { color: "var(--ac)", fontWeight: 700 } : undefined}>{c}{i === q.answer ? " ← 정답" : ""}</li>
               ))}
             </ol>
             {q.explanation && <p className="small muted" style={{ marginTop: 0 }}>해설: {q.explanation}</p>}
             <div className="row">
               <button className="btn" onClick={async () => { const { error } = await sb().rpc("admin_review", { p_question: q.id, p_approve: true }); if (error) setMsg(friendly(error)); loadAll(); }}>승인 (+5점 지급)</button>
-              <button className="btn ghost" onClick={async () => { const { error } = await sb().rpc("admin_review", { p_question: q.id, p_approve: false }); if (error) setMsg(friendly(error)); loadAll(); }}>반려</button>
+              <button className="btn line" onClick={async () => { const { error } = await sb().rpc("admin_review", { p_question: q.id, p_approve: false }); if (error) setMsg(friendly(error)); loadAll(); }}>반려</button>
             </div>
           </article>
         ))}
-        {msg && <p className="small" style={{ color: "var(--bad)" }}>{msg}</p>}
+        {msg && <p className="small res-wa">{msg}</p>}
+        </div>
       </section>
 
-      <section className="stack" style={{ gap: 8 }}>
-        <h2 className="h2" style={{ fontSize: 18 }}>문제 직접 추가 (바로 공개)</h2>
+      <section style={{ display: "grid", gap: 8 }}>
+        <h2 style={{ fontSize: 16, margin: 0 }}>문제 직접 추가 (바로 공개)</h2>
         <QuestionForm
           maxDifficulty={5}
           submitLabel="공개하기"
@@ -121,9 +123,9 @@ export default function AdminPage() {
         />
       </section>
 
-      <section className="card scroll">
-        <h2 className="h2" style={{ fontSize: 18, marginBottom: 8 }}>참가자 현황 <span className="num muted">{stats.length}명</span></h2>
-        <table className="t">
+      <section className="panel">
+        <div className="panel-head"><h2>참가자 현황 <span className="num muted">{stats.length}명</span></h2></div>
+        <div className="table-wrap"><table className="tbl">
           <thead><tr><th>닉네임</th><th>누적</th><th>이번 주</th><th>푼 문제</th><th>맞힘</th><th>정답 보기</th><th>오답 시도</th></tr></thead>
           <tbody>
             {stats.map((s) => (
@@ -133,12 +135,12 @@ export default function AdminPage() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       </section>
 
-      <section className="card row">
+      <section className="panel panel-body row">
         <button
-          className={`btn ${armed ? "danger" : "ghost"}`}
+          className={`btn ${armed ? "danger" : "line"}`}
           onClick={async () => {
             if (!armed) { setArmed(true); setTimeout(() => setArmed(false), 4000); return; }
             setArmed(false);
@@ -151,6 +153,6 @@ export default function AdminPage() {
         </button>
         <span className="small muted">모든 풀이 기록과 문제 점수를 지워. 닉네임과 문제 제안 보너스는 남아.</span>
       </section>
-    </div>
+    </>
   );
 }

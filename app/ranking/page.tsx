@@ -27,42 +27,44 @@ export default function RankingPage() {
   }, [scope, period]);
 
   return (
-    <div className="stack">
-      <div className="row">
-        <h1 className="h2" style={{ fontSize: 28 }}>랭킹</h1>
-        <span className="small muted">주간 랭킹은 매주 월요일 0시(한국 시간)에 새로 시작해. 누적 점수는 그대로야.</span>
+    <>
+      <div className="page-title">
+        <h1>랭킹</h1>
+        <span className="muted small">주간 랭킹은 매주 월요일 0시에 새로 시작해. 누적 점수는 그대로야.</span>
       </div>
-      <div className="tabs">
-        <button className="tab" aria-pressed={period === "all"} onClick={() => setPeriod("all")}>누적</button>
-        <button className="tab" aria-pressed={period === "week"} onClick={() => setPeriod("week")}>이번 주</button>
-      </div>
-      <div className="tabs">
-        {[{ code: "all", name: "전체" }, ...SUBJECTS].map((s) => (
-          <button key={s.code} className="tab" aria-pressed={scope === s.code} onClick={() => setScope(s.code)}>
-            {s.name}
-          </button>
-        ))}
-      </div>
-      <section className="card scroll">
-        <table className="t">
-          <thead>
-            <tr><th>순위</th><th>닉네임</th><th>점수</th><th>맞힌 문제</th></tr>
-          </thead>
-          <tbody>
-            {rows === null && <tr><td colSpan={4} className="muted">불러오는 중…</td></tr>}
-            {rows?.length === 0 && <tr><td colSpan={4} className="muted">아직 점수가 있는 사람이 없어.</td></tr>}
-            {rows?.map((r) => (
-              <tr key={r.user_id} className={r.user_id === user?.id ? "mine" : ""}>
-                <td className="n">{r.rank}</td>
-                <td>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}</td>
-                <td className="n">{r.points}</td>
-                <td className="n">{r.solved}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {scope === "all" && <p className="small muted" style={{ marginBottom: 0 }}>전체 점수에는 문제 제안 보너스(승인된 문제당 +5점)도 포함돼.</p>}
+      <section className="panel">
+        <div className="tabs">
+          <button aria-pressed={period === "all"} onClick={() => setPeriod("all")}>누적</button>
+          <button aria-pressed={period === "week"} onClick={() => setPeriod("week")}>이번 주</button>
+        </div>
+        <div className="tabs">
+          {[{ code: "all", name: "전체" }, ...SUBJECTS].map((s) => (
+            <button key={s.code} aria-pressed={scope === s.code} onClick={() => setScope(s.code)}>{s.name}</button>
+          ))}
+        </div>
+        <div className="table-wrap">
+          <table className="tbl">
+            <thead>
+              <tr><th className="c">순위</th><th>닉네임</th><th className="r">점수</th><th className="r">맞힌 문제</th><th className="r hide-m">제출</th><th className="r hide-m">정답 비율</th></tr>
+            </thead>
+            <tbody>
+              {rows === null && <tr><td colSpan={6} className="empty-cell">불러오는 중…</td></tr>}
+              {rows?.length === 0 && <tr><td colSpan={6} className="empty-cell">아직 점수가 있는 사람이 없어.</td></tr>}
+              {rows?.map((r) => (
+                <tr key={r.user_id} className={r.user_id === user?.id ? "mine" : ""}>
+                  <td className="c n"><b>{r.rank}</b></td>
+                  <td>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}</td>
+                  <td className="r n"><b>{r.points}</b></td>
+                  <td className="r n">{r.solved}</td>
+                  <td className="r n hide-m">{r.submissions}</td>
+                  <td className="r n hide-m">{r.submissions ? `${Math.round((100 * r.solved) / r.submissions)}%` : "–"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
-    </div>
+      {scope === "all" && <p className="small faint" style={{ margin: 0 }}>전체 점수에는 문제 제안 보너스(승인된 문제당 +5점)도 들어가.</p>}
+    </>
   );
 }

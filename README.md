@@ -23,19 +23,21 @@
 ```
 naesin-lab/
 ├── app/
-│   ├── page.tsx              메인 화면 (TOP 5, 과목 선택, 내 점수)
-│   ├── subject/[code]/       과목별 문제 풀이 (OMR 답안지)
-│   ├── ranking/              랭킹 (전체·과목·주간)
+│   ├── page.tsx              홈 (TOP 5, 과목별 문제 수, 최근 채점)
+│   ├── problems/             문제 목록 (과목→단원 분류, 난이도·풀이 상태 필터, 검색)
+│   ├── problem/[no]/         문제 풀이 (1001번~, 제출 → 맞았습니다!! / 틀렸습니다)
+│   ├── status/               채점 현황 (최근 제출, 내 제출)
+│   ├── ranking/              랭킹 (누적·주간 × 전체·과목별)
 │   ├── suggest/              문제 제안
-│   ├── me/                   내 기록, 닉네임 변경
-│   ├── admin/                관리자 페이지
-│   ├── layout.tsx            모든 화면 공통 틀
+│   ├── me/                   내 정보 (점수, 과목별 진도, 닉네임 변경)
+│   ├── admin/                관리자 페이지 (메뉴에 안 보임, /admin 으로 접속)
+│   ├── layout.tsx            모든 화면 공통 틀 (상단 메뉴)
 │   └── globals.css           디자인
-├── components/               화면 조각 (헤더, TOP5, 문제 입력 폼 등)
-├── lib/                      Supabase 연결, 과목·점수표
+├── components/               화면 조각 (상단 메뉴, 뱃지, 닉네임 입력, 문제 입력 폼)
+├── lib/                      Supabase 연결, 로그인 상태, 과목·난이도·점수표
 ├── supabase/
 │   ├── 01_schema.sql         데이터베이스 설계 + 서버 채점 (1번째로 실행)
-│   ├── 02_seed.sql           기본 문제 105개 (2번째로 실행)
+│   ├── 02_seed.sql           기본 문제 105개 + 정답 (2번째로 실행, GitHub에는 안 올림)
 │   └── 03_admin.sql          관리자 이메일 등록 (3번째로 실행)
 ├── .env.example              Supabase 연결 정보 견본
 └── package.json

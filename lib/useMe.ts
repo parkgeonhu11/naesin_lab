@@ -1,14 +1,38 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { createContext, createElement, useCallback, useContext, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { ensureUser, friendly, isConfigured, sb } from "./supabase";
 
-/** 현재 사용자(익명 포함)와 닉네임을 불러온다. */
-export function useMe() {
+type MeState = {
+  user: User | null;
+  nickname: string | null;
+  points: number;
+  rank: number | null;
+  error: string | null;
+  ready: boolean;
+  saveNickname: (n: string) => Promise<void>;
+  refreshScore: () => Promise<void>;
+};
+
+const Ctx = createContext<MeState | null>(null);
+
+/** 앱 전체에서 한 번만 로그인(익명)하고, 닉네임·점수를 함께 쓴다. */
+export function MeProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [nickname, setNickname] = useState<string | null>(null);
+  const [points, setPoints] = useState(0);
+  const [rank, setRank] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+
+  const refreshScore = useCallback(async () => {
+    const { data } = await sb().rpc("leaderboard", { p_subject: "all", p_period: "all", p_limit: 500 });
+    const { data: s } = await sb().auth.getSession();
+    const uid = s.session?.user.id;
+    const mine = ((data as { user_id: string; points: number; rank: number }[]) ?? []).find((r) => r.user_id === uid);
+    setPoints(mine?.points ?? 0);
+    setRank(mine?.rank ?? null);
+  }, []);
 
   const loadNick = useCallback(async (uid: string) => {
     const { data } = await sb().from("profiles").select("nickname").eq("user_id", uid).maybeSingle();
@@ -26,7 +50,7 @@ export function useMe() {
       .then(async (u) => {
         if (!alive) return;
         setUser(u);
-        await loadNick(u.id);
+        await Promise.all([loadNick(u.id), refreshScore()]);
       })
       .catch((e) => alive && setError(friendly(e)))
       .finally(() => alive && setReady(true));
@@ -40,7 +64,7 @@ export function useMe() {
       alive = false;
       sub.subscription.unsubscribe();
     };
-  }, [loadNick]);
+  }, [loadNick, refreshScore]);
 
   const saveNickname = useCallback(async (n: string) => {
     const { error } = await sb().rpc("set_nickname", { p_nick: n });
@@ -48,5 +72,11 @@ export function useMe() {
     setNickname(n.trim());
   }, []);
 
-  return { user, nickname, error, ready, saveNickname };
+  return createElement(Ctx.Provider, { value: { user, nickname, points, rank, error, ready, saveNickname, refreshScore } }, children);
+}
+
+export function useMe(): MeState {
+  const v = useContext(Ctx);
+  if (!v) throw new Error("MeProvider가 필요해");
+  return v;
 }

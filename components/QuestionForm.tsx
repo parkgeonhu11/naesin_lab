@@ -58,7 +58,7 @@ export default function QuestionForm({
   }
 
   return (
-    <form className="card stack" style={{ gap: 12 }} onSubmit={submit}>
+    <form className="panel panel-body" style={{ display: "grid", gap: 12 }} onSubmit={submit}>
       <div className="row">
         <label className="field" htmlFor="fSub">과목
           <select id="fSub" value={subject} onChange={(e) => setSubject(e.target.value)}>
@@ -77,12 +77,12 @@ export default function QuestionForm({
       <label className="field" htmlFor="fBody">문제
         <textarea id="fBody" maxLength={1000} value={body} onChange={(e) => setBody(e.target.value)} placeholder="문제를 입력해" />
       </label>
-      <div className="stack" style={{ gap: 6 }}>
+      <div style={{ display: "grid", gap: 6 }}>
         <span className="small muted">보기 (2개 이상) · 정답에 체크</span>
         {opts.map((o, i) => (
           <div key={i} className="row" style={{ gap: 8, flexWrap: "nowrap" }}>
             <input type="radio" name="fAns" id={`fAns${i}`} checked={ans === i} onChange={() => setAns(i)} aria-label={`${i + 1}번을 정답으로`} />
-            <span className="bub">{i + 1}</span>
+            <span className="badge subj">{i + 1}</span>
             <input id={`fOpt${i}`} className="input" maxLength={200} value={o} onChange={(e) => setOpts(opts.map((x, j) => (j === i ? e.target.value : x)))} placeholder={`보기 ${i + 1}`} />
           </div>
         ))}

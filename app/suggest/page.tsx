@@ -21,11 +21,11 @@ export default function SuggestPage() {
   useEffect(() => { load(); }, [load]);
 
   return (
-    <div className="stack">
-      {error && <div className="notice">{error}</div>}
-      <div>
-        <h1 className="h2" style={{ fontSize: 28 }}>문제 제안</h1>
-        <p className="muted small" style={{ margin: "6px 0 0" }}>
+    <>
+      {error && <div className="notice warn">{error}</div>}
+      <div className="page-title"><h1>문제 제안</h1></div>
+      <div className="notice">
+        <p className="small" style={{ margin: 0 }}>
           관리자가 확인하고 승인하면 모두가 풀 수 있게 공개되고, 승인된 문제마다 <b>+5점</b>을 받아 (최대 20문제).
           학교 기출문제나 문제집 문제를 그대로 옮기면 저작권 위반이라 반려돼. 직접 만들거나 바꾼 문제만 올려 줘.
         </p>
@@ -44,21 +44,21 @@ export default function SuggestPage() {
           return "제안했어! 관리자가 승인하면 공개돼.";
         }}
       />
-      <section className="card scroll">
-        <h2 className="h2" style={{ fontSize: 18, marginBottom: 8 }}>내가 제안한 문제</h2>
+      <section className="panel">
+        <div className="panel-head"><h2>내가 제안한 문제</h2></div>
         {mine.length === 0 ? (
-          <p className="muted small" style={{ margin: 0 }}>아직 없어.</p>
+          <p className="panel-body muted small" style={{ margin: 0 }}>아직 없어.</p>
         ) : (
-          <table className="t">
+          <div className="table-wrap"><table className="tbl">
             <thead><tr><th>과목</th><th>문제</th><th>상태</th></tr></thead>
             <tbody>
               {mine.map((m) => (
                 <tr key={m.id}><td>{subjectName(m.subject)}</td><td>{m.body.slice(0, 40)}</td><td>{STATUS[m.status]}</td></tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </section>
-    </div>
+    </>
   );
 }
