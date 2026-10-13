@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ResultText } from "@/components/Badges";
 import Icon from "@/components/Icon";
+import ExamDday from "@/components/ExamDday";
 import NicknameCard from "@/components/NicknameCard";
 import { Avatar } from "@/components/Shell";
 import { ago, levelOf, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
@@ -115,6 +116,9 @@ export default function Home() {
           <Link href="/review" className="btn ghost">오답 노트{wrongOpen ? ` ${wrongOpen}` : ""}</Link>
         </div>
       </section>
+
+      {/* 시험 D-day */}
+      <ExamDday counts={bySubject} />
 
       {/* 내 숫자 */}
       <section className="kpis" aria-label="내 기록">
