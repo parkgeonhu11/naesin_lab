@@ -624,3 +624,7 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .gate-inapp p { margin: 0; }
 :root[data-theme="dark"] .gate-inapp { background: #3a2e0e; }
 .gate-foot { margin: 0; word-break: keep-all; }
+.legal { max-width: 760px; line-height: 1.75; word-break: keep-all; }
+.legal h1 { margin: 0 0 4px; font-size: 24px; }
+.legal h2 { font-size: 16px; margin: 22px 0 6px; }
+.legal ul { padding-left: 20px; margin: 6px 0; }
