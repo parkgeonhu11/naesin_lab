@@ -5,7 +5,7 @@ import { ResultText } from "@/components/Badges";
 import Icon from "@/components/Icon";
 import NicknameCard from "@/components/NicknameCard";
 import { Avatar } from "@/components/Shell";
-import { ago, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
+import { ago, levelOf, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 import { useProblems } from "@/lib/useProblems";
@@ -21,6 +21,8 @@ export default function Home() {
   const [mine, setMine] = useState<Submission[] | null>(null);
   const [live, setLive] = useState<Submission[] | null>(null);
   const [units, setUnits] = useState<UnitStat[]>([]);
+  const [loadErr, setLoadErr] = useState(false);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!isConfigured) return;
@@ -34,6 +36,7 @@ export default function Home() {
         user ? sb().rpc("my_unit_stats") : Promise.resolve({ data: [] }),
       ]);
       if (!alive) return;
+      setLoadErr(!!(board.error || recent.error || ("error" in me && me.error)));
       setTop((board.data as BoardRow[]) ?? []);
       setLive((recent.data as Submission[]) ?? []);
       setSum((me.data as MySummary) ?? null);
@@ -46,7 +49,7 @@ export default function Home() {
       alive = false;
       clearInterval(t);
     };
-  }, [user]);
+  }, [user, tick]);
 
   // 과목별: 문제 수, 내가 맞힌 수, 내 정답률
   const bySubject = useMemo(() => {
@@ -72,20 +75,38 @@ export default function Home() {
   const acc = sum ? pct(sum.correct_submissions, sum.submissions) : 0;
   const today = Math.min(sum?.today_solved ?? 0, DAILY_GOAL);
   const name = nickname ?? "친구";
+  const lv = levelOf(sum?.points ?? 0);
+  const weekSubj = sum?.week_subjects ?? 0;
+  const weekAcc = sum ? pct(sum.week_ok, sum.week_subs) : 0;
+  const growth = sum?.week_subs && sum?.last_subs ? weekAcc - pct(sum.last_ok, sum.last_subs) : null;
+  const maxDaily = Math.max(1, ...(sum?.daily ?? []).map((x) => x.n));
 
   return (
     <>
       {error && <div className="notice warn">{error}</div>}
       {ready && user && !nickname && <NicknameCard current={nickname} onSave={saveNickname} />}
+      {loadErr && (
+        <div className="notice warn row">
+          <span className="grow">기록을 불러오지 못했어. 인터넷 연결을 확인하고 다시 시도해 줘.</span>
+          <button className="btn line" type="button" onClick={() => setTick((t) => t + 1)}>다시 시도</button>
+        </div>
+      )}
 
       {/* 인사 배너 */}
       <section className="hero">
         <h1>{name}, 오늘도 한 문제씩 올라가 보자</h1>
         <p>시험 범위 {total}문제가 준비돼 있어. 처음에 맞히면 만점, 찍으면 감점이야.</p>
-        <span className="streak">
-          <Icon name="flame" />
-          {sum?.streak ? `${sum.streak}일 연속 공부 중` : "오늘 첫 문제를 풀면 연속 기록이 시작돼"}
-        </span>
+        <div className="hero-meta">
+          <span className="streak">
+            <Icon name="flame" />
+            {sum?.streak ? `${sum.streak}일 연속 공부 중` : "오늘 첫 문제를 풀면 연속 기록이 시작돼"}
+          </span>
+          <span className="level" title={`Lv.${lv.lv + 1}까지 ${lv.toNext}점`}>
+            <b>Lv.{lv.lv}</b>
+            <span className="level-bar"><span style={{ width: `${lv.pct}%` }} /></span>
+            <small>다음 레벨까지 {lv.toNext}점</small>
+          </span>
+        </div>
         <div className="row">
           <Link href={nextProblem ? `/problem/${nextProblem.no}` : "/problems"} className="btn white">
             {nextProblem ? "안 푼 문제 바로 풀기" : "문제 목록 보기"}
@@ -147,6 +168,27 @@ export default function Home() {
             <span className="small faint">
               {today >= DAILY_GOAL ? "오늘 목표 달성! 더 풀면 랭킹이 더 올라가." : sum?.today_submissions ? `오늘 ${sum.today_submissions}번 제출했어.` : "오늘은 아직 안 풀었어."}
             </span>
+            <div className="week-box">
+              <div className="week-row">
+                <span>주간 미션 · 서로 다른 3과목 풀기</span>
+                <b className={weekSubj >= 3 ? "res-ac" : ""}>{weekSubj >= 3 ? "달성!" : `${weekSubj} / 3`}</b>
+              </div>
+              <div className="week-row">
+                <span>이번 주 정답률</span>
+                <b>
+                  {sum?.week_subs ? `${weekAcc}%` : "–"}
+                  {growth !== null && <small className={growth >= 0 ? "res-ac" : "res-wa"}> 지난주보다 {growth >= 0 ? "+" : ""}{growth}%p</small>}
+                </b>
+              </div>
+              <div className="spark" aria-label="최근 7일 맞힌 문제 수">
+                {(sum?.daily ?? []).map((x) => (
+                  <span key={x.d} className="spark-col" title={`${x.d.slice(5).replace("-", "/")} · ${x.n}문제`}>
+                    <span className="spark-bar" style={{ height: `${Math.max(4, (100 * x.n) / maxDaily)}%` }} data-zero={x.n === 0 || undefined} />
+                    <small>{"일월화수목금토"[new Date(x.d + "T00:00:00").getDay()]}</small>
+                  </span>
+                ))}
+              </div>
+            </div>
           </section>
 
           <section className="panel">
@@ -242,7 +284,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="panel">
+          <section className="panel pc-only">
             <div className="panel-head"><h2>점수 규칙</h2></div>
             <div className="panel-body">
               <ol className="howto">

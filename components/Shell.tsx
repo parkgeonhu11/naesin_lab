@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Icon from "@/components/Icon";
+import { levelOf } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 
 const NAV = [
@@ -46,6 +47,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const active = (href: string) =>
     href === "/" ? path === "/" : path === href || path.startsWith(href + "/") || (href === "/problems" && path.startsWith("/problem/"));
   const score = `${points}점${rank ? ` · ${rank}위` : ""}`;
+  const lv = levelOf(points).lv;
 
   const side = (
     <>
@@ -71,14 +73,14 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </button>
         <Link href="/me" className="me-card">
           <Avatar name={nickname} />
-          <span><b>{nickname ?? "닉네임 정하기"}</b><small>{score}</small></span>
+          <span><b>{nickname ?? "닉네임 정하기"} <span className="lv-chip">Lv.{lv}</span></b><small>{score}</small></span>
         </Link>
       </div>
     </>
   );
 
   return (
-    <div className="app">
+    <div className={`app ${path.startsWith("/problem/") ? "solving" : ""}`}>
       <aside className="side">{side}</aside>
       <div className="main">
         <header className="topbar">

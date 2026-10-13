@@ -429,3 +429,88 @@ a.list-item:hover { background: var(--surface-2); }
 @media (prefers-reduced-motion: no-preference) {
   .choice, .btn, .side-nav a, .tile { transition: background .12s, border-color .12s, color .12s; }
 }
+
+/* ================= 문제 풀이: PC 2열, 휴대폰 1열 + 아래 고정 제출 바 ================= */
+.solve { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: start; }
+.solve-main { position: relative; overflow: hidden; }
+.solve-side { position: sticky; top: 20px; display: grid; gap: 14px; }
+.side-card { padding: 16px; display: grid; gap: 12px; }
+.side-score small { display: block; font-size: 12.5px; color: var(--sub); font-weight: 600; }
+.side-score b { font-size: 30px; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.side-score b em { font-style: normal; font-size: 15px; color: var(--sub); margin-left: 2px; }
+.side-actions { display: grid; gap: 8px; }
+.btn.big { padding: 12px 18px; font-size: 16px; }
+.kbd-hint { margin: 0; font-size: 12px; color: var(--faint); line-height: 1.9; }
+kbd { display: inline-block; min-width: 20px; padding: 0 5px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 5px; background: var(--surface-2); font: 600 11px/18px var(--font); text-align: center; color: var(--sub); margin: 0 1px; }
+.side-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.side-title b { font-size: 14px; }
+.omr { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.omr-cell { height: 36px; border-radius: 9px; border: 1.5px solid var(--line); display: grid; place-items: center; font-size: 12.5px; font-weight: 700; color: var(--sub); font-variant-numeric: tabular-nums; background: var(--surface); }
+.omr-cell:hover { border-color: var(--line-strong); }
+.omr-cell.solved { background: var(--ac-soft); border-color: transparent; color: var(--ac); }
+.omr-cell.tried { background: var(--wa-soft); border-color: transparent; color: var(--wa); }
+.omr-cell.revealed { background: var(--gray-soft); border-color: transparent; color: var(--faint); }
+.omr-cell.now { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand-soft); color: var(--brand); }
+.omr-legend { display: flex; gap: 12px; }
+.omr-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: 1px; }
+.dot.solved { background: var(--ac); } .dot.tried { background: var(--wa); } .dot.revealed { background: var(--faint); }
+.prob-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
+.verdict.ok { background: var(--ac-soft); }
+.verdict.no { background: var(--wa-soft); }
+details.explain > summary { list-style: none; cursor: pointer; }
+details.explain > summary::-webkit-details-marker { display: none; }
+details.explain > summary h2 { margin-bottom: 12px; }
+details.explain:not([open]) > summary h2::after { content: "펼치기"; font-size: 12px; color: var(--faint); font-weight: 600; margin-left: 6px; }
+.m-actions { display: none; }
+
+/* 맞혔을 때 축하 효과 */
+.burst { position: absolute; left: 50%; top: 42%; width: 0; height: 0; pointer-events: none; z-index: 5; }
+.burst i { position: absolute; width: 8px; height: 12px; border-radius: 2px; opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .burst i { animation: pop .9s cubic-bezier(.2, .7, .3, 1) forwards; }
+  @keyframes pop {
+    0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(.6); }
+    100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--d) * -1.6)) rotate(200deg) scale(1); }
+  }
+}
+
+@media (max-width: 1000px) {
+  .solve { grid-template-columns: minmax(0, 1fr); }
+  .solve-side { position: static; }
+  .side-actions, .kbd-hint { display: none; }
+}
+@media (max-width: 900px) {
+  .m-actions { display: flex; gap: 8px; position: sticky; bottom: 0; z-index: 30; margin: 0 -16px -28px; padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 10px); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 20px rgba(16, 29, 68, .08); }
+  .m-actions .btn { min-height: 50px; font-size: 16px; }
+  .m-actions .btn.line { width: 54px; padding: 0; }
+  .m-actions .grow { flex: 1; }
+  .app.solving .tabbar { display: none; }
+}
+
+/* ================= 홈: 레벨 · 주간 미션 · 7일 그래프 ================= */
+.hero-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; position: relative; z-index: 1; }
+.hero-meta .streak { margin-top: 0; }
+.level { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 6px; border-radius: 999px; background: rgba(255, 255, 255, .12); font-size: 12.5px; }
+.level b { background: #ffd666; color: #4a3300; border-radius: 999px; padding: 0 8px; font-size: 12.5px; }
+.level-bar { width: 70px; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, .2); overflow: hidden; }
+.level-bar > span { display: block; height: 100%; background: #ffd666; border-radius: inherit; }
+.level small { color: #c8d4ff; font-size: 12px; }
+.week-box { display: grid; gap: 8px; padding-top: 12px; border-top: 1px dashed var(--line-strong); }
+.week-row { display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; color: var(--sub); }
+.week-row b { color: var(--text); font-variant-numeric: tabular-nums; }
+.week-row b small { font-size: 12px; font-weight: 600; }
+.spark { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; height: 74px; align-items: end; margin-top: 4px; }
+.spark-col { display: grid; grid-template-rows: 1fr auto; height: 100%; justify-items: center; gap: 4px; }
+.spark-bar { width: 100%; max-width: 22px; align-self: end; border-radius: 5px 5px 2px 2px; background: var(--brand); }
+.spark-bar[data-zero] { background: var(--gray-soft); }
+.spark-col small { font-size: 11px; color: var(--faint); }
+@media (max-width: 720px) {
+  .pc-only { display: none; }
+  /* 휴대폰 홈: 바로 할 일(배너 버튼) → 내 숫자 → 과목 고르기 → 나머지 */
+  .hero { order: 1; }
+  .kpis { order: 2; }
+  .subj-tiles { order: 3; }
+  .dash { order: 4; }
+  .level small { display: none; }
+}
+.lv-chip { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 999px; background: #ffd666; color: #4a3300; font-size: 11px; font-weight: 800; vertical-align: 1px; }

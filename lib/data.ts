@@ -171,7 +171,23 @@ export type MySummary = {
   today_solved: number;
   today_submissions: number;
   streak: number;
+  week_subjects: number;
+  week_subs: number;
+  week_ok: number;
+  last_subs: number;
+  last_ok: number;
+  daily: { d: string; n: number }[] | null;
 };
+
+/** 레벨: Lv.n이 되려면 누적 50·n·(n−1)점 (0, 100, 300, 600, 1000, …) */
+export function levelOf(points: number) {
+  const p = Math.max(0, points);
+  let lv = 1;
+  while (50 * (lv + 1) * lv <= p) lv++;
+  const base = 50 * lv * (lv - 1);
+  const next = 50 * (lv + 1) * lv;
+  return { lv, base, next, toNext: next - p, pct: Math.round((100 * (p - base)) / (next - base)) };
+}
 
 /** 과목 아이콘에 쓰는 한 글자 */
 export const subjectLetter = (code: string) => subjectName(code).slice(0, 1);

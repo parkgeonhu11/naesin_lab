@@ -472,7 +472,22 @@ begin
       'today_solved', (select count(*) from score_events s where s.user_id = uid and s.reason = 'solve' and s.points > 0
                          and (s.created_at at time zone 'Asia/Seoul')::date = today),
       'today_submissions', (select count(*) from attempts a where a.user_id = uid and (a.created_at at time zone 'Asia/Seoul')::date = today),
-      'streak', streak)
+      'streak', streak,
+      -- 이번 주에 풀어 본 과목 수 (주간 미션: 서로 다른 3과목)
+      'week_subjects', (select count(distinct q.subject) from attempts a join questions q on q.id = a.question_id
+                        where a.user_id = uid and a.created_at >= week_start()),
+      -- 이번 주 / 지난주 정답률 (성장 기록)
+      'week_subs', (select count(*) from attempts a where a.user_id = uid and a.created_at >= week_start()),
+      'week_ok', (select count(*) from attempts a where a.user_id = uid and a.is_correct and a.created_at >= week_start()),
+      'last_subs', (select count(*) from attempts a where a.user_id = uid
+                     and a.created_at >= week_start() - interval '7 days' and a.created_at < week_start()),
+      'last_ok', (select count(*) from attempts a where a.user_id = uid and a.is_correct
+                   and a.created_at >= week_start() - interval '7 days' and a.created_at < week_start()),
+      -- 최근 7일 날짜별 맞힌 문제 수 (오래된 날부터)
+      'daily', (select jsonb_agg(jsonb_build_object('d', g.d, 'n',
+                  (select count(*) from score_events s where s.user_id = uid and s.reason = 'solve' and s.points > 0
+                     and (s.created_at at time zone 'Asia/Seoul')::date = g.d)) order by g.d)
+                from generate_series(today - 6, today, interval '1 day') as g0(t), lateral (select g0.t::date as d) g))
   );
 end $$;
 revoke all on function public.my_summary() from public, anon;
