@@ -1,6 +1,7 @@
 "use client";
-import { createContext, createElement, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, createElement, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import { deviceInfo } from "./device";
 import { ensureUser, friendly, googleEnabled, handleOAuthReturn, isConfigured, sb, signInWithGoogle, signOutUser } from "./supabase";
 
 type MeState = {
@@ -54,6 +55,16 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     setRank(mine?.rank ?? null);
   }, []);
 
+  // 접속 기록 (관리자 화면의 로그인 현황). 같은 계정은 이 탭에서 한 번만 보냄, 서버에서도 30분에 한 번만 저장
+  const logged = useRef<string | null>(null);
+  const logLogin = useCallback((u: User) => {
+    const key = `${u.id}:${u.is_anonymous ? "a" : "g"}`;
+    if (logged.current === key) return;
+    logged.current = key;
+    const d = deviceInfo();
+    sb().rpc("log_login", { p_device: d.device, p_os: d.os, p_browser: d.browser }).then(() => {}, () => {});
+  }, []);
+
   const loadNick = useCallback(async (uid: string) => {
     const { data } = await sb().from("profiles").select("nickname,must_rename").eq("user_id", uid).maybeSingle();
     setNickname(data?.nickname ?? null);
@@ -84,6 +95,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
       if (!u) return;
       if (!u.is_anonymous) try { sessionStorage.removeItem("nl-oauth-retry"); } catch {}
       setUser(u);
+      logLogin(u);
       await Promise.all([loadNick(u.id), refreshScore()]);
     })()
       .catch((e) => alive && setError(friendly(e)))
@@ -91,6 +103,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     const { data: sub } = sb().auth.onAuthStateChange((_e, session) => {
       if (session?.user) {
         setUser(session.user);
+        logLogin(session.user);
         loadNick(session.user.id);
         refreshScore();
       }
@@ -99,7 +112,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
       alive = false;
       sub.subscription.unsubscribe();
     };
-  }, [loadNick, refreshScore]);
+  }, [loadNick, refreshScore, logLogin]);
 
   const saveNickname = useCallback(async (n: string) => {
     const { error } = await sb().rpc("set_nickname", { p_nick: n });
@@ -121,11 +134,12 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     try {
       const u = await ensureUser();
       setUser(u);
+      logLogin(u);
       await Promise.all([loadNick(u.id), refreshScore()]);
     } catch (e) {
       setNotice(friendly(e));
     }
-  }, [loadNick, refreshScore]);
+  }, [loadNick, refreshScore, logLogin]);
 
   const signOut = useCallback(async () => {
     const u = await signOutUser(false);
