@@ -183,6 +183,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 :root[data-theme="dark"] .badge.lv3 { background: #3a2e0e; color: #f0c25e; }
 :root[data-theme="dark"] .badge.lv4 { background: #40220f; color: #f5a07c; }
 :root[data-theme="dark"] .badge.lv5 { background: #2f2050; color: #c9a3f5; }
+.diff-guide { margin: 12px 0 0; font-size: 13px; }
+.panel > .diff-guide { padding: 0 16px 14px; }
+.diff-guide summary { cursor: pointer; color: var(--sub); font-weight: 700; padding: 6px 0; }
+.diff-guide ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
+.diff-guide li { display: grid; grid-template-columns: 64px 40px minmax(0, 1fr); align-items: center; gap: 8px; word-break: keep-all; }
+.diff-guide li .badge { text-align: center; }
+.diff-guide li b { color: var(--sub); font-size: 12px; }
 .badge.type-mc { background: var(--gray-soft); color: var(--sub); }
 .badge.type-short { background: var(--brand-soft); color: var(--brand); }
 .res-ac { color: var(--ac); font-weight: 700; }

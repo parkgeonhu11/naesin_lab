@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { DiffBadge, StateIcon, SubjBadge, TypeBadge } from "@/components/Badges";
+import { DiffBadge, DiffGuide, StateIcon, SubjBadge, TypeBadge } from "@/components/Badges";
 import { DIFF, QTYPES, stateOf, SUBJECTS, subjectName } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 import { buildTree, useProblems } from "@/lib/useProblems";
@@ -181,6 +181,7 @@ export default function ProblemList() {
               </tbody>
             </table>
           </div>
+          <DiffGuide />
         </section>
       </div>
     </>

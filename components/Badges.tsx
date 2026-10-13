@@ -1,11 +1,29 @@
-import { diffOf, qtypeName, subjectName, type MyState } from "@/lib/data";
+import { DIFF, diffOf, qtypeName, subjectName, type MyState } from "@/lib/data";
 
 export function DiffBadge({ level }: { level: number }) {
   const d = diffOf(level);
   return (
-    <span className={`badge lv${d.level}`} title={`${d.label} · ${d.points}점`}>
+    <span className={`badge lv${d.level}`} title={`${d.label} · ${d.points}점 — ${d.desc}`}>
       {d.label}
     </span>
+  );
+}
+
+/** 난이도 기준표 (접었다 펼 수 있음) */
+export function DiffGuide({ open = false }: { open?: boolean }) {
+  return (
+    <details className="diff-guide" open={open}>
+      <summary>난이도는 이렇게 나눠</summary>
+      <ul>
+        {DIFF.map((d) => (
+          <li key={d.level}>
+            <span className={`badge lv${d.level}`}>{d.label}</span>
+            <b className="n">{d.points}점</b>
+            <span>{d.desc}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 

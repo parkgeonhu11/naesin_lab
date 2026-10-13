@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import NicknameCard from "@/components/NicknameCard";
 import QuestionForm from "@/components/QuestionForm";
+import { DiffGuide } from "@/components/Badges";
 import { subjectName } from "@/lib/data";
 import { sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -27,9 +28,10 @@ export default function SuggestPage() {
       <div className="notice">
         <p className="small" style={{ margin: 0 }}>
           관리자가 확인하고 승인하면 모두가 풀 수 있게 공개되고, 승인된 문제마다 <b>+5점</b>을 받아 (최대 20문제).
-          매우 쉬움부터 최상위까지 모든 난이도를 제안할 수 있어. 어려움·최상위는 풀이 과정을 해설에 꼭 써 줘.
-          관리자가 검토하면서 난이도를 조정할 수 있어. 학교 기출문제나 문제집 문제를 그대로 옮기면 저작권 위반이라 반려돼. 직접 만든 문제만 올려 줘.
+          기초부터 최상위까지 모든 난이도를 제안할 수 있어. 어려움·최상위는 풀이 과정을 해설에 꼭 써 줘.
+          관리자가 아래 기준에 맞춰 난이도를 조정할 수 있어. 학교 기출문제나 문제집 문제를 그대로 옮기면 저작권 위반이라 반려돼. 직접 만든 문제만 올려 줘.
         </p>
+        <DiffGuide open />
       </div>
       {ready && user && !nickname && <NicknameCard current={nickname} onSave={saveNickname} />}
       <QuestionForm
