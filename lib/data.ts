@@ -157,3 +157,21 @@ export function shuffle<T>(arr: T[]): T[] {
 export const penaltyOf = (points: number) => Math.round(points * 0.25);
 /** 지금까지 서로 다른 오답 수가 wrong일 때, 다음 오답에서 깎일 점수 */
 export const nextPenalty = (points: number, wrong: number) => (wrong >= 1 && wrong <= 4 ? penaltyOf(points) : 0);
+
+/** 홈 대시보드용 내 요약 (my_summary 함수) */
+export type MySummary = {
+  points: number;
+  week: number;
+  rank: number | null;
+  players: number;
+  solved: number;
+  revealed: number;
+  submissions: number;
+  correct_submissions: number;
+  today_solved: number;
+  today_submissions: number;
+  streak: number;
+};
+
+/** 과목 아이콘에 쓰는 한 글자 */
+export const subjectLetter = (code: string) => subjectName(code).slice(0, 1);

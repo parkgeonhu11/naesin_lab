@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import Header from "@/components/Header";
+import Shell from "@/components/Shell";
 import { MeProvider } from "@/lib/useMe";
 import "./globals.css";
 
@@ -9,22 +9,19 @@ export const metadata: Metadata = {
   openGraph: { title: "내신랩", description: "시험 범위 문제 풀고 친구들이랑 랭킹 대결", type: "website" },
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0f1d44" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <head>
+        {/* 저장해 둔 밝은/어두운 화면 설정을 그리기 전에 적용 (깜빡임 방지) */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem("nl-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}` }} />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
       </head>
       <body>
         <MeProvider>
-          <Header />
-          <main className="container">{children}</main>
-          <footer className="site-foot container">
-            <span>내신랩 · 서연중 3학년 2학기 시험 대비</span>
-            <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요.</span>
-          </footer>
+          <Shell>{children}</Shell>
         </MeProvider>
       </body>
     </html>

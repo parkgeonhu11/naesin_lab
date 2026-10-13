@@ -430,6 +430,54 @@ begin
   return nid;
 end $$;
 
+-- 내 요약: 홈 화면 대시보드용 (점수, 순위, 맞힌 문제, 정답률, 오늘 푼 문제, 연속 학습일)
+create or replace function public.my_summary()
+returns jsonb language plpgsql stable security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  today date := (now() at time zone 'Asia/Seoul')::date;
+  total bigint; wk bigint; d date; streak int := 0;
+begin
+  if uid is null then return null; end if;
+  select coalesce(sum(x.points), 0) into total from (
+    select s.points from score_events s where s.user_id = uid
+    union all select p.points from score_penalties p where p.user_id = uid) x;
+  select coalesce(sum(x.points), 0) into wk from (
+    select s.points from score_events s where s.user_id = uid and s.created_at >= week_start()
+    union all select p.points from score_penalties p where p.user_id = uid and p.created_at >= week_start()) x;
+  -- 연속 학습일: 오늘(없으면 어제)부터 거꾸로 하루도 빠짐없이 제출한 날 수
+  d := today;
+  if not exists (select 1 from attempts a where a.user_id = uid and (a.created_at at time zone 'Asia/Seoul')::date = d) then
+    d := today - 1;
+  end if;
+  while exists (select 1 from attempts a where a.user_id = uid and (a.created_at at time zone 'Asia/Seoul')::date = d) loop
+    streak := streak + 1; d := d - 1;
+    exit when streak > 366;
+  end loop;
+  return (
+    with pts as (
+      select y.user_id, sum(y.points) as p from (
+        select s.user_id, s.points from score_events s
+        union all select q.user_id, q.points from score_penalties q) y
+      group by y.user_id)
+    select jsonb_build_object(
+      'points', total,
+      'week', wk,
+      'rank', case when total > 0 then 1 + (select count(*) from pts where pts.p > total) end,
+      'players', (select count(*) from pts where pts.p > 0),
+      'solved', (select count(*) from score_events s where s.user_id = uid and s.reason = 'solve' and s.points > 0),
+      'revealed', (select count(*) from score_events s where s.user_id = uid and s.reason = 'solve' and s.points = 0),
+      'submissions', (select count(*) from attempts a where a.user_id = uid),
+      'correct_submissions', (select count(*) from attempts a where a.user_id = uid and a.is_correct),
+      'today_solved', (select count(*) from score_events s where s.user_id = uid and s.reason = 'solve' and s.points > 0
+                         and (s.created_at at time zone 'Asia/Seoul')::date = today),
+      'today_submissions', (select count(*) from attempts a where a.user_id = uid and (a.created_at at time zone 'Asia/Seoul')::date = today),
+      'streak', streak)
+  );
+end $$;
+revoke all on function public.my_summary() from public, anon;
+grant execute on function public.my_summary() to authenticated;
+
 -- ---------- 관리자 함수 (admin_emails 에 있는 이메일로 로그인해야 실행됨) ----------
 drop function if exists public.admin_pending();
 create or replace function public.admin_pending()
