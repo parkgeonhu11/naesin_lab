@@ -194,12 +194,14 @@ export type MySummary = {
 };
 
 /** 레벨: Lv.n이 되려면 누적 50·n·(n−1)점 (0, 100, 300, 600, 1000, …) */
+/** 레벨 k가 되는 점수 = LV_STEP × k × (k − 1). Lv.2 70점 · Lv.5 700점 · Lv.10 3150점 · Lv.15 7350점 */
+export const LV_STEP = 35;
 export function levelOf(points: number) {
   const p = Math.max(0, points);
   let lv = 1;
-  while (50 * (lv + 1) * lv <= p) lv++;
-  const base = 50 * lv * (lv - 1);
-  const next = 50 * (lv + 1) * lv;
+  while (LV_STEP * (lv + 1) * lv <= p) lv++;
+  const base = LV_STEP * lv * (lv - 1);
+  const next = LV_STEP * (lv + 1) * lv;
   return { lv, base, next, toNext: next - p, pct: Math.round((100 * (p - base)) / (next - base)) };
 }
 
