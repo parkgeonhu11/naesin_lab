@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { GuardedText, isGuarded } from "@/components/Guarded";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
 import Figure from "@/components/Figure";
@@ -226,7 +227,7 @@ export default function ProblemPage() {
 
           <section className="section">
             <h2>문제</h2>
-            <p className="statement">{q.body}</p>
+            <GuardedText className="statement" text={q.body} seed={q.id} on={isGuarded(q)} />
             <Figure spec={q.figure} />
           </section>
 
@@ -234,6 +235,7 @@ export default function ProblemPage() {
             <h2>{q.qtype === "short" ? "답안" : "보기"}</h2>
             <AnswerInput
               q={q}
+              guard={isGuarded(q) ? q.id : undefined}
               value={val}
               onChange={(v) => {
                 if (q.qtype === "mc" && v.choice !== val.choice && v.choice !== null) trace.pick(v.choice + 1);

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GuardedText, isGuarded } from "@/components/Guarded";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, TypeBadge } from "@/components/Badges";
 import Figure from "@/components/Figure";
@@ -209,10 +210,11 @@ export default function Exam() {
                 <DiffBadge level={q.difficulty} />
                 <span className="faint">{diffOf(q.difficulty).points}점 · {q.no}번</span>
               </div>
-              <p className="statement" style={{ marginBottom: 12 }}>{q.body}</p>
+              <GuardedText className="statement" style={{ marginBottom: 12 }} text={q.body} seed={q.id} on={isGuarded(q)} />
               <Figure spec={q.figure} />
               <AnswerInput
                 q={q}
+                guard={isGuarded(q) ? q.id : undefined}
                 idPrefix={`q${i}`}
                 value={answers[q.id] ?? emptyAnswer}
                 onChange={(v) => {

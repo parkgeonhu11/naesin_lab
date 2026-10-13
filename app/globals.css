@@ -674,3 +674,7 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .tl-key { display: inline-block; width: 12px; height: 8px; border-radius: 3px; margin: 0 3px 0 8px; vertical-align: middle; }
 .tl-key.away { background: rgba(217, 58, 58, .55); } .tl-key.pick { background: var(--brand); width: 8px; border-radius: 50%; }
 .tl-key.ok { background: var(--ac); } .tl-key.no { background: var(--wa); } .tl-key.need { background: #b97a00; width: 3px; }
+
+/* 최상위 문제 복사 방지: 보이지 않는 가짜 글자 (복사·드래그하면 섞여 나온다) */
+.guarded { -webkit-touch-callout: none; }
+.gz { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; opacity: 0; pointer-events: none; }

@@ -1,5 +1,6 @@
 "use client";
 import type { Question } from "@/lib/data";
+import { GuardedText } from "@/components/Guarded";
 
 export type AnswerValue = { choice: number | null; text: string };
 export const emptyAnswer: AnswerValue = { choice: null, text: "" };
@@ -20,6 +21,7 @@ export default function AnswerInput({
   wrongPick,
   onEnter,
   idPrefix = "ans",
+  guard,
 }: {
   q: Pick<Question, "qtype" | "choices">;
   value: AnswerValue;
@@ -30,6 +32,8 @@ export default function AnswerInput({
   wrongPick?: number | null;
   onEnter?: () => void;
   idPrefix?: string;
+  /** 복사 방지할 문제면 문제 id */
+  guard?: string;
 }) {
   if (q.qtype === "short") {
     return (
@@ -74,7 +78,7 @@ export default function AnswerInput({
               onClick={() => onChange({ ...value, choice: i })}
             >
               <span className="cn">{i + 1}</span>
-              <span className="ct">{c}</span>
+              {guard ? <GuardedText as="span" className="ct" text={c} seed={guard + i} on /> : <span className="ct">{c}</span>}
             </button>
           </li>
         );
