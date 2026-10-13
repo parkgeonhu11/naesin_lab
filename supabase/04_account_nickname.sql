@@ -13,6 +13,11 @@ revoke all on public.banned_words from anon, authenticated;
 
 alter table public.profiles add column if not exists must_rename boolean not null default false;
 
+-- 별명 중복 금지 (대소문자·띄어쓰기 무시). '별명 변경 중'(관리자가 초기화한 상태)은 여러 명 가능
+create unique index if not exists profiles_nickname_unique
+  on public.profiles (lower(regexp_replace(nickname, '\s', '', 'g')))
+  where nickname <> '별명 변경 중';
+
 -- 비교용 형태 4가지
 --  a: 숫자를 비슷한 영어로 바꾼 뒤 글자만 (f4ck → fack, sh1t → shit)
 --  b: 숫자·기호·공백을 모두 뺀 형태 (시1발 → 시발, f.u.c.k → fuck)
@@ -61,8 +66,11 @@ begin
   if k = 'bad'      then return '욕설이나 비속어가 들어 있어서 쓸 수 없어. 다른 별명으로 해 줘.'; end if;
   if k = 'reserved' then return '관리자나 사이트 이름으로 착각할 수 있어서 쓸 수 없어. 다른 별명으로 해 줘.'; end if;
 
+  -- 중복: 대소문자·띄어쓰기 무시 (민지 = 민 지, Kim = kim)
   if exists (select 1 from profiles pr
-             where lower(pr.nickname) = lower(n) and pr.user_id is distinct from coalesce(p_uid, auth.uid())) then
+             where lower(regexp_replace(pr.nickname, '\s', '', 'g')) = lower(regexp_replace(n, '\s', '', 'g'))
+               and pr.nickname <> '별명 변경 중'
+               and pr.user_id is distinct from coalesce(p_uid, auth.uid())) then
     return '이미 다른 친구가 쓰고 있는 별명이야. 다른 별명으로 해 줘.';
   end if;
   return null;
@@ -87,8 +95,12 @@ begin
   if auth.uid() is null then raise exception '로그인 세션이 없어'; end if;
   r := nickname_problem(n, auth.uid());
   if r is not null then raise exception '%', r; end if;
-  insert into profiles(user_id, nickname) values (auth.uid(), n)
-  on conflict (user_id) do update set nickname = excluded.nickname, must_rename = false;
+  begin
+    insert into profiles(user_id, nickname) values (auth.uid(), n)
+    on conflict (user_id) do update set nickname = excluded.nickname, must_rename = false;
+  exception when unique_violation then
+    raise exception '방금 다른 친구가 같은 별명을 정했어. 다른 별명으로 해 줘.';
+  end;
 end $$;
 
 -- 관리자: 이 사람 별명 초기화 (새 별명을 정할 때까지 '별명 변경 중'으로 보임)
