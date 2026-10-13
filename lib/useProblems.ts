@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import type { ProblemRow, Progress } from "./data";
+import { loadProblemRows, type ProblemRow, type Progress } from "./data";
 import { isConfigured, sb } from "./supabase";
 import { useMe } from "./useMe";
 
@@ -29,11 +29,11 @@ export function useProblems() {
 
   const reload = useCallback(async () => {
     if (!isConfigured) return;
-    const [{ data: list }, mine] = await Promise.all([
-      sb().rpc("problem_list"),
+    const [list, mine] = await Promise.all([
+      loadProblemRows(sb()),
       user ? sb().rpc("my_progress") : Promise.resolve({ data: [] }),
     ]);
-    setRows((list as ProblemRow[]) ?? []);
+    setRows(list);
     const m: Record<string, Progress> = {};
     ((mine.data as Progress[]) ?? []).forEach((p) => (m[p.question_id] = p));
     setProg(m);

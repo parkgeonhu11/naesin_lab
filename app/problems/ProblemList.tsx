@@ -153,14 +153,15 @@ export default function ProblemList() {
                   <th className="hide-m">단원 · 유형</th>
                   <th className="c hide-m">형식</th>
                   <th className="c">난이도</th>
-                  <th className="r">정답률</th>
+                  <th className="r" title="맞힌 사람 / 풀어 본 사람">맞힌 사람</th>
+                  <th className="r hide-m">정답률</th>
                   <th className="c">내 상태</th>
                 </tr>
               </thead>
               <tbody>
-                {rows === null && <tr><td colSpan={7} className="empty-cell">불러오는 중…</td></tr>}
+                {rows === null && <tr><td colSpan={8} className="empty-cell">불러오는 중…</td></tr>}
                 {rows && shown.length === 0 && (
-                  <tr><td colSpan={7} className="empty-cell">
+                  <tr><td colSpan={8} className="empty-cell">
                     {rows.length === 0 || (!diff && !type && !mine && !q) ? <>이 분류에는 아직 문제가 없어. <Link className="link" href="/suggest">문제를 제안</Link>하면 관리자가 확인하고 올려 줘.</> : "조건에 맞는 문제가 없어."}
                   </td></tr>
                 )}
@@ -174,7 +175,10 @@ export default function ProblemList() {
                     </td>
                     <td className="c hide-m"><TypeBadge type={r.qtype} /></td>
                     <td className="c nowrap"><DiffBadge level={r.difficulty} /></td>
-                    <td className="r n nowrap" title={`맞힌 사람 ${r.solvers}명 · 제출 ${r.submissions}번`}>{r.submissions ? `${r.accuracy}%` : "–"}</td>
+                    <td className="r n nowrap" title={`${r.tried ?? 0}명이 풀어 봤고 ${r.solved_people ?? 0}명이 맞혔어`}>
+                      {r.tried ? <><b>{r.solved_people ?? 0}</b><span className="faint">/{r.tried}명</span></> : <span className="faint">–</span>}
+                    </td>
+                    <td className="r n nowrap hide-m" title={`맞힌 사람 ${r.solvers}명 · 제출 ${r.submissions}번`}>{r.submissions ? `${r.accuracy}%` : "–"}</td>
                     <td className="c nowrap"><StateIcon state={stateOf(prog[r.id])} /></td>
                   </tr>
                 ))}

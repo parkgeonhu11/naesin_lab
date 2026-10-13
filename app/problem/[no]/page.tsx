@@ -6,7 +6,7 @@ import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/compone
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
 import Figure from "@/components/Figure";
 import ReportButton from "@/components/ReportButton";
-import { diffOf, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
+import { diffOf, loadProblemRows, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
@@ -56,8 +56,7 @@ export default function ProblemPage() {
   }, []);
 
   const loadStats = useCallback(async () => {
-    const { data } = await sb().rpc("problem_list");
-    const list = (data as ProblemRow[]) ?? [];
+    const list = await loadProblemRows(sb());
     const me = list.find((p) => String(p.no) === no) ?? null;
     setInfo(me);
     setUnitList(me ? list.filter((p) => p.subject === me.subject && p.unit === me.unit) : []);
@@ -210,6 +209,9 @@ export default function ProblemPage() {
             <div className="prob-tags">
               <SubjBadge code={q.subject} /> <TypeBadge type={q.qtype} /> <DiffBadge level={q.difficulty} />
               <span className="small muted">배점 {d.points}점 · 정답률 {info?.submissions ? `${info.accuracy}%` : "–"}</span>
+              <span className="people-chip" title="이 문제를 풀어 본 사람 중 맞힌 사람">
+                <b>{info?.solved_people ?? 0}</b>명 맞힘 <span className="faint">/ {info?.tried ?? 0}명 풀어 봄</span>
+              </span>
               {idx >= 0 && <span className="small faint">{idx + 1} / {unitList.length}</span>}
               <ReportButton questionId={q.id} no={q.no} className="push-right" />
             </div>

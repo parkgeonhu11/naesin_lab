@@ -46,7 +46,19 @@ export type ProblemRow = {
   source: string;
   author_nick: string;
   from_student: boolean;
+  /** 이 문제를 풀어 본 사람 수 (제출했거나 정답을 본 사람) */
+  tried?: number;
+  /** 이 문제를 맞힌 사람 수 */
+  solved_people?: number;
 };
+
+type People = { question_id: string; tried: number; solved: number };
+/** 문제 목록 + 푼 사람/맞힌 사람 수를 함께 불러온다 */
+export async function loadProblemRows(client: { rpc: (fn: string) => PromiseLike<{ data: unknown }> }): Promise<ProblemRow[]> {
+  const [{ data: list }, { data: people }] = await Promise.all([client.rpc("problem_list"), client.rpc("problem_people")]);
+  const m = new Map(((people as People[]) ?? []).map((p) => [p.question_id, p]));
+  return ((list as ProblemRow[]) ?? []).map((r) => ({ ...r, tried: +(m.get(r.id)?.tried ?? 0), solved_people: +(m.get(r.id)?.solved ?? 0) }));
+}
 
 /** 문제 상세 */
 export type Question = {
