@@ -649,3 +649,7 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .people-chip b { color: var(--ac); font-size: 13px; }
 .warn-dlg { border: 2px solid var(--wa); }
 .warn-ic { width: 44px; height: 44px; border-radius: 50%; background: var(--wa); color: #fff; display: grid; place-items: center; font-size: 26px; font-weight: 800; }
+.pod { position: relative; }
+.pod-link { position: absolute; inset: 0; z-index: 2; border-radius: inherit; }
+.user-head { align-items: center; gap: 12px; }
+.user-head .avatar.big { width: 44px; height: 44px; font-size: 18px; }
