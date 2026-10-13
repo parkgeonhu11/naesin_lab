@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
+import Figure from "@/components/Figure";
 import ReportButton from "@/components/ReportButton";
 import { diffOf, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
@@ -14,7 +15,7 @@ type Verdict =
   | { kind: "wa"; picked: number | null; text: string; penalty: number; repeat: boolean; nextPenalty: number }
   | { kind: "reveal"; answer: number | null; answerText: string | null; explanation: string };
 
-const QCOLS = "id,no,subject,unit,topic,qtype,difficulty,body,choices,source,author,author_nick";
+const QCOLS = "id,no,subject,unit,topic,qtype,difficulty,body,choices,figure,source,author,author_nick";
 
 /** 맞혔을 때 잠깐 터지는 축하 효과 (움직임 줄이기 설정이면 안 보임) */
 function Burst() {
@@ -217,6 +218,7 @@ export default function ProblemPage() {
           <section className="section">
             <h2>문제</h2>
             <p className="statement">{q.body}</p>
+            <Figure spec={q.figure} />
           </section>
 
           <section className="section">

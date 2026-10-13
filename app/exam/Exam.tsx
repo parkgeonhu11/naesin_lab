@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, TypeBadge } from "@/components/Badges";
+import Figure from "@/components/Figure";
 import { DIFF, diffOf, QTYPES, shuffle, stateOf, SUBJECTS, subjectName, type GradeResult, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -12,7 +13,7 @@ import { buildTree, useProblems } from "@/lib/useProblems";
 type Phase = "setup" | "taking" | "grading" | "result";
 type Graded = { q: Question; val: AnswerValue; result: GradeResult | null; skipped: boolean };
 
-const QCOLS = "id,no,subject,unit,topic,qtype,difficulty,body,choices,source,author,author_nick";
+const QCOLS = "id,no,subject,unit,topic,qtype,difficulty,body,choices,figure,source,author,author_nick";
 const COUNTS = [5, 10, 15, 20, 30];
 
 export default function Exam() {
@@ -203,6 +204,7 @@ export default function Exam() {
                 <span className="faint">{diffOf(q.difficulty).points}점 · {q.no}번</span>
               </div>
               <p className="statement" style={{ marginBottom: 12 }}>{q.body}</p>
+              <Figure spec={q.figure} />
               <AnswerInput
                 q={q}
                 idPrefix={`q${i}`}

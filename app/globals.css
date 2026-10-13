@@ -634,3 +634,14 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .acct-stats b { font-size: 22px; }
 @media (max-width: 600px) { .acct-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .row > .tabs { padding: 0; border: 0; }
+
+/* ================= 문제 그림 ================= */
+.qfig { margin: 4px 0 14px; display: grid; justify-items: center; gap: 4px; }
+.qfig-svg { color: var(--text); background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; max-width: 100%; }
+.qfig-svg svg { display: block; max-width: 100%; max-height: 260px; width: auto; height: auto; }
+.qfig-svg .thin { stroke-width: 1.1; }
+.qfig-svg text.pt { font-weight: 700; }
+.qfig-svg text.len { fill: var(--brand); font-size: 12px; font-weight: 600; }
+.qfig-svg text.ang { fill: var(--wa); font-size: 12px; font-weight: 600; }
+.qfig figcaption { font-size: 12px; color: var(--faint); }
+@media (min-width: 900px) { .qfig-svg svg { min-width: 300px; } }

@@ -63,6 +63,8 @@ export type Question = {
   source: string;
   author: string | null;
   author_nick: string;
+  /** 문제 그림 (좌표 설명). 없으면 null */
+  figure?: import("./figure").FigureSpec | null;
 };
 
 export type Progress = {
