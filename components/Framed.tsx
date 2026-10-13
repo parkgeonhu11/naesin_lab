@@ -72,17 +72,70 @@ function Avatar({ name, className = "" }: { name?: string | null; className?: st
   return <span className={`avatar ${className}`} aria-hidden="true">{(name ?? "?").trim().slice(0, 1) || "?"}</span>;
 }
 
+// 불꽃 하나 (아래가 뿌리, 위가 끝). 원 둘레에 돌려 가며 붙인다
+const FLAME = "M0,0 C-7,-5 -7,-13 -2,-20 C-1,-14 2,-13 1,-24 C7,-17 9,-9 6,-4 C5,-1 3,0 0,0 Z";
+
+function FlameRing({ tone }: { tone: "gold" | "fire" }) {
+  const n = 12;
+  const g = tone === "gold" ? ["#fff7c2", "#ffd23f", "#ff9d00"] : ["#ffe08a", "#ff7a1a", "#d61f00"];
+  const id = `frf-${tone}`;
+  return (
+    <svg className="fr-flames" viewBox="-50 -50 100 100" aria-hidden="true">
+      <defs>
+        <linearGradient id={id} x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0" stopColor={g[2]} />
+          <stop offset=".55" stopColor={g[1]} />
+          <stop offset="1" stopColor={g[0]} />
+        </linearGradient>
+      </defs>
+      {Array.from({ length: n }, (_, k) => (
+        <g key={k} transform={`rotate(${(360 / n) * k}) translate(0 -26) scale(${k % 2 ? 0.8 : 1.05})`}>
+          <path d={FLAME} fill={`url(#${id})`} className="fl" style={{ animationDelay: `${(k % 4) * -0.23}s` }} />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function IceWings() {
+  // 오른쪽 날개를 그리고 왼쪽은 뒤집어서 쓴다
+  const wing = "M30,-2 C40,-30 70,-46 96,-44 C88,-34 82,-28 70,-22 C84,-22 92,-16 97,-8 C84,-6 74,-4 64,-2 C74,2 80,8 84,16 C70,14 58,10 48,8 C54,14 56,20 56,26 C46,20 38,12 30,6 Z";
+  return (
+    <svg className="fr-wings" viewBox="-100 -70 200 130" aria-hidden="true">
+      <defs>
+        <linearGradient id="frw" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#f2f9ff" />
+          <stop offset=".5" stopColor="#8cc6ff" />
+          <stop offset="1" stopColor="#3c72d6" />
+        </linearGradient>
+      </defs>
+      <ellipse className="halo" cx="0" cy="-48" rx="22" ry="6" />
+      <g className="wl"><path d={wing} transform="scale(-1 1)" fill="url(#frw)" /></g>
+      <g className="wr"><path d={wing} fill="url(#frw)" /></g>
+    </svg>
+  );
+}
+
 /** 테두리 + 아바타. frame이 없으면 그냥 아바타 */
 export function FramedAvatar({ name, frame, className = "" }: { name?: string | null; frame: FrameKey | null; className?: string }) {
   if (!frame) return <Avatar name={name} className={className} />;
+  const top = frame === "gold" || frame === "silver" || frame === "bronze";
   return (
-    <span className={`fr fr-${frame}`} title={`${FRAME_NAME[frame]} 테두리`}>
+    <span className={`fr fr-${frame} ${top ? "fr-top" : ""}`} title={`${FRAME_NAME[frame]} 테두리`}>
+      {frame === "gold" && <span className="fr-rays" aria-hidden="true" />}
+      {frame === "gold" && <FlameRing tone="gold" />}
+      {frame === "bronze" && <FlameRing tone="fire" />}
+      {frame === "silver" && <IceWings />}
       {frame === "gold" && (
         <svg className="fr-crown" viewBox="0 0 24 16" aria-hidden="true">
           <path d="M2 14 L1 4 L7 8 L12 1 L17 8 L23 4 L22 14 Z" />
           <circle cx="12" cy="9.5" r="1.8" className="gem" />
+          <circle cx="1" cy="4" r="1.1" className="tip" />
+          <circle cx="12" cy="1" r="1.1" className="tip" />
+          <circle cx="23" cy="4" r="1.1" className="tip" />
         </svg>
       )}
+      {top && <span className="fr-embers" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>}
       {(frame === "silver" || frame === "cosmic" || frame === "gold") && <span className="fr-spark" aria-hidden="true" />}
       <Avatar name={name} className={className} />
     </span>

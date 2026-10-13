@@ -770,3 +770,94 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
   .pod.p1 .fr > .avatar { width: 62px; height: 62px; font-size: 23px; }
 }
 .user-head .fr { margin-top: 14px; }
+
+/* ===== 1·2·3위 아우라 (레벨 테두리보다 훨씬 화려하게) ===== */
+.fr-top { padding: 5px; }
+.pod .fr-top, .user-head .fr-top { padding: 7px; }
+.fr-top::after { inset: -10px; filter: blur(9px); opacity: 1; }
+.pod .fr-top::after, .user-head .fr-top::after { inset: -16px; filter: blur(14px); }
+.fr-top::before { box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), 0 0 10px rgba(255,255,255,.35); }
+
+/* 레벨 테두리는 한 단계 차분하게 */
+.fr:not(.fr-top) { padding: 3px; }
+.pod .fr:not(.fr-top), .user-head .fr:not(.fr-top) { padding: 4px; }
+.fr:not(.fr-top)::after { inset: -2px; filter: blur(4px); opacity: .4; animation: none; }
+
+/* 1위: 회전하는 금빛 햇살 */
+.fr-rays { position: absolute; inset: -75%; border-radius: 50%; z-index: -4; pointer-events: none;
+  background: repeating-conic-gradient(from var(--fr-a), rgba(255, 210, 70, .8) 0 4deg, transparent 4deg 15deg);
+  -webkit-mask: radial-gradient(circle, #000 22%, transparent 66%); mask: radial-gradient(circle, #000 22%, transparent 66%);
+  animation: fr-spin 16s linear infinite; }
+:root[data-theme="dark"] .fr-rays { background: repeating-conic-gradient(from var(--fr-a), rgba(255, 214, 90, .9) 0 4deg, transparent 4deg 15deg); }
+
+/* 1위·3위: 불꽃 고리 */
+.fr-flames { position: absolute; left: -38%; top: -38%; width: 176%; height: 176%; z-index: -3; overflow: visible; pointer-events: none; animation: fr-turn 22s linear infinite; }
+.fr-gold .fr-flames { filter: drop-shadow(0 0 3px #ffb300); }
+.fr-bronze .fr-flames { filter: drop-shadow(0 0 4px #ff3d00); left: -42%; top: -42%; width: 184%; height: 184%; }
+.fr-flames .fl { transform-box: fill-box; transform-origin: 50% 100%; animation: fr-flick .8s ease-in-out infinite alternate; }
+@keyframes fr-turn { to { transform: rotate(360deg); } }
+@keyframes fr-flick { from { transform: scale(1.06, .78); opacity: .75; } to { transform: scale(.9, 1.18); opacity: 1; } }
+
+/* 2위: 얼음 날개 + 천사 고리 */
+.fr-wings { position: absolute; left: 50%; top: 50%; width: 270%; height: 175.5%; transform: translate(-50%, -54%); z-index: -3; overflow: visible; pointer-events: none; filter: drop-shadow(0 0 4px #8cc4ff) drop-shadow(0 0 1px #fff); }
+.fr-wings path { stroke: #ffffff; stroke-width: 1.4; stroke-linejoin: round; }
+.fr-wings .wr { transform-box: view-box; transform-origin: 30px 0; animation: fr-flap-r 2.6s ease-in-out infinite; }
+.fr-wings .wl { transform-box: view-box; transform-origin: -30px 0; animation: fr-flap-l 2.6s ease-in-out infinite; }
+.fr-wings .halo { fill: none; stroke: #f4fbff; stroke-width: 3; filter: drop-shadow(0 0 3px #a8d6ff); animation: fr-halo 3s ease-in-out infinite; transform-box: view-box; }
+@keyframes fr-flap-r { 50% { transform: rotate(-9deg); } }
+@keyframes fr-flap-l { 50% { transform: rotate(9deg); } }
+@keyframes fr-halo { 50% { transform: translateY(-3px); } }
+
+/* 떠오르는 불씨 / 눈송이 */
+.fr-embers { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.fr-embers i { position: absolute; bottom: 12%; width: 4px; height: 4px; border-radius: 50%; opacity: 0; animation: fr-rise 2.6s linear infinite; }
+.fr-gold .fr-embers i { background: #fff1a0; box-shadow: 0 0 6px #ffc400; }
+.fr-bronze .fr-embers i { background: #ffb04d; box-shadow: 0 0 6px #ff3d00; }
+.fr-silver .fr-embers i { background: #ffffff; box-shadow: 0 0 6px #9fd0ff; }
+.fr-embers i:nth-child(1) { left: 6%; animation-delay: 0s; }
+.fr-embers i:nth-child(2) { left: 24%; animation-delay: -.9s; width: 3px; height: 3px; }
+.fr-embers i:nth-child(3) { left: 46%; animation-delay: -1.7s; }
+.fr-embers i:nth-child(4) { left: 66%; animation-delay: -.4s; width: 3px; height: 3px; }
+.fr-embers i:nth-child(5) { left: 84%; animation-delay: -1.3s; }
+.fr-embers i:nth-child(6) { left: 96%; animation-delay: -2.1s; width: 3px; height: 3px; }
+@keyframes fr-rise { 0% { transform: translateY(0) scale(1); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-46px) translateX(4px) scale(.3); opacity: 0; } }
+
+/* 1위 왕관 크게 */
+.fr-top.fr-gold .fr-crown { width: 74%; transform: translate(-50%, -70%) rotate(-6deg); }
+.fr-crown .tip { fill: #fff6c8; stroke: #9c6400; stroke-width: .5; }
+
+/* 작은 자리(표·목록·상단바)에서는 장식을 줄인다 */
+.rank-name .fr-embers, .top-me .fr-embers, .me-card .fr-embers, .list-item .fr-embers, .my-rank .fr-embers { display: none; }
+.rank-name .fr-wings, .top-me .fr-wings, .me-card .fr-wings, .list-item .fr-wings, .my-rank .fr-wings { width: 230%; height: 149.5%; }
+.rank-name .fr-rays, .top-me .fr-rays, .me-card .fr-rays, .list-item .fr-rays, .my-rank .fr-rays { inset: -55%; }
+.pod.p1 .fr-top { margin-top: 22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fr-rays, .fr-flames, .fr-flames .fl, .fr-wings .wl, .fr-wings .wr, .fr-wings .halo, .fr-embers i { animation: none !important; }
+}
+/* 아우라가 이름을 덮지 않게 */
+.pod b, .pod small { position: relative; z-index: 3; }
+.pod .fr-top { margin-bottom: 14px; }
+.pod.p1 .fr-top { margin-bottom: 18px; }
+.rank-name:has(.fr-top) { gap: 18px; padding-left: 8px; }
+.list-item:has(.fr-top) .li-main, .my-rank:has(.fr-top) .grow { margin-left: 8px; }
+.rank-name .fr-flames, .list-item .fr-flames, .my-rank .fr-flames, .me-card .fr-flames, .top-me .fr-flames { left: -26%; top: -26%; width: 152%; height: 152%; }
+.rank-name .fr-wings, .list-item .fr-wings, .my-rank .fr-wings { width: 205%; height: 133%; }
+.me-card .fr-wings, .top-me .fr-wings { display: none; }
+.me-card:has(.fr-top) > span:last-child, .top-me:has(.fr-top) { gap: 12px; }
+.me-card:has(.fr-top) { gap: 14px; }
+/* 밝은 화면에서도 날개가 보이게 */
+.fr-wings path { stroke: #5f97e6; }
+.fr-wings .halo { stroke: #8fc2ff; }
+.fr-wings { filter: drop-shadow(0 0 4px #6fb0ff) drop-shadow(0 1px 1px rgba(40,80,160,.35)); }
+:root[data-theme="dark"] .fr-wings path { stroke: #ffffff; }
+:root[data-theme="dark"] .fr-wings .halo { stroke: #f4fbff; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .fr-wings path { stroke: #ffffff; }
+  :root:not([data-theme="light"]) .fr-wings .halo { stroke: #f4fbff; }
+}
+@media (max-width: 720px) {
+  .pod .fr-wings { width: 215%; height: 140%; }
+  .pod .fr-rays { inset: -55%; }
+}
+.list-item .fr-top, .my-rank .fr-top { margin: 0 8px 0 10px; }
