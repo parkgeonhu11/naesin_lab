@@ -678,3 +678,95 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 /* 최상위 문제 복사 방지: 보이지 않는 가짜 글자 (복사·드래그하면 섞여 나온다) */
 .guarded { -webkit-touch-callout: none; }
 .gz { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; opacity: 0; pointer-events: none; }
+
+/* ===== 아바타 테두리 (1·2·3위, 레벨 5 이상) ===== */
+@property --fr-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.fr { position: relative; display: inline-grid; place-items: center; flex: none; border-radius: 50%; padding: 4px; isolation: isolate; overflow: visible; }
+.pod .fr, .user-head .fr { padding: 6px; }
+.fr::before { content: ""; position: absolute; inset: 0; border-radius: 50%; z-index: -1; animation: fr-spin 4.5s linear infinite; }
+.fr::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; z-index: -2; filter: blur(6px); opacity: .85; animation: fr-glow 2.4s ease-in-out infinite; }
+.pod .fr::after, .user-head .fr::after { inset: -9px; filter: blur(10px); }
+.fr > .avatar { position: relative; box-shadow: 0 0 0 2px var(--surface), inset 0 0 0 1px rgba(255,255,255,.25) !important; }
+@keyframes fr-spin { to { --fr-a: 360deg; } }
+@keyframes fr-glow { 50% { opacity: .45; transform: scale(.95); } }
+
+/* 1위 왕관 골드 */
+.fr-gold::before { background: conic-gradient(from var(--fr-a), #fff8d6, #ffd34d, #c98a00, #fff1a6, #ffbf1f, #8a5a00, #ffe27a, #fff8d6); }
+.fr-gold::after { background: radial-gradient(circle, #ffe066 30%, #ffae00 58%, transparent 72%); }
+.fr-gold > .avatar { background: radial-gradient(circle at 35% 30%, #fff1b0, #ffc93a 45%, #e08a00) !important; color: #5a3500 !important; text-shadow: 0 1px 0 rgba(255,255,255,.6); }
+.fr-crown { position: absolute; left: 50%; top: 0; width: 64%; transform: translate(-50%, -66%) rotate(-5deg); z-index: 3; overflow: visible; filter: drop-shadow(0 2px 3px rgba(120,70,0,.5)) drop-shadow(0 0 6px rgba(255,210,60,.8)); animation: fr-bob 3s ease-in-out infinite; }
+.fr-crown path { fill: #ffcc33; stroke: #8a5600; stroke-width: 1.1; stroke-linejoin: round; }
+.fr-crown .gem { fill: #c56bff; stroke: #fff; stroke-width: .7; }
+@keyframes fr-bob { 50% { transform: translate(-50%, -74%) rotate(4deg); } }
+
+/* 2위 프로스트 실버 */
+.fr-silver::before { background: conic-gradient(from var(--fr-a), #ffffff, #cfe0f5, #7e90ab, #eaf6ff, #9cc3ff, #66789a, #e3eefc, #ffffff); }
+.fr-silver::after { background: radial-gradient(circle, #e2f0ff 30%, #7fb0ff 58%, transparent 72%); }
+.fr-silver > .avatar { background: radial-gradient(circle at 35% 30%, #ffffff, #c4d3e8 45%, #7385a3) !important; color: #23324a !important; }
+
+/* 3위 인페르노 브론즈 */
+.fr-bronze::before { background: conic-gradient(from var(--fr-a), #ffd9b0, #e0763a, #7a2f0c, #ffb067, #ff4d14, #5c2309, #f39a5b, #ffd9b0); animation-duration: 3s; }
+.fr-bronze::after { background: radial-gradient(circle, #ffb04d 25%, #ff3d00 55%, transparent 72%); animation: fr-flame 1.2s ease-in-out infinite; }
+.fr-bronze > .avatar { background: radial-gradient(circle at 35% 30%, #ffc49a, #d9733a 45%, #8e3f12) !important; color: #fff !important; }
+@keyframes fr-flame { 30% { opacity: 1; transform: scale(1.06) translateY(-1px); } 65% { opacity: .5; transform: scale(.95); } }
+
+/* Lv.5~9 네온 링 */
+.fr-neon::before { background: conic-gradient(from var(--fr-a), #00f0ff, #0070ff 25%, #ff2bd6 50%, #7a00ff 75%, #00f0ff); }
+.fr-neon::after { background: conic-gradient(from 45deg, #00f0ff, #ff2bd6, #00f0ff); filter: blur(7px); }
+.fr-neon > .avatar { background: radial-gradient(circle at 40% 35%, #1b2a5c, #0a1029) !important; color: #7ff6ff !important; text-shadow: 0 0 6px #00e5ff; }
+
+/* Lv.10~14 오로라 웨이브 */
+.fr-aurora::before { background: conic-gradient(from var(--fr-a), #3cffc8, #2aa8ff, #8b5cff, #ff6ad5, #ffd36e, #3cffc8); animation-duration: 3.2s; }
+.fr-aurora::after { background: conic-gradient(from 90deg, #3cffc8, #2aa8ff, #8b5cff, #ff6ad5, #3cffc8); filter: blur(8px); }
+.fr-aurora > .avatar { background: linear-gradient(140deg, #18c8a0, #3b7dff 55%, #9b5cff) !important; color: #fff !important; }
+
+/* Lv.15~ 코스믹 스타 */
+.fr-cosmic::before { background: conic-gradient(from var(--fr-a), #ffd66e, #6a3cff, #1b0b4a, #c56bff, #ffd66e, #2a1070, #6a3cff, #ffd66e); }
+.fr-cosmic::after { background: radial-gradient(circle, #a77bff 30%, #3a149a 58%, transparent 72%); }
+.fr-cosmic > .avatar { color: #ffe9a8 !important; text-shadow: 0 0 6px #ffcc55;
+  background: radial-gradient(circle at 25% 30%, #fff 0 1px, transparent 1.5px), radial-gradient(circle at 70% 70%, #fff 0 1px, transparent 1.5px), radial-gradient(circle at 75% 25%, #ffe9a8 0 1px, transparent 1.6px), radial-gradient(circle at 40% 40%, #3b1d8f, #12073a) !important; }
+
+/* 반짝이 (골드·실버·코스믹) */
+.fr-spark { position: absolute; inset: -8px; border-radius: 50%; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(circle at 10% 30%, #fff 0 1.4px, transparent 2.2px),
+    radial-gradient(circle at 90% 20%, #fff 0 1.7px, transparent 2.5px),
+    radial-gradient(circle at 84% 86%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 16% 84%, #fff 0 1.5px, transparent 2.3px),
+    radial-gradient(circle at 50% 100%, #fff 0 1px, transparent 1.8px);
+  animation: fr-twinkle 2s ease-in-out infinite; }
+.fr-silver .fr-spark { filter: drop-shadow(0 0 3px #9fc4ff); }
+.fr-gold .fr-spark { filter: drop-shadow(0 0 3px #ffcc33); }
+.fr-cosmic .fr-spark { filter: drop-shadow(0 0 3px #ffd66e); }
+@keyframes fr-twinkle { 50% { opacity: .2; transform: rotate(20deg) scale(1.05); } }
+
+/* 테두리 이름표 */
+.fr-chip { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; vertical-align: 2px; color: #fff; white-space: nowrap; box-shadow: 0 1px 6px rgba(0,0,0,.15); }
+.fr-chip-gold { background: linear-gradient(90deg, #f0a400, #ffd84d); color: #4a2c00; }
+.fr-chip-silver { background: linear-gradient(90deg, #7e90ab, #dbe7f6); color: #1c2a40; }
+.fr-chip-bronze { background: linear-gradient(90deg, #b5401b, #f08a45); }
+.fr-chip-neon { background: linear-gradient(90deg, #00a8d4, #c51fa8); }
+.fr-chip-aurora { background: linear-gradient(90deg, #12b38a, #2a8cff, #a35cff); }
+.fr-chip-cosmic { background: linear-gradient(90deg, #2a1070, #6a3cff, #c9a23a); }
+
+/* 랭킹 표 안의 작은 아바타 */
+.tbl td .rank-name, .rank-name { display: inline-flex !important; align-items: center; gap: 10px; min-width: 0; overflow: visible; padding: 4px 0; }
+.rank-name .avatar { width: 30px; height: 30px; font-size: 12.5px; }
+.rank-name .fr-crown { width: 60%; }
+.tbl td:has(.rank-name) { overflow: visible; }
+.pod .fr { margin-top: 10px; }
+.pod.p1 .fr > .avatar, .pod.p2 .fr > .avatar, .pod.p3 .fr > .avatar { box-shadow: 0 0 0 2px var(--surface) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fr::before, .fr::after, .fr-crown, .fr-spark { animation: none !important; }
+}
+.pod .fr > .avatar { width: 62px; height: 62px; font-size: 22px; }
+.pod.p1 .fr > .avatar { width: 78px; height: 78px; font-size: 28px; }
+@media (max-width: 720px) {
+  .rank-name { gap: 7px; padding: 2px 0; }
+  .rank-name .avatar { width: 24px; height: 24px; font-size: 11px; }
+  .rank-name .fr { padding: 3px; }
+  .pod .fr > .avatar { width: 50px; height: 50px; font-size: 19px; }
+  .pod.p1 .fr > .avatar { width: 62px; height: 62px; font-size: 23px; }
+}
+.user-head .fr { margin-top: 14px; }

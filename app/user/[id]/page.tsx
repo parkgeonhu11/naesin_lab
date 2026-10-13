@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DiffBadge, SubjBadge } from "@/components/Badges";
-import { Avatar } from "@/components/Shell";
+import { FrameChip, FramedAvatar, useFrames } from "@/components/Framed";
 import { ago, levelOf, SUBJECTS, subjectName } from "@/lib/data";
 import { sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -18,6 +18,7 @@ export default function UserPage() {
   const { user } = useMe();
   const rowLink = useRowLink();
   const [info, setInfo] = useState<Info | null | undefined>(undefined);
+  const frameFor = useFrames();
   const [subject, setSubject] = useState("all");
 
   useEffect(() => {
@@ -35,12 +36,13 @@ export default function UserPage() {
   if (info === undefined) return <p className="muted">불러오는 중…</p>;
   if (info === null) return <div className="notice warn">이 친구의 기록을 볼 수 없어. <Link className="link" href="/ranking">랭킹으로</Link></div>;
   const lv = levelOf(info.points).lv;
+  const frame = frameFor(id);
 
   return (
     <>
       <div className="page-title user-head">
-        <Avatar name={info.nickname} className="big" />
-        <h1>{info.nickname}{info.is_me ? " (나)" : ""} <span className="lv-chip">Lv.{lv}</span></h1>
+        <FramedAvatar name={info.nickname} className="big" frame={frame} />
+        <h1>{info.nickname}{info.is_me ? " (나)" : ""} <span className="lv-chip">Lv.{lv}</span><FrameChip frame={frame} /></h1>
         <Link className="btn line" style={{ marginLeft: "auto" }} href="/ranking">← 랭킹</Link>
       </div>
 

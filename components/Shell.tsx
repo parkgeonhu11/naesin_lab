@@ -1,4 +1,5 @@
 "use client";
+import { FramedAvatar, frameOf } from "@/components/Framed";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -76,7 +77,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           {theme === "dark" ? "밝은 화면" : "어두운 화면"}
         </button>
         <Link href="/me" className="me-card">
-          <Avatar name={nickname} />
+          <FramedAvatar name={nickname} frame={frameOf(rank, points)} />
           <span><b>{nickname ?? "별명 정하기"} <span className="lv-chip">Lv.{lv}</span></b><small>{isAnon ? `${score} · 임시 계정` : score}</small></span>
         </Link>
       </div>
@@ -106,7 +107,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <b>내신랩</b>
           </Link>
           <Link href="/me" className="top-me">
-            <Avatar name={nickname} />
+            <FramedAvatar name={nickname} frame={frameOf(rank, points)} />
             {score}
           </Link>
           <button type="button" className="menu-btn" aria-label="전체 메뉴" onClick={() => setOpen(true)}>

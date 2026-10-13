@@ -5,7 +5,7 @@ import { ResultText } from "@/components/Badges";
 import Icon from "@/components/Icon";
 import AccountCard from "@/components/AccountCard";
 import ExamDday from "@/components/ExamDday";
-import { Avatar } from "@/components/Shell";
+import { FramedAvatar, frameOf, useFrames } from "@/components/Framed";
 import { ago, levelOf, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -15,6 +15,7 @@ const DAILY_GOAL = 10;
 const pct = (a: number, b: number) => (b ? Math.round((100 * a) / b) : 0);
 
 export default function Home() {
+  const frameFor = useFrames();
   const { user, nickname, error, isAnon, ready } = useMe();
   const { rows, prog } = useProblems();
   const [sum, setSum] = useState<MySummary | null>(null);
@@ -250,7 +251,7 @@ export default function Home() {
               {live?.length === 0 && <div className="list-empty">아직 제출이 없어. 첫 번째로 풀어 봐!</div>}
               {live?.map((s) => (
                 <Link key={s.id} href={`/problem/${s.problem_no}`} className={`list-item ${s.is_me ? "mine" : ""}`}>
-                  <Avatar name={s.nickname} />
+                  <FramedAvatar name={s.nickname} frame={frameFor(null, s.nickname)} />
                   <span className="li-main">
                     <b>{s.nickname}</b>
                     <small>{subjectName(s.subject)} {s.problem_no}번 · {ago(s.created_at)}</small>
@@ -275,6 +276,7 @@ export default function Home() {
               {top?.map((r) => (
                 <div key={r.user_id} className={`list-item ${r.user_id === user?.id ? "mine" : ""}`}>
                   <span className={`medal m${r.rank}`}>{r.rank}</span>
+                  <FramedAvatar name={r.nickname} frame={frameFor(r.user_id)} />
                   <span className="li-main">
                     <b>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}</b>
                     <small>맞힌 문제 {r.solved}개</small>
@@ -284,7 +286,7 @@ export default function Home() {
               ))}
             </div>
             <div className="my-rank">
-              <Avatar name={nickname} />
+              <FramedAvatar name={nickname} frame={frameOf(sum?.rank, sum?.points)} />
               <span className="grow">내 순위 <b>{sum?.rank ? `${sum.rank}위` : "–"}</b>{sum?.players ? ` / ${sum.players}명` : ""}</span>
               <span className="pts">{sum?.points ?? 0}점</span>
             </div>
