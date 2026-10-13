@@ -36,7 +36,7 @@ const buzz = (p: number | number[]) => {
 export default function ProblemPage() {
   const { no } = useParams<{ no: string }>();
   const router = useRouter();
-  const { user, refreshScore } = useMe();
+  const { user, refreshScore, refreshStatus } = useMe();
   const [q, setQ] = useState<Question | null | undefined>(undefined);
   const [info, setInfo] = useState<ProblemRow | null>(null);
   const [unitList, setUnitList] = useState<ProblemRow[]>([]);
@@ -71,6 +71,8 @@ export default function ProblemPage() {
       const { data, error } = await sb().from("questions").select(QCOLS).eq("no", Number(no)).eq("status", "published").maybeSingle();
       if (error) return setErr(friendly(error));
       setQ((data as Question) ?? null);
+      // 문제를 처음 연 시각을 서버에 남김 (너무 빨리 맞힌 답 확인용)
+      if (data) sb().rpc("open_questions", { p_ids: [(data as Question).id] }).then(() => {}, () => {});
       if (data) await Promise.all([loadMine(), loadStats()]);
     })();
   }, [user, no, loadMine, loadStats]);
@@ -109,7 +111,7 @@ export default function ProblemPage() {
       setVerdict({ kind: "wa", picked: val.choice, text: val.text, penalty: r.penalty ?? 0, repeat: !!r.repeat, nextPenalty: r.next_penalty ?? 0 });
       buzz([20, 60, 20]);
     }
-    await Promise.all([loadMine(), loadStats(), refreshScore()]);
+    await Promise.all([loadMine(), loadStats(), refreshScore(), refreshStatus()]);
   }
 
   async function reveal() {

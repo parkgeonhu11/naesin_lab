@@ -18,7 +18,7 @@ const COUNTS = [5, 10, 15, 20, 30];
 
 export default function Exam() {
   const params = useSearchParams();
-  const { user, refreshScore } = useMe();
+  const { user, refreshScore, refreshStatus } = useMe();
   const { rows, prog, cats } = useProblems();
   const tree = useMemo(() => buildTree(rows ?? [], cats), [rows, cats]);
 
@@ -92,6 +92,8 @@ export default function Exam() {
     // 시험지는 대단원 → 난이도 순서로 정렬 (쉬운 문제부터)
     const qs = ((data as Question[]) ?? []).sort((a, b) => a.unit.localeCompare(b.unit) || a.difficulty - b.difficulty || a.no - b.no);
     setPaper(qs);
+    // 시험지를 받은 시각을 서버에 남김 (너무 빨리 맞힌 답 확인용)
+    sb().rpc("open_questions", { p_ids: qs.map((x) => x.id) }).then(() => {}, () => {});
     setAnswers({});
     setStartedAt(Date.now());
     setNow(Date.now());
@@ -130,7 +132,7 @@ export default function Exam() {
       out.push({ q, val, result: error ? null : (data as GradeResult), skipped: false });
     }
     setGraded(out);
-    await refreshScore();
+    await Promise.all([refreshScore(), refreshStatus()]);
     setPhase("result");
     window.scrollTo({ top: 0 });
   }

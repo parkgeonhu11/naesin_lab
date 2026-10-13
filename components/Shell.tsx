@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Icon from "@/components/Icon";
+import { BanScreen, WarningModal } from "@/components/FairPlay";
 import LoginGate from "@/components/LoginGate";
 import NicknameCard, { GoogleButton } from "@/components/NicknameCard";
 import { levelOf } from "@/lib/data";
@@ -29,7 +30,7 @@ export function Avatar({ name, className = "" }: { name?: string | null; classNa
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn } = useMe();
+  const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn, banned } = useMe();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
 
@@ -92,6 +93,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       );
     }
     if (needLogin) return <LoginGate />;
+    if (banned) return <BanScreen />;
   }
 
   return (
@@ -114,6 +116,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
         <main className="content">
           {notice && <div className="notice warn">{notice}</div>}
+          <WarningModal />
           {ready && user && path !== "/admin" && (!nickname || mustRename) && (
             <NicknameCard
               current={nickname}

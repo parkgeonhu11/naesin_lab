@@ -28,6 +28,13 @@ type MeState = {
   /** Google 로그인 설정 전에만: 임시 계정으로 들어가기 */
   enterAsGuest: () => Promise<void>;
   notice: string | null;
+  /** 너무 빨리 맞힌 답이 쌓여서 받은 경고 (아직 확인 안 함) */
+  warned: boolean;
+  /** 이용 정지 */
+  banned: boolean;
+  ackWarning: () => Promise<void>;
+  /** 경고·정지 상태 다시 확인 (제출 뒤에 호출) */
+  refreshStatus: () => Promise<void>;
   refreshScore: () => Promise<void>;
 };
 
@@ -38,6 +45,8 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [nickname, setNickname] = useState<string | null>(null);
   const [mustRename, setMustRename] = useState(false);
+  const [warned, setWarned] = useState(false);
+  const [banned, setBanned] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [points, setPoints] = useState(0);
   const [rank, setRank] = useState<number | null>(null);
@@ -69,6 +78,9 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     const { data } = await sb().from("profiles").select("nickname,must_rename").eq("user_id", uid).maybeSingle();
     setNickname(data?.nickname ?? null);
     setMustRename(!!data?.must_rename);
+    const { data: st } = await sb().rpc("my_status");
+    setWarned(!!(st as { warned?: boolean } | null)?.warned);
+    setBanned(!!(st as { banned?: boolean } | null)?.banned);
   }, []);
 
   useEffect(() => {
@@ -121,6 +133,16 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     setMustRename(false);
   }, []);
 
+  const refreshStatus = useCallback(async () => {
+    const { data: st } = await sb().rpc("my_status");
+    setWarned(!!(st as { warned?: boolean } | null)?.warned);
+    setBanned(!!(st as { banned?: boolean } | null)?.banned);
+  }, []);
+  const ackWarning = useCallback(async () => {
+    await sb().rpc("ack_warning");
+    setWarned(false);
+  }, []);
+
   const signInGoogle = useCallback(async () => {
     try {
       await signInWithGoogle();
@@ -154,6 +176,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
   return createElement(Ctx.Provider, { value: {
     user, nickname, mustRename, isAnon: user?.is_anonymous ?? true, email: user?.email ?? null,
     points, rank, error, ready, authChecked, needLogin: !user || (loginRequired && !!user.is_anonymous), googleOn: loginRequired || (!!user && !user.is_anonymous), saveNickname, signInGoogle, signOut, enterAsGuest, notice, refreshScore,
+    warned, banned, ackWarning, refreshStatus,
   } }, children);
 }
 
