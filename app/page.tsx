@@ -3,8 +3,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ResultText } from "@/components/Badges";
 import Icon from "@/components/Icon";
+import AccountCard from "@/components/AccountCard";
 import ExamDday from "@/components/ExamDday";
-import NicknameCard from "@/components/NicknameCard";
 import { Avatar } from "@/components/Shell";
 import { ago, levelOf, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
@@ -15,7 +15,7 @@ const DAILY_GOAL = 10;
 const pct = (a: number, b: number) => (b ? Math.round((100 * a) / b) : 0);
 
 export default function Home() {
-  const { user, nickname, error, ready, saveNickname } = useMe();
+  const { user, nickname, error, isAnon, ready } = useMe();
   const { rows, prog } = useProblems();
   const [sum, setSum] = useState<MySummary | null>(null);
   const [top, setTop] = useState<BoardRow[] | null>(null);
@@ -85,7 +85,6 @@ export default function Home() {
   return (
     <>
       {error && <div className="notice warn">{error}</div>}
-      {ready && user && !nickname && <NicknameCard current={nickname} onSave={saveNickname} />}
       {loadErr && (
         <div className="notice warn row">
           <span className="grow">기록을 불러오지 못했어. 인터넷 연결을 확인하고 다시 시도해 줘.</span>
@@ -119,6 +118,9 @@ export default function Home() {
 
       {/* 시험 D-day */}
       <ExamDday counts={bySubject} />
+
+      {/* 임시(익명) 계정이면 Google 로그인 권하기 */}
+      {ready && nickname && isAnon && <AccountCard compact />}
 
       {/* 내 숫자 */}
       <section className="kpis" aria-label="내 기록">

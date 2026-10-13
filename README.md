@@ -4,7 +4,8 @@
 전부 무료고, 처음이면 1시간 정도 걸려.
 
 ## 이 사이트가 하는 일
-- 회원가입 없이 접속하면 바로 문제를 풀 수 있어 (익명 계정 자동 생성)
+- 회원가입 없이 접속하면 바로 문제를 풀 수 있어 (임시 계정 자동 생성). **Google로 로그인**하면 기록이 계정에 묶여서 다른 기기에서도 이어져
+- 별명은 저장할 때 자동 검수 (욕설·비속어·19금·비하·사칭 금지, 띄어쓰기·숫자 섞어도 잡음). 관리자는 별명 초기화·금지어 추가 가능
 - 과목 → 대단원 → 세부 유형 → 난이도 4단계 분류, 문제 번호(1001번~)
 - 객관식 + 단답형 (단답형은 띄어쓰기·마침표·° 기호를 무시하고 채점, 정답 여러 개 허용)
 - 시험지 만들기: 단원·유형·난이도·형식·문항 수를 골라 모의고사처럼 한 번에 풀고 채점
@@ -45,7 +46,8 @@ naesin-lab/
 ├── supabase/
 │   ├── 01_schema.sql         데이터베이스 설계 + 서버 채점 (1번째로 실행)
 │   ├── 02_structure.sql      과목과 분류(대단원 → 세부 유형) 구조만, 문제는 없음 (2번째로 실행)
-│   └── 03_admin.sql          관리자 이메일 등록 (3번째로 실행)
+│   ├── 03_admin.sql          관리자 이메일 등록 (3번째로 실행)
+│   └── 04_account_nickname.sql 별명 검수·별명 초기화 (4번째로 실행, 금지어 목록은 관리자 화면에서 추가)
 ├── .env.example              Supabase 연결 정보 견본
 └── package.json
 ```
@@ -90,6 +92,14 @@ naesin-lab/
 1. 왼쪽 메뉴 **Authentication → Sign In / Providers** (또는 **Settings**).
 2. **Allow anonymous sign-ins**를 **켜고 저장**.
 3. 같은 화면에서 **Email** 로그인이 켜져 있는지 확인 (관리자 로그인에 써, 보통 기본으로 켜져 있어).
+4. **Allow manual linking**도 **켜기** (임시 계정에 Google 계정을 붙여서 기록을 그대로 옮길 때 필요해).
+
+## 4-1단계. Google 로그인 켜기
+1. [Google Cloud Console](https://console.cloud.google.com) → 새 프로젝트 → **APIs & Services → OAuth consent screen**: User type **External**, 앱 이름 `내신랩`, 이메일 입력 → 저장. 다 만든 뒤 **Publish app**(게시)을 눌러야 아무 Google 계정이나 로그인할 수 있어.
+2. **Credentials → Create credentials → OAuth client ID** → Application type **Web application**.
+   - **Authorized redirect URIs**에 `https://<내 프로젝트 ID>.supabase.co/auth/v1/callback` 추가 (Supabase의 Google 설정 화면에 이 주소가 그대로 나와 있어서 복사하면 돼).
+3. 만들어진 **Client ID**와 **Client secret**을 Supabase **Authentication → Sign In / Providers → Google**에 붙여 넣고 **Enable** → **Save**.
+   Client secret은 비밀번호랑 같아. 다른 사람이나 채팅에 보내지 말고 Supabase 화면에만 넣어.
 
 ## 5단계. 연결 정보 넣고 내 컴퓨터에서 실행
 1. Supabase 왼쪽 아래 톱니바퀴 **Project Settings → API Keys**(또는 **Data API**)에서 두 값을 찾아:
@@ -155,12 +165,13 @@ naesin-lab/
 ## 막히면
 - 빨간 오류가 나면 **오류 문장을 그대로 복사**하거나 화면을 캡처해서 AI한테 보여 줘.
 - "익명 로그인이 꺼져 있어" → 4단계 확인
+- "Google 로그인이 켜져 있지 않아" → 4-1단계 확인. "Manual linking" 오류 → 4단계의 4번 확인
 - "Supabase 연결 정보가 없어" → 5단계 `.env.local`(내 컴퓨터) 또는 7단계 환경 변수(Vercel) 확인. Vercel에서 환경 변수를 고친 뒤에는 **Deployments → 맨 위 ⋯ → Redeploy**를 눌러야 적용돼.
 - 관리자 메일 링크를 눌렀는데 홈으로만 가면 → 8단계 Redirect URLs 확인
 
 ## 알아 둘 점
 - **무료 한도**: Supabase 무료 플랜은 일주일 동안 아무도 안 쓰면 프로젝트가 일시 정지돼. 대시보드에서 **Restore**를 누르면 다시 켜지고 데이터는 그대로야. 시험 기간처럼 매일 쓰면 걱정 없어.
-- **익명 기록**: 브라우저 기록을 지우거나 다른 기기로 열면 새 계정이 돼. 같은 폰, 같은 브라우저면 그대로 남아.
+- **임시 계정**: Google로 로그인하기 전에는 브라우저 기록을 지우거나 다른 기기로 열면 새 계정이 돼. Google로 한 번 로그인해 두면 어느 기기에서든 Google로 들어오면 같은 기록이 나와.
 - **개인정보**: 실명 대신 별명을 쓰도록 안내해 줘. 서비스 운영 과정에서 접속 기록(IP 등)이 남을 수 있어.
 - **저작권**: 학교 기출, 문제집 문제를 그대로 올리면 안 돼. 직접 만들거나 바꾼 문제만 승인해 줘.
 - **분류**는 서연중 3학년 2학기 시험 범위를 기준으로 미리 넣어 뒀어. 영어는 Lesson 5~8을 본문 독해·어휘·문법·의사소통 표현으로 나눴고, 국어 '문학의 샘'은 작품 대신 갈래(시·소설·수필·희곡)로 나눴어. 학교 진도에 맞게 관리자 페이지에서 고치면 돼.

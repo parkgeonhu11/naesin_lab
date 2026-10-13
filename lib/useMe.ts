@@ -1,16 +1,24 @@
 "use client";
 import { createContext, createElement, useCallback, useContext, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { ensureUser, friendly, isConfigured, sb } from "./supabase";
+import { ensureUser, friendly, handleOAuthReturn, isConfigured, sb, signInWithGoogle, signOutToAnon } from "./supabase";
 
 type MeState = {
   user: User | null;
   nickname: string | null;
+  /** 관리자가 별명을 초기화했거나 금지어에 걸려서 새로 정해야 함 */
+  mustRename: boolean;
+  /** Google 계정에 연결 안 된 임시(익명) 계정인지 */
+  isAnon: boolean;
+  email: string | null;
   points: number;
   rank: number | null;
   error: string | null;
   ready: boolean;
   saveNickname: (n: string) => Promise<void>;
+  signInGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
+  notice: string | null;
   refreshScore: () => Promise<void>;
 };
 
@@ -20,6 +28,8 @@ const Ctx = createContext<MeState | null>(null);
 export function MeProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [nickname, setNickname] = useState<string | null>(null);
+  const [mustRename, setMustRename] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const [points, setPoints] = useState(0);
   const [rank, setRank] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,8 +45,9 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const loadNick = useCallback(async (uid: string) => {
-    const { data } = await sb().from("profiles").select("nickname").eq("user_id", uid).maybeSingle();
+    const { data } = await sb().from("profiles").select("nickname,must_rename").eq("user_id", uid).maybeSingle();
     setNickname(data?.nickname ?? null);
+    setMustRename(!!data?.must_rename);
   }, []);
 
   useEffect(() => {
@@ -46,9 +57,11 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     let alive = true;
+    handleOAuthReturn().then((m) => m && alive && setNotice(m));
     ensureUser()
       .then(async (u) => {
         if (!alive) return;
+        if (!u.is_anonymous) try { sessionStorage.removeItem("nl-oauth-retry"); } catch {}
         setUser(u);
         await Promise.all([loadNick(u.id), refreshScore()]);
       })
@@ -58,6 +71,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         setUser(session.user);
         loadNick(session.user.id);
+        refreshScore();
       }
     });
     return () => {
@@ -69,10 +83,31 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
   const saveNickname = useCallback(async (n: string) => {
     const { error } = await sb().rpc("set_nickname", { p_nick: n });
     if (error) throw error;
-    setNickname(n.trim());
+    setNickname(n.trim().replace(/\s+/g, " "));
+    setMustRename(false);
   }, []);
 
-  return createElement(Ctx.Provider, { value: { user, nickname, points, rank, error, ready, saveNickname, refreshScore } }, children);
+  const signInGoogle = useCallback(async () => {
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      setNotice(friendly(e));
+      throw e;
+    }
+  }, []);
+
+  const signOut = useCallback(async () => {
+    const u = await signOutToAnon();
+    setUser(u);
+    setNickname(null);
+    setMustRename(false);
+    await refreshScore();
+  }, [refreshScore]);
+
+  return createElement(Ctx.Provider, { value: {
+    user, nickname, mustRename, isAnon: user?.is_anonymous ?? true, email: user?.email ?? null,
+    points, rank, error, ready, saveNickname, signInGoogle, signOut, notice, refreshScore,
+  } }, children);
 }
 
 export function useMe(): MeState {

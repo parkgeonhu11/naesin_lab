@@ -8,6 +8,8 @@ import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
 type Pending = { id: string; subject: string; unit: string; topic: string; qtype: string; difficulty: number; body: string; choices: string[]; answer: number | null; answer_text: string | null; explanation: string; author_nick: string };
+type Banned = { word: string; kind: string; active: boolean };
+const KIND: Record<string, string> = { bad: "욕설·비속어", adult: "19금", hate: "비하·혐오", reserved: "사칭(관리자 등)", allow: "예외(허용)" };
 type Stat = { user_id: string; nickname: string; total: number; week: number; solved: number; gave_up: number; submissions: number; correct_submissions: number; penalty: number; last_at: string | null };
 
 export default function AdminPage() {
@@ -20,13 +22,19 @@ export default function AdminPage() {
   const [armed, setArmed] = useState(false);
   const [armedUser, setArmedUser] = useState<string | null>(null);
   const [diffFix, setDiffFix] = useState<Record<string, number>>({});
+  const [armedNick, setArmedNick] = useState<string | null>(null);
+  const [banned, setBanned] = useState<Banned[]>([]);
+  const [word, setWord] = useState("");
+  const [kind, setKind] = useState("bad");
+  const [wordMsg, setWordMsg] = useState("");
 
   const emailUser = user && !user.is_anonymous && user.email;
 
   const loadAll = useCallback(async () => {
-    const [{ data: p }, { data: s }] = await Promise.all([sb().rpc("admin_pending"), sb().rpc("admin_user_stats")]);
+    const [{ data: p }, { data: s }, { data: b }] = await Promise.all([sb().rpc("admin_pending"), sb().rpc("admin_user_stats"), sb().rpc("admin_banned_words")]);
     setPending((p as Pending[]) ?? []);
     setStats((s as Stat[]) ?? []);
+    setBanned((b as Banned[]) ?? []);
   }, []);
 
   useEffect(() => {
@@ -145,10 +153,10 @@ export default function AdminPage() {
         <div className="table-wrap"><table className="tbl">
           <thead><tr>
             <th>닉네임</th><th className="r">누적 점수</th><th className="r">이번 주</th><th className="r">맞힌 문제</th><th className="r">제출 횟수</th>
-            <th className="r">평균 정답률</th><th className="r">감점</th><th className="r">정답 보기</th><th>마지막 제출</th><th className="c">이 사람만 초기화</th>
+            <th className="r">평균 정답률</th><th className="r">감점</th><th className="r">정답 보기</th><th>마지막 제출</th><th className="c">별명</th><th className="c">이 사람만 초기화</th>
           </tr></thead>
           <tbody>
-            {stats.length === 0 && <tr><td colSpan={10} className="empty-cell">아직 참가자가 없어.</td></tr>}
+            {stats.length === 0 && <tr><td colSpan={11} className="empty-cell">아직 참가자가 없어.</td></tr>}
             {stats.map((s) => (
               <tr key={s.user_id}>
                 <td>{s.nickname}</td>
@@ -160,6 +168,22 @@ export default function AdminPage() {
                 <td className="r n res-wa">{s.penalty ? `−${s.penalty}` : "0"}</td>
                 <td className="r n">{s.gave_up}</td>
                 <td className="small faint nowrap">{s.last_at ? ago(s.last_at) : "–"}</td>
+                <td className="c">
+                  <button
+                    className={`btn ${armedNick === s.user_id ? "danger" : "line"}`}
+                    style={{ padding: "3px 10px", fontSize: 12.5, minHeight: 0 }}
+                    title="부적절한 별명이면 초기화해. 그 학생은 다음에 들어올 때 새 별명을 정해야 해."
+                    onClick={async () => {
+                      if (armedNick !== s.user_id) { setArmedNick(s.user_id); setTimeout(() => setArmedNick((u) => (u === s.user_id ? null : u)), 4000); return; }
+                      setArmedNick(null);
+                      const { error } = await sb().rpc("admin_reset_nickname", { p_user: s.user_id });
+                      setMsg(error ? friendly(error) : `${s.nickname}의 별명을 초기화했어. 새 별명을 정할 때까지 '별명 변경 중'으로 보여.`);
+                      loadAll();
+                    }}
+                  >
+                    {armedNick === s.user_id ? "한 번 더" : "별명 초기화"}
+                  </button>
+                </td>
                 <td className="c">
                   <button
                     className={`btn ${armedUser === s.user_id ? "danger" : "line"}`}
@@ -180,6 +204,47 @@ export default function AdminPage() {
           </tbody>
         </table></div>
         {msg && <p className="small muted" style={{ margin: 0, padding: "10px 16px" }}>{msg}</p>}
+      </section>
+
+      <section className="panel">
+        <div className="panel-head">
+          <h2>별명 금지어 <span className="num muted">{banned.filter((b) => b.active).length}개</span></h2>
+          <span className="small faint">별명은 저장할 때 자동으로 검수돼. 띄어쓰기·숫자·기호를 섞어도(예: 시 1 발) 잡아. 학생에게는 목록이 안 보여.</span>
+        </div>
+        <form
+          className="panel-body row"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const { data, error } = await sb().rpc("admin_add_banned_word", { p_word: word, p_kind: kind });
+            setWordMsg(error ? friendly(error) : `추가했어.${data ? ` 지금 쓰는 별명 중 ${data}개가 걸려서 바꾸게 했어.` : ""}`);
+            if (!error) setWord("");
+            loadAll();
+          }}
+        >
+          <input className="input" style={{ flex: "1 1 180px" }} value={word} onChange={(e) => setWord(e.target.value)} placeholder="막을 단어" required />
+          <select className="input" style={{ width: "auto" }} value={kind} onChange={(e) => setKind(e.target.value)}>
+            {Object.entries(KIND).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+          <button className="btn">추가</button>
+          {wordMsg && <span className="small muted" style={{ flexBasis: "100%" }}>{wordMsg}</span>}
+        </form>
+        <details className="panel-body" style={{ paddingTop: 0 }}>
+          <summary className="small muted" style={{ cursor: "pointer" }}>목록 보기 (누르면 끄고 켤 수 있어)</summary>
+          <div className="row" style={{ gap: 6, marginTop: 10 }}>
+            {banned.map((b) => (
+              <button
+                key={b.word}
+                type="button"
+                className="badge subj"
+                style={{ border: 0, cursor: "pointer", textDecoration: b.active ? undefined : "line-through", opacity: b.active ? 1 : 0.5 }}
+                title={`${KIND[b.kind] ?? b.kind} · ${b.active ? "누르면 끄기" : "누르면 켜기"}`}
+                onClick={async () => { await sb().rpc("admin_set_banned_word", { p_word: b.word, p_active: !b.active }); loadAll(); }}
+              >
+                {b.word}
+              </button>
+            ))}
+          </div>
+        </details>
       </section>
 
       <section className="panel panel-body row">

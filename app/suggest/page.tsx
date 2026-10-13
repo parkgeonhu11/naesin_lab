@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import NicknameCard from "@/components/NicknameCard";
 import QuestionForm from "@/components/QuestionForm";
 import { DiffGuide } from "@/components/Badges";
 import { subjectName } from "@/lib/data";
@@ -11,7 +10,7 @@ type Mine = { id: string; subject: string; body: string; status: string };
 const STATUS: Record<string, string> = { pending: "검토 중", published: "공개됨 (+5점)", rejected: "반려됨" };
 
 export default function SuggestPage() {
-  const { user, nickname, error, ready, saveNickname } = useMe();
+  const { user, error } = useMe();
   const [mine, setMine] = useState<Mine[]>([]);
 
   const load = useCallback(async () => {
@@ -33,7 +32,6 @@ export default function SuggestPage() {
         </p>
         <DiffGuide open />
       </div>
-      {ready && user && !nickname && <NicknameCard current={nickname} onSave={saveNickname} />}
       <QuestionForm
         maxDifficulty={5}
         explainFrom={4}

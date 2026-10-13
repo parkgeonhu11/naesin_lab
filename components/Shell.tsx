@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Icon from "@/components/Icon";
+import NicknameCard, { GoogleButton } from "@/components/NicknameCard";
 import { levelOf } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 
@@ -27,7 +28,7 @@ export function Avatar({ name, className = "" }: { name?: string | null; classNa
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const { nickname, points, rank } = useMe();
+  const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname } = useMe();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
 
@@ -67,13 +68,14 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         ))}
       </nav>
       <div className="side-foot">
+        {ready && user && isAnon && <GoogleButton className="side-google" />}
         <button type="button" className="theme-btn" onClick={toggleTheme}>
           <Icon name={theme === "dark" ? "sun" : "moon"} />
           {theme === "dark" ? "밝은 화면" : "어두운 화면"}
         </button>
         <Link href="/me" className="me-card">
           <Avatar name={nickname} />
-          <span><b>{nickname ?? "닉네임 정하기"} <span className="lv-chip">Lv.{lv}</span></b><small>{score}</small></span>
+          <span><b>{nickname ?? "별명 정하기"} <span className="lv-chip">Lv.{lv}</span></b><small>{isAnon ? `${score} · 임시 계정` : score}</small></span>
         </Link>
       </div>
     </>
@@ -97,7 +99,18 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </button>
         </header>
 
-        <main className="content">{children}</main>
+        <main className="content">
+          {notice && <div className="notice warn">{notice}</div>}
+          {ready && user && path !== "/admin" && (!nickname || mustRename) && (
+            <NicknameCard
+              current={nickname}
+              onSave={saveNickname}
+              firstTime={!nickname}
+              title={mustRename ? "지금 별명은 쓸 수 없어서 바꿔야 해. 새 별명을 정해 줘" : "랭킹에 쓸 별명을 정해 줘"}
+            />
+          )}
+          {children}
+        </main>
         <footer className="site-foot">
           <span>내신랩 · 서연중 3학년 2학기 시험 대비</span>
           <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요.</span>

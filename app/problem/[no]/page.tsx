@@ -4,7 +4,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
-import NicknameCard from "@/components/NicknameCard";
 import { diffOf, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -35,7 +34,7 @@ const buzz = (p: number | number[]) => {
 export default function ProblemPage() {
   const { no } = useParams<{ no: string }>();
   const router = useRouter();
-  const { user, nickname, ready, saveNickname, refreshScore } = useMe();
+  const { user, refreshScore } = useMe();
   const [q, setQ] = useState<Question | null | undefined>(undefined);
   const [info, setInfo] = useState<ProblemRow | null>(null);
   const [unitList, setUnitList] = useState<ProblemRow[]>([]);
@@ -196,7 +195,6 @@ export default function ProblemPage() {
 
   return (
     <>
-      {ready && user && !nickname && <NicknameCard current={nickname} onSave={saveNickname} />}
       <div className="solve">
         <article className="panel solve-main" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           {burst > 0 && <Burst key={burst} />}

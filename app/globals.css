@@ -553,3 +553,22 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
   .dday-date { margin-bottom: 6px; }
   .dday-subj a { padding: 6px 8px; }
 }
+
+/* ================= 로그인 · 별명 ================= */
+.btn.google { background: #fff; color: #1f1f1f; border: 1px solid #c9ced8; box-shadow: none; font-weight: 600; gap: 10px; }
+.btn.google:hover { background: #f6f8fb; }
+:root[data-theme="dark"] .btn.google { background: #131314; color: #e3e3e3; border-color: #8e918f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.google { background: #131314; color: #e3e3e3; border-color: #8e918f; } }
+.side-google { width: 100%; margin-bottom: 8px; font-size: 13px; padding: 8px 10px; }
+.nick-card { display: grid; gap: 8px; border-color: var(--brand); }
+.nick-card.bad { border-color: var(--wa); }
+.nick-card .input[aria-invalid="true"] { border-color: var(--wa); box-shadow: 0 0 0 3px var(--wa-soft); }
+.nick-check { min-height: 18px; font-size: 13px; word-break: keep-all; }
+.nick-check .ok { color: var(--ac); font-weight: 600; }
+.nick-check .no { color: var(--wa); font-weight: 600; }
+.nick-login { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding-top: 10px; border-top: 1px dashed var(--line-strong); }
+.nick-login .small { flex: 1 1 260px; color: var(--sub); word-break: keep-all; }
+.account-card { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 16px; }
+.account-card .grow { flex: 1 1 280px; min-width: 0; word-break: keep-all; }
+.account-card.warn { border-color: #f3c76b; background: linear-gradient(0deg, rgba(242, 162, 12, .06), rgba(242, 162, 12, .06)), var(--surface); }
+@media (max-width: 720px) { .account-card { order: 1; } .account-card .btn { width: 100%; } }

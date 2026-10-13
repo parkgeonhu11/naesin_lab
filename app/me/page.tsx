@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import AccountCard from "@/components/AccountCard";
 import NicknameCard from "@/components/NicknameCard";
 import { SUBJECTS, subjectName, type BoardRow, type UnitStat } from "@/lib/data";
 import { sb } from "@/lib/supabase";
@@ -72,6 +73,7 @@ export default function MePage() {
         <h1>{nickname ?? "닉네임 없음"}</h1>
         <span className="muted small">내 정보 · 성적 분석</span>
       </div>
+      <AccountCard />
 
       <section className="panel stat-row">
         <div className="stat"><small>누적 점수</small><b>{points}</b></div>
@@ -137,7 +139,7 @@ export default function MePage() {
         </div>
       </section>
 
-      <NicknameCard current={nickname} onSave={saveNickname} title="닉네임 바꾸기" />
+      <NicknameCard current={nickname} onSave={saveNickname} title="별명 바꾸기" />
 
       <p className="small faint" style={{ margin: 0 }}>
         기록은 이 브라우저의 익명 계정에 저장돼. 브라우저 기록(쿠키·사이트 데이터)을 지우거나 다른 기기로 열면 새 계정으로 시작돼.
