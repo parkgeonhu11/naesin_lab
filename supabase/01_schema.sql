@@ -534,6 +534,46 @@ begin
     order by 3 desc;
 end $$;
 
+-- 참가자별 현황: 점수, 맞힌 문제, 제출 횟수, 정답률(맞은 제출 ÷ 전체 제출), 감점
+create or replace function public.admin_user_stats()
+returns table(user_id uuid, nickname text, total bigint, week bigint, solved bigint, gave_up bigint,
+              submissions bigint, correct_submissions bigint, penalty bigint, last_at timestamptz)
+language plpgsql stable security definer set search_path = public as $$
+#variable_conflict use_column
+begin
+  if not is_admin() then raise exception '관리자만 가능해'; end if;
+  return query
+    with u as (
+      select se.user_id as uid from score_events se
+      union select a.user_id from attempts a
+      union select sp.user_id from score_penalties sp
+      union select pr.user_id from profiles pr
+    )
+    select u.uid, coalesce(p.nickname, '이름 없음'),
+      (coalesce((select sum(s.points) from score_events s where s.user_id = u.uid), 0)
+       + coalesce((select sum(s.points) from score_penalties s where s.user_id = u.uid), 0))::bigint,
+      (coalesce((select sum(s.points) from score_events s where s.user_id = u.uid and s.created_at >= week_start()), 0)
+       + coalesce((select sum(s.points) from score_penalties s where s.user_id = u.uid and s.created_at >= week_start()), 0))::bigint,
+      (select count(*) from score_events s where s.user_id = u.uid and s.reason = 'solve' and s.points > 0)::bigint,
+      (select count(*) from score_events s where s.user_id = u.uid and s.reason = 'solve' and s.points = 0)::bigint,
+      (select count(*) from attempts a where a.user_id = u.uid)::bigint,
+      (select count(*) from attempts a where a.user_id = u.uid and a.is_correct)::bigint,
+      (select coalesce(-sum(s.points), 0) from score_penalties s where s.user_id = u.uid)::bigint,
+      (select max(a.created_at) from attempts a where a.user_id = u.uid)
+    from u left join profiles p on p.user_id = u.uid
+    order by 3 desc, 7 desc;
+end $$;
+
+-- 한 사람만 초기화: 풀이 점수·감점·제출 기록을 지운다 (닉네임과 문제 제안 보너스는 남김)
+create or replace function public.admin_reset_user(p_user uuid)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if not is_admin() then raise exception '관리자만 가능해'; end if;
+  delete from score_events where user_id = p_user and reason = 'solve';
+  delete from score_penalties where user_id = p_user;
+  delete from attempts where user_id = p_user;
+end $$;
+
 create or replace function public.admin_reset_all()
 returns void language plpgsql security definer set search_path = public as $$
 begin
@@ -550,11 +590,13 @@ revoke all on function public.admin_add_question(text,text,text,text,smallint,te
 revoke all on function public.admin_hide_question(uuid)  from public, anon;
 revoke all on function public.admin_stats()             from public, anon;
 revoke all on function public.admin_reset_all()         from public, anon;
+revoke all on function public.admin_user_stats()        from public, anon;
+revoke all on function public.admin_reset_user(uuid)    from public, anon;
 revoke all on function public.admin_add_category(text,text,text)    from public, anon;
 revoke all on function public.admin_remove_category(text,text,text) from public, anon;
 grant execute on function public.admin_pending(), public.admin_review(uuid,boolean,smallint),
   public.admin_add_question(text,text,text,text,smallint,text,jsonb,smallint,text,text,text), public.admin_hide_question(uuid),
-  public.admin_stats(), public.admin_reset_all(),
+  public.admin_stats(), public.admin_reset_all(), public.admin_user_stats(), public.admin_reset_user(uuid),
   public.admin_add_category(text,text,text), public.admin_remove_category(text,text,text) to authenticated;
 grant execute on function public.set_nickname(text), public.submit_answer(uuid,smallint,text), public.reveal_answer(uuid),
   public.my_progress(), public.my_unit_stats(),

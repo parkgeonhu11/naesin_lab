@@ -3,12 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import { DiffBadge, TypeBadge } from "@/components/Badges";
 import CategoryManager from "@/components/CategoryManager";
 import QuestionForm from "@/components/QuestionForm";
-import { DIFF, subjectName } from "@/lib/data";
+import { ago, DIFF, subjectName } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
 type Pending = { id: string; subject: string; unit: string; topic: string; qtype: string; difficulty: number; body: string; choices: string[]; answer: number | null; answer_text: string | null; explanation: string; author_nick: string };
-type Stat = { user_id: string; nickname: string; total: number; week: number; answered: number; correct: number; gave_up: number; wrong_tries: number };
+type Stat = { user_id: string; nickname: string; total: number; week: number; solved: number; gave_up: number; submissions: number; correct_submissions: number; penalty: number; last_at: string | null };
 
 export default function AdminPage() {
   const { user, ready } = useMe();
@@ -18,12 +18,13 @@ export default function AdminPage() {
   const [pending, setPending] = useState<Pending[]>([]);
   const [stats, setStats] = useState<Stat[]>([]);
   const [armed, setArmed] = useState(false);
+  const [armedUser, setArmedUser] = useState<string | null>(null);
   const [diffFix, setDiffFix] = useState<Record<string, number>>({});
 
   const emailUser = user && !user.is_anonymous && user.email;
 
   const loadAll = useCallback(async () => {
-    const [{ data: p }, { data: s }] = await Promise.all([sb().rpc("admin_pending"), sb().rpc("admin_stats")]);
+    const [{ data: p }, { data: s }] = await Promise.all([sb().rpc("admin_pending"), sb().rpc("admin_user_stats")]);
     setPending((p as Pending[]) ?? []);
     setStats((s as Stat[]) ?? []);
   }, []);
@@ -140,18 +141,45 @@ export default function AdminPage() {
       <CategoryManager />
 
       <section className="panel">
-        <div className="panel-head"><h2>참가자 현황 <span className="num muted">{stats.length}명</span></h2></div>
+        <div className="panel-head"><h2>참가자 현황 <span className="num muted">{stats.length}명</span></h2><span className="small faint">평균 정답률 = 맞은 제출 ÷ 전체 제출 · 초기화하면 풀이 점수·감점·제출 기록이 지워지고 닉네임과 제안 보너스는 남아</span></div>
         <div className="table-wrap"><table className="tbl">
-          <thead><tr><th>닉네임</th><th>누적</th><th>이번 주</th><th>푼 문제</th><th>맞힘</th><th>정답 보기</th><th>오답 시도</th></tr></thead>
+          <thead><tr>
+            <th>닉네임</th><th className="r">누적 점수</th><th className="r">이번 주</th><th className="r">맞힌 문제</th><th className="r">제출 횟수</th>
+            <th className="r">평균 정답률</th><th className="r">감점</th><th className="r">정답 보기</th><th>마지막 제출</th><th className="c">이 사람만 초기화</th>
+          </tr></thead>
           <tbody>
+            {stats.length === 0 && <tr><td colSpan={10} className="empty-cell">아직 참가자가 없어.</td></tr>}
             {stats.map((s) => (
               <tr key={s.user_id}>
-                <td>{s.nickname}</td><td className="n">{s.total}</td><td className="n">{s.week}</td><td className="n">{s.answered}</td>
-                <td className="n">{s.correct}</td><td className="n">{s.gave_up}</td><td className="n">{s.wrong_tries}</td>
+                <td>{s.nickname}</td>
+                <td className="r n"><b>{s.total}</b></td>
+                <td className="r n">{s.week}</td>
+                <td className="r n">{s.solved}</td>
+                <td className="r n">{s.submissions}</td>
+                <td className="r n">{s.submissions ? `${Math.round((100 * s.correct_submissions) / s.submissions)}%` : "–"}</td>
+                <td className="r n res-wa">{s.penalty ? `−${s.penalty}` : "0"}</td>
+                <td className="r n">{s.gave_up}</td>
+                <td className="small faint nowrap">{s.last_at ? ago(s.last_at) : "–"}</td>
+                <td className="c">
+                  <button
+                    className={`btn ${armedUser === s.user_id ? "danger" : "line"}`}
+                    style={{ padding: "3px 10px", fontSize: 12.5, minHeight: 0 }}
+                    onClick={async () => {
+                      if (armedUser !== s.user_id) { setArmedUser(s.user_id); setTimeout(() => setArmedUser((u) => (u === s.user_id ? null : u)), 4000); return; }
+                      setArmedUser(null);
+                      const { error } = await sb().rpc("admin_reset_user", { p_user: s.user_id });
+                      setMsg(error ? friendly(error) : `${s.nickname}의 기록을 초기화했어.`);
+                      loadAll();
+                    }}
+                  >
+                    {armedUser === s.user_id ? "한 번 더 누르면 초기화" : "초기화"}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table></div>
+        {msg && <p className="small muted" style={{ margin: 0, padding: "10px 16px" }}>{msg}</p>}
       </section>
 
       <section className="panel panel-body row">

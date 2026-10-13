@@ -108,15 +108,16 @@ export default function Home() {
               <Link href="/ranking" className="more">전체 랭킹</Link>
             </div>
             <table className="tbl">
-              <thead><tr><th className="c">순위</th><th>닉네임</th><th className="r">점수</th></tr></thead>
+              <thead><tr><th className="c">순위</th><th>닉네임</th><th className="r">맞힌 문제</th><th className="r">점수</th></tr></thead>
               <tbody>
-                {top === null && <tr><td colSpan={3} className="empty-cell">불러오는 중…</td></tr>}
-                {top?.length === 0 && <tr><td colSpan={3} className="empty-cell">첫 문제를 맞히면 1위!</td></tr>}
+                {top === null && <tr><td colSpan={4} className="empty-cell">불러오는 중…</td></tr>}
+                {top?.length === 0 && <tr><td colSpan={4} className="empty-cell">첫 문제를 맞히면 1위!</td></tr>}
                 {top?.map((r) => (
                   <tr key={r.user_id} className={r.user_id === user?.id ? "mine" : ""}>
                     <td className="c n"><b>{r.rank}</b></td>
                     <td>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}</td>
-                    <td className="r n">{r.points}</td>
+                    <td className="r n">{r.solved}개</td>
+                    <td className="r n"><b>{r.points}</b></td>
                   </tr>
                 ))}
               </tbody>
