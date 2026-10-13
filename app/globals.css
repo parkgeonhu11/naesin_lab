@@ -861,3 +861,49 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
   .pod .fr-rays { inset: -55%; }
 }
 .list-item .fr-top, .my-rank .fr-top { margin: 0 8px 0 10px; }
+
+/* ===== 연습장(그림판) ===== */
+.pad { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+.pad-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.pad-title { font-size: 14px; margin-right: auto; }
+.pad-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.pad-btn { min-width: 32px; height: 32px; padding: 0 7px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--sub); display: inline-grid; place-items: center; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.pad-btn:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+.pad-btn.on { border-color: var(--brand); background: var(--brand-soft, rgba(47,107,255,.1)); color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+.pad-btn:disabled { opacity: .4; cursor: default; }
+.pad-color i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+.pad-size { display: block; border-radius: 99px; background: currentColor; width: 16px; }
+.pad-size.s1 { height: 2.5px; } .pad-size.s2 { height: 5.5px; }
+.pad-sep { width: 1px; height: 20px; background: var(--line); margin: 0 2px; }
+.pad-clear { color: #e5383b; }
+.pad-close { background: var(--brand); color: #fff; border-color: var(--brand); }
+.pad-area { position: relative; flex: 1 1 auto; min-height: 260px; touch-action: none; cursor: crosshair; background-color: var(--surface); }
+.pad-area.grid { background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 24px 24px; background-position: -1px -1px; }
+.pad-area.tool-eraser { cursor: cell; }
+.pad-area canvas { position: absolute; inset: 0; touch-action: none; display: block; }
+.pad-empty { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; color: var(--faint); font-size: 14px; line-height: 1.7; pointer-events: none; }
+.pad-empty small { font-size: 12px; }
+
+/* PC: 오른쪽 칸에서 남은 높이를 연습장이 다 쓴다 */
+.solve-side { display: flex; flex-direction: column; max-height: calc(100vh - 40px); }
+.solve-side > * { flex: none; }
+.solve-side > .pad-pc { order: 5; flex: 1 1 auto; min-height: 300px; display: flex; }
+.solve-side > .pad-pc > .pad { flex: 1; }
+.solve-side .omr { max-height: 150px; overflow-y: auto; padding: 2px; }
+@media (min-width: 1400px) {
+  .app.solving .content { max-width: 1680px; }
+  .app.solving .site-foot { max-width: 1680px; }
+  .solve { grid-template-columns: minmax(0, 1fr) minmax(380px, 38%); }
+}
+@media (max-width: 1000px) {
+  .solve-side { max-height: none; }
+  .solve-side > .pad-pc { display: none; }
+}
+
+/* 휴대폰: 전체 화면 연습장 */
+.pad-open { display: none; }
+@media (max-width: 1000px) { .pad-open { display: inline-grid; place-items: center; } }
+.pad-sheet { position: fixed; inset: 0; z-index: 90; background: var(--bg); padding: calc(env(safe-area-inset-top, 0px) + 8px) 8px calc(env(safe-area-inset-bottom, 0px) + 8px); display: flex; }
+.pad-sheet .pad { flex: 1; }
+@media (min-width: 1001px) { .solve-side { height: calc(100vh - 40px); } }
+.list-item .fr-top, .my-rank .fr-top { margin: 0 8px 0 10px; }

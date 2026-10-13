@@ -7,6 +7,7 @@ import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/compone
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
 import Figure from "@/components/Figure";
 import ReportButton from "@/components/ReportButton";
+import Scratchpad from "@/components/Scratchpad";
 import { diffOf, loadProblemRows, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -44,6 +45,7 @@ export default function ProblemPage() {
   const [unitList, setUnitList] = useState<ProblemRow[]>([]);
   const [progAll, setProgAll] = useState<Record<string, Progress>>({});
   const [val, setVal] = useState<AnswerValue>(emptyAnswer);
+  const [padOpen, setPadOpen] = useState(false);
   const [verdict, setVerdict] = useState<Verdict | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -309,6 +311,8 @@ export default function ProblemPage() {
             {shown !== null && next && <Link className="btn" href={`/problem/${next}`}>다음 문제 ({next}번)</Link>}
           </section>
 
+          <div className="pad-pc"><Scratchpad padKey={q.id} /></div>
+
           {unitList.length > 1 && (
             <section className="panel side-card">
               <div className="side-title">
@@ -333,8 +337,13 @@ export default function ProblemPage() {
         </aside>
       </div>
 
+      {padOpen && <div className="pad-sheet"><Scratchpad padKey={q.id} overlay onClose={() => setPadOpen(false)} /></div>}
+
       {/* 휴대폰: 엄지로 누르기 쉬운 아래 고정 제출 바 */}
       <div className="m-actions">
+        <button type="button" className="btn line pad-open" aria-label="연습장 열기" onClick={() => setPadOpen(true)}>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z M14 6l3 3" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" /></svg>
+        </button>
         {prev ? <Link className="btn line" href={`/problem/${prev}`} aria-label="이전 문제">←</Link> : <span className="btn line" aria-hidden="true" style={{ visibility: "hidden" }}>←</span>}
         {shown === null ? (
           <button className="btn grow" type="button" disabled={!hasAnswer(q, val) || busy} onClick={submit}>
