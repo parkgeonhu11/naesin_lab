@@ -7,7 +7,8 @@ import { useMe } from "@/lib/useMe";
 
 /** 처음 들어오면 보이는 로그인 화면 (Google 로그인 필수) */
 export default function LoginGate() {
-  const { user, notice } = useMe();
+  const { user, notice, googleOn, enterAsGuest } = useMe();
+  const [entering, setEntering] = useState(false);
   const [app, setApp] = useState<InApp>(null);
   const [copied, setCopied] = useState(false);
 
@@ -63,8 +64,22 @@ export default function LoginGate() {
               {copied ? "주소 복사했어! 브라우저 주소창에 붙여 넣어 줘" : "사이트 주소 복사하기"}
             </button>
           </div>
-        ) : (
+        ) : googleOn ? (
           <GoogleButton label="Google로 계속하기" className="big gate-google" />
+        ) : (
+          <div className="gate-inapp">
+            <b>Google 로그인은 관리자가 준비하는 중이야</b>
+            <p className="small">준비되면 이 화면에서 바로 Google로 로그인할 수 있어. 그 전에는 임시 계정으로 먼저 풀어 두고, 나중에 Google로 로그인하면 기록이 그대로 옮겨져.</p>
+            <button type="button" className="btn google big gate-google" disabled aria-disabled="true">Google로 계속하기 (준비 중)</button>
+            <button
+              type="button"
+              className="btn big"
+              disabled={entering}
+              onClick={async () => { setEntering(true); await enterAsGuest(); setEntering(false); }}
+            >
+              {entering ? "들어가는 중…" : "임시 계정으로 들어가기"}
+            </button>
+          </div>
         )}
 
         <p className="gate-foot small faint">

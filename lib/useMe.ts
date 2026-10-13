@@ -24,6 +24,8 @@ type MeState = {
   saveNickname: (n: string) => Promise<void>;
   signInGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** Google 로그인 설정 전에만: 임시 계정으로 들어가기 */
+  enterAsGuest: () => Promise<void>;
   notice: string | null;
   refreshScore: () => Promise<void>;
 };
@@ -75,7 +77,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
         const g = await googleEnabled();
         if (!alive) return;
         setLoginRequired(g);
-        if (!u && !g) u = await ensureUser(); // Google 설정 전에는 예전처럼 임시 계정
+        // 처음 온 사람(세션 없음)은 언제나 로그인 화면부터. 임시 계정은 만들지 않음
       }
       if (!alive) return;
       setAuthChecked(true);
@@ -115,19 +117,29 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const enterAsGuest = useCallback(async () => {
+    try {
+      const u = await ensureUser();
+      setUser(u);
+      await Promise.all([loadNick(u.id), refreshScore()]);
+    } catch (e) {
+      setNotice(friendly(e));
+    }
+  }, [loadNick, refreshScore]);
+
   const signOut = useCallback(async () => {
-    const u = await signOutUser(!loginRequired);
+    const u = await signOutUser(false);
     setUser(u);
     setNickname(null);
     setMustRename(false);
     setPoints(0);
     setRank(null);
     if (u) await refreshScore();
-  }, [refreshScore, loginRequired]);
+  }, [refreshScore]);
 
   return createElement(Ctx.Provider, { value: {
     user, nickname, mustRename, isAnon: user?.is_anonymous ?? true, email: user?.email ?? null,
-    points, rank, error, ready, authChecked, needLogin: loginRequired && (!user || !!user.is_anonymous), googleOn: loginRequired || (!!user && !user.is_anonymous), saveNickname, signInGoogle, signOut, notice, refreshScore,
+    points, rank, error, ready, authChecked, needLogin: !user || (loginRequired && !!user.is_anonymous), googleOn: loginRequired || (!!user && !user.is_anonymous), saveNickname, signInGoogle, signOut, enterAsGuest, notice, refreshScore,
   } }, children);
 }
 
