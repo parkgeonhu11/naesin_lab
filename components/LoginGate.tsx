@@ -84,7 +84,7 @@ export default function LoginGate() {
 
         <p className="gate-foot small faint">
           처음 로그인하면 랭킹에 쓸 별명을 정해. 욕설·19금·비하 표현이 든 별명은 쓸 수 없어.{" "}
-          <a className="link" href="/privacy">개인정보처리방침</a>
+          <a className="link" href="/terms">이용약관</a> · <a className="link" href="/privacy">개인정보처리방침</a>
         </p>
       </div>
     </div>

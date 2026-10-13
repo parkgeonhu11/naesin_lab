@@ -83,7 +83,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   );
 
   // 로그인 확인 중: 잠깐 로고만 / Google 로그인 필요: 로그인 화면 (관리자 페이지는 따로 로그인)
-  if (path !== "/admin" && path !== "/privacy") {
+  if (path !== "/admin" && path !== "/privacy" && path !== "/terms") {
     if (!authChecked) {
       return (
         <div className="gate gate-wait" aria-busy="true">
@@ -126,7 +126,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </main>
         <footer className="site-foot">
           <span>내신랩 · 서연중 3학년 2학기 시험 대비</span>
-          <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요. · <a className="link" href="/privacy">개인정보처리방침</a></span>
+          <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요. · <a className="link" href="/terms">이용약관</a> · <a className="link" href="/privacy">개인정보처리방침</a></span>
         </footer>
 
         <nav className="tabbar" aria-label="빠른 메뉴">
