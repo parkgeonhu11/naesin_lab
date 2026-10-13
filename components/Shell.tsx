@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Icon from "@/components/Icon";
+import { useQnaUnread } from "@/components/Qna";
 import { BanScreen, WarningModal } from "@/components/FairPlay";
 import LoginGate from "@/components/LoginGate";
 import NicknameCard, { GoogleButton } from "@/components/NicknameCard";
@@ -15,6 +16,7 @@ const NAV = [
   { href: "/problems", label: "문제", icon: "book" },
   { href: "/exam", label: "시험지", icon: "paper" },
   { href: "/review", label: "오답 노트", icon: "note" },
+  { href: "/qna", label: "질문방", icon: "chat" },
   { href: "/ranking", label: "랭킹", icon: "trophy" },
   { href: "/status", label: "채점 현황", icon: "pulse" },
   { href: "/me", label: "성적 분석", icon: "chart" },
@@ -32,6 +34,7 @@ export function Avatar({ name, className = "" }: { name?: string | null; classNa
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn, banned } = useMe();
+  const qnaNew = useQnaUnread(!!user && authChecked && !needLogin);
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
 
@@ -62,10 +65,11 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <nav className="side-nav" aria-label="메뉴">
         {NAV.map((n, i) => (
           <span key={n.href} style={{ display: "contents" }}>
-            {i === 5 && <span className="side-sep" />}
+            {i === 6 && <span className="side-sep" />}
             <Link href={n.href} aria-current={active(n.href) ? "page" : undefined}>
               <Icon name={n.icon} />
               {n.label}
+              {n.href === "/qna" && qnaNew > 0 && <span className="nav-badge" aria-label={`새 답변 ${qnaNew}개`}>{qnaNew}</span>}
             </Link>
           </span>
         ))}
@@ -112,6 +116,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </Link>
           <button type="button" className="menu-btn" aria-label="전체 메뉴" onClick={() => setOpen(true)}>
             <Icon name="menu" size={24} />
+            {qnaNew > 0 && <span className="menu-dot" aria-label="질문방에 새 답변" />}
           </button>
         </header>
 

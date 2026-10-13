@@ -8,6 +8,7 @@ import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
 import Figure from "@/components/Figure";
 import ReportButton from "@/components/ReportButton";
 import Scratchpad from "@/components/Scratchpad";
+import { ProblemQna } from "@/components/Qna";
 import { diffOf, loadProblemRows, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -285,6 +286,8 @@ export default function ProblemPage() {
             </details>
           )}
           {err && <div className="verdict res-wa">{err}</div>}
+
+          <ProblemQna questionId={q.id} done={done} />
 
           <div className="prob-foot">
             {prev ? <Link className="btn line" href={`/problem/${prev}`}>← {prev}번</Link> : <span />}

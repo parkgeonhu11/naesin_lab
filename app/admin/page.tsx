@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DiffBadge, TypeBadge } from "@/components/Badges";
 import AdminAccounts from "@/components/AdminAccounts";
 import AdminFairplay from "@/components/AdminFairplay";
+import AdminQna from "@/components/AdminQna";
 import AdminReports from "@/components/AdminReports";
 import CategoryManager from "@/components/CategoryManager";
 import QuestionForm from "@/components/QuestionForm";
@@ -96,6 +97,7 @@ export default function AdminPage() {
       <AdminReports />
 
       <AdminFairplay />
+      <AdminQna />
 
       <AdminAccounts />
 

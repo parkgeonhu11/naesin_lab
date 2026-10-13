@@ -907,3 +907,62 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .pad-sheet .pad { flex: 1; }
 @media (min-width: 1001px) { .solve-side { height: calc(100vh - 40px); } }
 .list-item .fr-top, .my-rank .fr-top { margin: 0 8px 0 10px; }
+
+/* ===== 질문방 ===== */
+.qna { border-top: 1px solid var(--line); }
+.qna-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.qna-title h2 { margin: 0; }
+.qna-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.qna-item { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: visible; }
+.qna-item.open { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+.qna-head { all: unset; box-sizing: border-box; width: 100%; display: flex; gap: 12px; align-items: flex-start; padding: 13px 14px; cursor: pointer; }
+.qna-head:focus-visible { outline: 2px solid var(--brand); border-radius: 14px; }
+.qna-head-main { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.qna-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12.5px; }
+.qna-meta b { font-size: 13.5px; }
+.qna-prob { padding: 0 7px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-weight: 700; font-size: 11.5px; }
+.qna-q { font-size: 15px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.qna-item.open .qna-q { -webkit-line-clamp: unset; display: block; }
+.qna-count { display: grid; justify-items: end; gap: 4px; flex: none; text-align: right; }
+.qna-tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; background: var(--gray-soft); color: var(--sub); white-space: nowrap; }
+.qna-tag.best { background: #e3f7ea; color: #13894a; }
+.qna-tag.wait { background: #fff4dc; color: #a86a00; }
+:root[data-theme="dark"] .qna-tag.best { background: #133524; color: #6fdc9d; }
+:root[data-theme="dark"] .qna-tag.wait { background: #3a2c0e; color: #f0c25e; }
+.qna-new { padding: 1px 8px; border-radius: 999px; background: #e5383b; color: #fff; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.qna-open { padding: 0 14px 14px 62px; display: grid; gap: 10px; }
+.qna-thread { display: grid; gap: 10px; }
+.qna-none { margin: 0; }
+.qna-answers { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; transition: filter .2s; }
+.qna-answers.blur { filter: blur(6px); user-select: none; pointer-events: none; max-height: 140px; overflow: hidden; }
+.qna-spoiler { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); font-size: 13.5px; color: var(--sub); }
+.qna-answer { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+.qna-answer.best { background: #effbf3; box-shadow: 0 0 0 1px #9fe0b8 inset; }
+:root[data-theme="dark"] .qna-answer.best { background: #10261b; box-shadow: 0 0 0 1px #2a6b47 inset; }
+.qna-answer .avatar { width: 30px; height: 30px; font-size: 12px; }
+.qna-head .avatar { width: 36px; height: 36px; }
+.qna-a-main { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.qna-body { margin: 0; font-size: 14.5px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.qna-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.qna-mini { border: 1px solid var(--line); background: var(--surface); color: var(--sub); border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; cursor: pointer; justify-self: start; }
+.qna-mini:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+.qna-mini.on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+.qna-mini.danger { color: #d23a3a; }
+.qna-mini:disabled { opacity: .5; cursor: default; }
+.qna-compose { display: grid; gap: 6px; margin-bottom: 4px; }
+.qna-compose textarea { width: 100%; box-sizing: border-box; resize: vertical; min-height: 64px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; font-size: 14.5px; line-height: 1.6; }
+.qna-compose textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+.qna-compose-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.qna-loading { padding: 4px 0; }
+.nav-badge { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #e5383b; color: #fff; font-size: 11.5px; font-weight: 800; display: inline-grid; place-items: center; }
+.menu-btn { position: relative; }
+.menu-dot { position: absolute; top: 6px; right: 6px; width: 9px; height: 9px; border-radius: 50%; background: #e5383b; box-shadow: 0 0 0 2px var(--surface); }
+@media (max-width: 720px) {
+  .qna-open { padding: 0 12px 12px; }
+  .qna-head { padding: 12px; gap: 10px; }
+  .qna-count .faint { display: none; }
+}
+.qna-head:has(.fr-top) { gap: 20px; padding-left: 22px; }
+.qna-answer:has(.fr-top) { gap: 18px; padding-left: 18px; }
+.qna-head .fr-top .fr-wings, .qna-answer .fr-top .fr-wings { width: 205%; height: 133%; }
+.qna-head .fr-embers, .qna-answer .fr-embers { display: none; }
