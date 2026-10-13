@@ -193,7 +193,6 @@ export type MySummary = {
   daily: { d: string; n: number }[] | null;
 };
 
-/** 레벨: Lv.n이 되려면 누적 50·n·(n−1)점 (0, 100, 300, 600, 1000, …) */
 /** 레벨 k가 되는 점수 = LV_STEP × k × (k − 1). Lv.2 70점 · Lv.5 700점 · Lv.10 3150점 · Lv.15 7350점 */
 export const LV_STEP = 35;
 export function levelOf(points: number) {
