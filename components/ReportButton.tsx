@@ -12,7 +12,7 @@ export const REPORT_KINDS: { code: string; label: string; hint: string }[] = [
 ];
 export const reportKindName = (k: string) => REPORT_KINDS.find((x) => x.code === k)?.label ?? k;
 
-type Mine = { kind: string; detail: string; status: "open" | "fixed" | "dismissed"; admin_note: string | null };
+type Mine = { kind: string; detail: string; status: "open" | "fixed" | "dismissed"; admin_note: string | null; reward: number };
 
 /** 문제 오류 신고 버튼 + 신고 창 */
 export default function ReportButton({ questionId, no, className = "" }: { questionId: string; no: number; className?: string }) {
@@ -25,7 +25,7 @@ export default function ReportButton({ questionId, no, className = "" }: { quest
 
   useEffect(() => {
     setMine(null); setMsg(""); setDetail(""); setKind("answer");
-    sb().rpc("my_report", { p_question: questionId }).then(({ data }) => setMine(((data as Mine[]) ?? [])[0] ?? null));
+    sb().rpc("my_report_status", { p_question: questionId }).then(({ data }) => setMine(((data as Mine[]) ?? [])[0] ?? null));
   }, [questionId]);
 
   const open = () => {
@@ -35,7 +35,7 @@ export default function ReportButton({ questionId, no, className = "" }: { quest
   };
   const hint = REPORT_KINDS.find((k) => k.code === kind)?.hint ?? "";
   const label =
-    mine?.status === "open" ? "신고 접수됨 (확인 중)" : mine?.status === "fixed" ? "신고 반영됨 ✓" : "문제 오류 신고";
+    mine?.status === "open" ? "신고 접수됨 (확인 중)" : mine?.status === "fixed" ? `신고 반영됨 ✓${mine.reward ? ` +${mine.reward}점` : ""}` : "문제 오류 신고";
 
   return (
     <>
@@ -63,7 +63,7 @@ export default function ReportButton({ questionId, no, className = "" }: { quest
             setBusy(false);
             if (error) return setMsg(friendly(error));
             setMsg(String(data));
-            setMine({ kind, detail, status: "open", admin_note: null });
+            setMine({ kind, detail, status: "open", admin_note: null, reward: 0 });
             setTimeout(() => dlg.current?.close(), 1200);
           }}
         >
@@ -74,7 +74,7 @@ export default function ReportButton({ questionId, no, className = "" }: { quest
 
           {mine && mine.status !== "open" && (
             <p className={`notice ${mine.status === "fixed" ? "" : "warn"}`} style={{ margin: 0 }}>
-              지난 신고: {mine.status === "fixed" ? "관리자가 고쳤어." : "관리자가 확인했는데 문제가 없대."}
+              지난 신고: {mine.status === "fixed" ? `관리자가 고쳤어.${mine.reward ? ` 보너스 +${mine.reward}점을 받았어!` : ""}` : "관리자가 확인했는데 문제가 없대."}
               {mine.admin_note ? ` (${mine.admin_note})` : ""}
             </p>
           )}
@@ -95,7 +95,7 @@ export default function ReportButton({ questionId, no, className = "" }: { quest
             onChange={(e) => setDetail(e.target.value)} placeholder={hint}
           />
           <p className="small faint" style={{ margin: 0 }}>
-            관리자가 확인하고 고치면 이 버튼에 &lsquo;반영됨&rsquo;으로 표시돼. 장난 신고는 하지 말아 줘.
+            진짜 오류라서 관리자가 고치면 <b>보너스 점수</b>를 줘: 가장 먼저 신고한 사람 +5점, 같은 문제를 뒤이어 신고한 사람 +2점 (한 사람당 20번까지). 장난 신고는 점수 없어.
           </p>
           {msg && <p className={`small ${/했어|고쳤어/.test(msg) ? "res-ac" : "res-wa"}`} style={{ margin: 0 }}>{msg}</p>}
           <div className="row" style={{ justifyContent: "flex-end" }}>

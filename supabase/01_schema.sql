@@ -74,12 +74,12 @@ create table if not exists public.attempts (
 create index if not exists attempts_user_idx on public.attempts(user_id, question_id);
 create index if not exists attempts_q_idx on public.attempts(question_id);
 
--- 점수 지급 내역: reason = 'solve'(문제 풀이) | 'author'(출제 보너스)
+-- 점수 지급 내역: reason = 'solve'(문제 풀이) | 'author'(출제 보너스) | 'report'(오류 신고 보너스)
 create table if not exists public.score_events (
   id          bigserial primary key,
   user_id     uuid not null,
   question_id uuid references public.questions(id) on delete set null,
-  reason      text not null check (reason in ('solve','author')),
+  reason      text not null check (reason in ('solve','author','report')),
   subject     text,
   points      int  not null,
   created_at  timestamptz not null default now(),

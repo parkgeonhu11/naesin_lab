@@ -19,6 +19,7 @@ function ReportCard({ it, onDone }: { it: Item; onDone: () => void }) {
   const [explanation, setExplanation] = useState(it.explanation ?? "");
   const [difficulty, setDifficulty] = useState(it.difficulty);
   const [note, setNote] = useState("");
+  const [reward, setReward] = useState(true);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const list = choices.split("\n").map((c) => c.trim()).filter(Boolean);
@@ -76,6 +77,10 @@ function ReportCard({ it, onDone }: { it: Item; onDone: () => void }) {
       </details>
 
       <input className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="신고한 친구에게 보일 한마디 (선택) 예: 정답을 3번으로 고쳤어" />
+      <label className="small" style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+        <input type="checkbox" checked={reward} onChange={(e) => setReward(e.target.checked)} />
+        진짜 오류였으면 신고한 친구에게 보너스 주기 (먼저 신고한 사람 +5점, 다음 사람들 +2점)
+      </label>
       <div className="row">
         <button className="btn" disabled={busy} onClick={() => run(async () => {
           const { error } = await sb().rpc("admin_update_question", {
@@ -83,12 +88,13 @@ function ReportCard({ it, onDone }: { it: Item; onDone: () => void }) {
             p_answer_text: mc ? null : answerText, p_explanation: explanation, p_difficulty: difficulty,
           });
           if (error) throw error;
-          const { error: e2 } = await sb().rpc("admin_resolve_reports", { p_question: it.question_id, p_status: "fixed", p_note: note });
+          const { data, error: e2 } = await sb().rpc("admin_close_reports", { p_question: it.question_id, p_status: "fixed", p_note: note, p_reward: reward });
           if (e2) throw e2;
-          return `${it.no}번을 고치고 '반영됨'으로 처리했어.`;
+          const got = ((data as { rewarded: { nickname: string; points: number }[] })?.rewarded ?? []).map((x) => `${x.nickname} +${x.points}`).join(", ");
+          return `${it.no}번을 고치고 '반영됨'으로 처리했어.${got ? ` 보너스: ${got}` : ""}`;
         })}>고친 내용 저장 + 반영됨</button>
         <button className="btn line" disabled={busy} onClick={() => run(async () => {
-          const { error } = await sb().rpc("admin_resolve_reports", { p_question: it.question_id, p_status: "dismissed", p_note: note });
+          const { error } = await sb().rpc("admin_close_reports", { p_question: it.question_id, p_status: "dismissed", p_note: note, p_reward: false });
           if (error) throw error;
           return `${it.no}번 신고를 '문제 없음'으로 닫았어.`;
         })}>문제 없음</button>
