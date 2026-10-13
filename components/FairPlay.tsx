@@ -22,7 +22,7 @@ export function WarningModal() {
         </p>
         <ul className="small" style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 4 }}>
           <li>이 경고는 <b>너에게만</b> 보이고, 다른 친구들은 몰라.</li>
-          <li>경고를 확인한 뒤에도 이런 답이 <b>2번 더</b> 나오면 <b>이용이 정지</b>되고 랭킹에서 빠져.</li>
+          <li>그 뒤에도 이런 답이 계속 나오면 관리자가 풀이 기록을 확인하고 <b>이용을 정지</b>할 수 있어. 정지되면 랭킹에서도 빠져.</li>
           <li>오해라면 관리자에게 말해 줘. 관리자가 확인하고 풀어 줄 수 있어.</li>
         </ul>
         <button
@@ -49,7 +49,7 @@ export function BanScreen() {
         </div>
         <h1>이용이 정지된 계정이야</h1>
         <p className="muted" style={{ margin: 0 }}>
-          경고를 받은 뒤에도 문제를 읽는 시간보다 훨씬 빨리 맞힌 답이 계속 나와서 이용이 정지됐어. 랭킹에서도 빠졌어.
+          관리자가 풀이 기록을 확인하고 이용을 정지했어. 랭킹에서도 빠졌어.
         </p>
         <p className="small muted" style={{ margin: 0 }}>오해라면 관리자에게 직접 말해 줘. 확인되면 정지를 풀어 줄 수 있어.</p>
       </div>

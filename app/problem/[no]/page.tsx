@@ -9,6 +9,7 @@ import ReportButton from "@/components/ReportButton";
 import { diffOf, loadProblemRows, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
+import { useTrace } from "@/lib/useTrace";
 
 type Verdict =
   | { kind: "ac"; points: number; lost: number; answer: number | null; answerText: string | null; explanation: string; already?: boolean }
@@ -47,6 +48,7 @@ export default function ProblemPage() {
   const [err, setErr] = useState("");
   const [burst, setBurst] = useState(0);
   const touch = useRef<{ x: number; y: number; ok: boolean } | null>(null);
+  const trace = useTrace(q?.id, q?.id ?? null);
 
   const loadMine = useCallback(async () => {
     const { data } = await sb().rpc("my_progress");
@@ -103,6 +105,7 @@ export default function ProblemPage() {
     setBusy(false);
     if (error) return setErr(friendly(error));
     const r = data as GradeResult;
+    trace.submit(!!r.correct, q.qtype === "mc" ? (val.choice ?? -1) + 1 : val.text.slice(0, 20));
     if (r.correct) {
       setVerdict({ kind: "ac", points: r.points, lost: r.lost ?? 0, answer: r.answer ?? null, answerText: r.answer_text ?? null, explanation: r.explanation ?? "", already: r.already });
       if (!r.already && r.points > 0) setBurst((b) => b + 1);
@@ -121,6 +124,7 @@ export default function ProblemPage() {
     setBusy(false);
     if (error) return setErr(friendly(error));
     const r = data as GradeResult;
+    trace.reveal();
     if (q.qtype === "mc") setVal({ ...val, choice: r.answer ?? null });
     setVerdict({ kind: "reveal", answer: r.answer ?? null, answerText: r.answer_text ?? null, explanation: r.explanation ?? "" });
     await loadMine();
@@ -135,6 +139,7 @@ export default function ProblemPage() {
     if (q.qtype === "mc" && /^[1-9]$/.test(e.key) && !locked) {
       const i = Number(e.key) - 1;
       if (i < q.choices.length) {
+        if (val.choice !== i) trace.pick(i + 1);
         setVal({ ...val, choice: i });
         if (verdict?.kind === "wa") setVerdict(null);
         e.preventDefault();
@@ -231,6 +236,7 @@ export default function ProblemPage() {
               q={q}
               value={val}
               onChange={(v) => {
+                if (q.qtype === "mc" && v.choice !== val.choice && v.choice !== null) trace.pick(v.choice + 1);
                 setVal(v);
                 if (verdict?.kind === "wa") setVerdict(null);
               }}

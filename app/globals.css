@@ -653,3 +653,24 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .pod-link { position: absolute; inset: 0; z-index: 2; border-radius: inherit; }
 .user-head { align-items: center; gap: 12px; }
 .user-head .avatar.big { width: 44px; height: 44px; font-size: 18px; }
+
+/* ================= 부정행위 의심 · 풀이 기록 ================= */
+.btn.mini { padding: 3px 10px; font-size: 12.5px; min-height: 0; }
+.sus { display: inline-block; width: 70px; height: 7px; border-radius: 99px; background: var(--gray-soft); overflow: hidden; vertical-align: middle; margin-right: 6px; }
+.sus span { display: block; height: 100%; border-radius: inherit; }
+.sus.lo span { background: var(--ac); } .sus.mid span { background: var(--gold); } .sus.hi span { background: var(--wa); }
+.sus-t.lo { color: var(--ac); } .sus-t.mid { color: #b97a00; } .sus-t.hi { color: var(--wa); }
+.trace-row td { background: var(--surface-2); }
+.traces { display: grid; gap: 10px; }
+.trace { display: grid; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.trace-head { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.tl-bar { position: relative; height: 14px; border-radius: 6px; background: var(--gray-soft); }
+.tl-away { position: absolute; top: 0; bottom: 0; background: rgba(217, 58, 58, .55); border-radius: 4px; }
+.tl-need { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #b97a00; }
+.tl-pick { position: absolute; top: 4px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--brand); }
+.tl-sub { position: absolute; top: -4px; width: 10px; height: 22px; margin-left: -5px; border-radius: 3px; }
+.tl-sub.ok { background: var(--ac); } .tl-sub.no { background: var(--wa); } .tl-sub.rv { background: var(--faint); }
+.tl-scale { display: flex; justify-content: space-between; margin-top: 2px; }
+.tl-key { display: inline-block; width: 12px; height: 8px; border-radius: 3px; margin: 0 3px 0 8px; vertical-align: middle; }
+.tl-key.away { background: rgba(217, 58, 58, .55); } .tl-key.pick { background: var(--brand); width: 8px; border-radius: 50%; }
+.tl-key.ok { background: var(--ac); } .tl-key.no { background: var(--wa); } .tl-key.need { background: #b97a00; width: 3px; }

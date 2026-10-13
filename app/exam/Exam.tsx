@@ -8,6 +8,7 @@ import Figure from "@/components/Figure";
 import { DIFF, diffOf, QTYPES, shuffle, stateOf, SUBJECTS, subjectName, type GradeResult, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
+import { useTrace } from "@/lib/useTrace";
 import { buildTree, useProblems } from "@/lib/useProblems";
 
 type Phase = "setup" | "taking" | "grading" | "result";
@@ -76,6 +77,7 @@ export default function Exam() {
   const [now, setNow] = useState(0);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [err, setErr] = useState("");
+  const trace = useTrace(phase === "taking" || phase === "grading" ? `exam-${startedAt}` : null, null, "exam");
 
   useEffect(() => {
     if (phase !== "taking") return;
@@ -132,6 +134,8 @@ export default function Exam() {
       out.push({ q, val, result: error ? null : (data as GradeResult), skipped: false });
     }
     setGraded(out);
+    const okCount = out.filter((g) => g.result?.correct).length;
+    trace.submit(okCount > 0, `${okCount}/${paper.length}`);
     await Promise.all([refreshScore(), refreshStatus()]);
     setPhase("result");
     window.scrollTo({ top: 0 });
@@ -211,7 +215,10 @@ export default function Exam() {
                 q={q}
                 idPrefix={`q${i}`}
                 value={answers[q.id] ?? emptyAnswer}
-                onChange={(v) => setAnswers({ ...answers, [q.id]: v })}
+                onChange={(v) => {
+                  if (q.qtype === "mc" && v.choice !== null && v.choice !== answers[q.id]?.choice) trace.pick(`${i + 1}번→${v.choice + 1}`);
+                  setAnswers({ ...answers, [q.id]: v });
+                }}
                 disabled={phase === "grading"}
               />
             </div>
