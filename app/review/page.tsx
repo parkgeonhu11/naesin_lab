@@ -57,7 +57,7 @@ export default function ReviewPage() {
       {error && <div className="notice warn">{error}</div>}
       <div className="page-title">
         <h1>오답 노트</h1>
-        <span className="muted small">틀린 문제를 모아 뒀어. 다시 맞히면 절반 점수를 받아.</span>
+        <span className="muted small">틀린 문제를 모아 뒀어. 다시 맞히면 절반 점수를 받아. 두 번째 오답부터는 틀릴 때마다 감점되니까 신중하게!</span>
       </div>
 
       <section className="panel">

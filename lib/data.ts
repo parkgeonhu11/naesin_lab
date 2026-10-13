@@ -114,6 +114,14 @@ export type GradeResult = {
   points: number;
   already?: boolean;
   tried?: number;
+  /** 이번 오답으로 깎인 점수 (양수) */
+  penalty?: number;
+  /** 다음에 또 틀리면 깎일 점수 */
+  next_penalty?: number;
+  /** 같은 오답을 다시 낸 경우 (감점 없음) */
+  repeat?: boolean;
+  /** 맞히기 전까지 오답으로 깎인 점수 합계 */
+  lost?: number;
   answer?: number | null;
   answer_text?: string | null;
   explanation?: string;
@@ -144,3 +152,8 @@ export function shuffle<T>(arr: T[]): T[] {
   }
   return a;
 }
+
+/** 오답 감점: 첫 오답은 봐주고, 두 번째 오답부터 배점의 25% (문제당 최대 4번) */
+export const penaltyOf = (points: number) => Math.round(points * 0.25);
+/** 지금까지 서로 다른 오답 수가 wrong일 때, 다음 오답에서 깎일 점수 */
+export const nextPenalty = (points: number, wrong: number) => (wrong >= 1 && wrong <= 4 ? penaltyOf(points) : 0);

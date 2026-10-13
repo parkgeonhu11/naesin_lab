@@ -87,6 +87,17 @@ create table if not exists public.score_events (
 );
 create index if not exists score_events_time_idx on public.score_events(created_at);
 
+-- 오답 감점 내역 (points는 음수). 두 번째 오답부터 틀릴 때마다 한 줄씩 쌓인다.
+create table if not exists public.score_penalties (
+  id          bigserial primary key,
+  user_id     uuid not null,
+  question_id uuid references public.questions(id) on delete set null,
+  subject     text,
+  points      int  not null check (points < 0),
+  created_at  timestamptz not null default now()
+);
+create index if not exists score_penalties_user_idx on public.score_penalties(user_id, question_id);
+
 -- 관리자 이메일 목록 (아무도 직접 못 읽음)
 create table if not exists public.admin_emails (
   email text primary key
@@ -100,6 +111,7 @@ alter table public.question_answers enable row level security;
 alter table public.profiles         enable row level security;
 alter table public.attempts         enable row level security;
 alter table public.score_events     enable row level security;
+alter table public.score_penalties  enable row level security;
 alter table public.admin_emails     enable row level security;
 
 drop policy if exists "subjects read" on public.subjects;
@@ -120,6 +132,8 @@ create policy "attempts read own" on public.attempts for select using (user_id =
 
 drop policy if exists "score read own" on public.score_events;
 create policy "score read own" on public.score_events for select using (user_id = auth.uid());
+drop policy if exists "penalty read own" on public.score_penalties;
+create policy "penalty read own" on public.score_penalties for select using (user_id = auth.uid());
 -- question_answers, admin_emails 에는 정책이 없으므로 브라우저에서 절대 읽거나 쓸 수 없다.
 -- profiles/attempts/score_events/questions 쓰기도 정책이 없으므로 아래 함수로만 가능하다.
 
@@ -178,6 +192,11 @@ end $$;
 -- 답안 제출 → 서버 채점 → 점수 지급
 -- 객관식은 p_choice(0부터), 단답형은 p_text 로 보낸다.
 drop function if exists public.submit_answer(uuid, smallint);
+-- 채점 규칙
+--   처음에 맞히면 만점, 한 번이라도 틀린 뒤 맞히면 절반
+--   첫 번째 오답은 봐주고, 두 번째 오답부터는 틀릴 때마다 배점의 25%를 바로 감점 (문제당 최대 4번 = 배점만큼)
+--   똑같은 오답을 다시 내면 감점하지 않는다
+--   그래서 객관식을 1번부터 5번까지 찍어서 마지막에 맞히면 합계가 마이너스가 된다
 create or replace function public.submit_answer(p_question uuid, p_choice smallint default null, p_text text default null)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
@@ -186,8 +205,12 @@ declare
   qa  question_answers%rowtype;
   ok  boolean;
   tried int;
+  repeat_wrong boolean;
+  full_pts int;
   pts int := 0;
+  pen int := 0;
   done boolean;
+  my_key text;
 begin
   if uid is null then raise exception '로그인 세션이 없어'; end if;
   -- 같은 사람이 같은 문제를 동시에 여러 번 보내도 한 번씩 처리
@@ -202,9 +225,11 @@ begin
     select exists (
       select 1 from unnest(string_to_array(qa.answer_text, '|')) a where norm_answer(a) = norm_answer(p_text)
     ) into ok;
+    my_key := norm_answer(p_text);
   else
     if p_choice is null then raise exception '보기를 골라 줘'; end if;
     ok := (p_choice = qa.answer);
+    my_key := p_choice::text;
   end if;
 
   select exists(select 1 from score_events where user_id = uid and question_id = p_question and reason = 'solve') into done;
@@ -213,22 +238,43 @@ begin
                               'answer', qa.answer, 'answer_text', first_answer(qa.answer_text), 'explanation', q.explanation);
   end if;
 
-  select count(*) into tried from attempts where user_id = uid and question_id = p_question and not is_correct;
+  -- 지금까지 낸 서로 다른 오답 개수
+  select count(distinct coalesce(a.choice::text, norm_answer(a.text_answer))),
+         bool_or(coalesce(a.choice::text, norm_answer(a.text_answer)) = my_key)
+    into tried, repeat_wrong
+  from attempts a where a.user_id = uid and a.question_id = p_question and not a.is_correct;
+  repeat_wrong := coalesce(repeat_wrong, false);
+
   insert into attempts(user_id, question_id, choice, text_answer, is_correct)
   values (uid, p_question, p_choice, left(p_text, 200), ok);
 
+  full_pts := case when q.author = uid then 0 else points_for(q.difficulty) end;   -- 내가 낸 문제는 0점
+
   if not ok then
-    return jsonb_build_object('correct', false, 'points', 0, 'tried', tried + 1);
+    if repeat_wrong then
+      return jsonb_build_object('correct', false, 'points', 0, 'penalty', 0, 'tried', tried, 'repeat', true);
+    end if;
+    -- 이번이 (tried + 1)번째 오답. 첫 오답은 봐주고, 2~5번째 오답만 감점
+    if tried between 1 and 4 then
+      pen := round(full_pts * 0.25);
+      if pen > 0 then
+        insert into score_penalties(user_id, question_id, subject, points)
+        values (uid, p_question, q.subject, -pen);
+      end if;
+    end if;
+    return jsonb_build_object('correct', false, 'points', 0, 'penalty', pen, 'tried', tried + 1,
+                              'next_penalty', case when tried + 1 between 1 and 4 then round(full_pts * 0.25) else 0 end);
   end if;
 
-  pts := points_for(q.difficulty);
+  pts := full_pts;
   if tried > 0 then pts := pts / 2; end if;        -- 한 번이라도 틀렸으면 절반
-  if q.author = uid then pts := 0; end if;          -- 내가 낸 문제는 0점
   insert into score_events(user_id, question_id, reason, subject, points)
   values (uid, p_question, 'solve', q.subject, pts)
   on conflict do nothing;
   return jsonb_build_object('correct', true, 'points', pts, 'answer', qa.answer,
-                            'answer_text', first_answer(qa.answer_text), 'explanation', q.explanation);
+                            'answer_text', first_answer(qa.answer_text), 'explanation', q.explanation,
+                            'lost', (select coalesce(-sum(points),0) from score_penalties
+                                     where user_id = uid and question_id = p_question));
 end $$;
 
 -- 포기하고 정답 보기 (0점으로 기록)
@@ -251,7 +297,8 @@ create or replace function public.my_progress()
 returns table(question_id uuid, points int, tried boolean, wrong int, answer smallint, answer_text text, explanation text)
 language sql stable security definer set search_path = public as $$
   with s as (select question_id, points from score_events where user_id = auth.uid() and reason = 'solve'),
-       a as (select question_id, count(*) filter (where not is_correct)::int as wrong
+       a as (select question_id,
+                    count(distinct coalesce(choice::text, norm_answer(text_answer))) filter (where not is_correct)::int as wrong
              from attempts where user_id = auth.uid() group by question_id)
   select coalesce(s.question_id, a.question_id), s.points, coalesce(a.wrong, 0) > 0, coalesce(a.wrong, 0),
          case when s.question_id is not null then qa.answer end,
@@ -292,6 +339,11 @@ language sql stable security definer set search_path = public as $$
     from score_events se
     where (p_subject = 'all' or se.subject = p_subject)
       and (p_period <> 'week' or se.created_at >= week_start())
+    union all
+    select sp.user_id, sp.points, 'penalty'
+    from score_penalties sp
+    where (p_subject = 'all' or sp.subject = p_subject)
+      and (p_period <> 'week' or sp.created_at >= week_start())
   ), t as (
     select e.user_id, sum(e.points)::bigint as points,
            count(*) filter (where e.reason = 'solve' and e.points > 0)::bigint as solved
@@ -470,8 +522,10 @@ begin
   return query
     with u as (select distinct se.user_id from score_events se union select distinct a.user_id from attempts a)
     select u.user_id, coalesce(p.nickname,'이름 없음'),
-      coalesce((select sum(points) from score_events s where s.user_id = u.user_id),0)::bigint,
-      coalesce((select sum(points) from score_events s where s.user_id = u.user_id and s.created_at >= week_start()),0)::bigint,
+      (coalesce((select sum(points) from score_events s where s.user_id = u.user_id),0)
+       + coalesce((select sum(points) from score_penalties s where s.user_id = u.user_id),0))::bigint,
+      (coalesce((select sum(points) from score_events s where s.user_id = u.user_id and s.created_at >= week_start()),0)
+       + coalesce((select sum(points) from score_penalties s where s.user_id = u.user_id and s.created_at >= week_start()),0))::bigint,
       (select count(*) from score_events s where s.user_id = u.user_id and s.reason='solve')::bigint,
       (select count(*) from score_events s where s.user_id = u.user_id and s.reason='solve' and s.points > 0)::bigint,
       (select count(*) from score_events s where s.user_id = u.user_id and s.reason='solve' and s.points = 0)::bigint,
@@ -485,6 +539,7 @@ returns void language plpgsql security definer set search_path = public as $$
 begin
   if not is_admin() then raise exception '관리자만 가능해'; end if;
   delete from score_events where reason = 'solve';
+  delete from score_penalties where true;
   delete from attempts where true;
 end $$;
 

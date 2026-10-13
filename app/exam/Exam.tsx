@@ -135,7 +135,7 @@ export default function Exam() {
   }
 
   const correct = graded.filter((g) => g.result?.correct).length;
-  const earned = graded.reduce((s, g) => s + (g.result?.correct ? g.result.points : 0), 0);
+  const earned = graded.reduce((s, g) => s + (g.result?.correct ? g.result.points : -(g.result?.penalty ?? 0)), 0);
   const wrongNos = graded.filter((g) => !g.result?.correct).map((g) => g.q.no);
   const mmss = (ms: number) => `${Math.floor(ms / 60000)}분 ${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}초`;
 
@@ -147,12 +147,12 @@ export default function Exam() {
         <section className="panel stat-row">
           <div className="stat"><small>맞힌 문항</small><div className="score-big">{correct}<small> / {paper.length}</small></div></div>
           <div className="stat"><small>100점 환산</small><div className="score-big">{Math.round((100 * correct) / Math.max(1, paper.length))}<small>점</small></div></div>
-          <div className="stat"><small>랭킹 점수</small><div className="score-big">+{earned}</div></div>
+          <div className="stat"><small>랭킹 점수</small><div className="score-big">{earned > 0 ? "+" : ""}{earned}</div></div>
         </section>
         <section className="panel">
           <div className="panel-head">
             <h2>문항별 결과</h2>
-            <span className="small faint">틀린 문제는 정답을 숨겨 뒀어. 다시 풀어서 맞히면 절반 점수를 받아.</span>
+            <span className="small faint">틀린 문제는 정답을 숨겨 뒀어. 다시 풀어서 맞히면 절반 점수를 받아. 두 번째 오답부터는 감점이야.</span>
           </div>
           <div className="table-wrap">
             <table className="tbl">
@@ -166,7 +166,7 @@ export default function Exam() {
                       {g.skipped ? <span className="res-rv">답 안 함</span> : g.result?.correct ? <span className="res-ac">맞았습니다!!</span> : <span className="res-wa">틀렸습니다</span>}
                     </td>
                     <td className="hide-m small muted">{g.skipped ? "–" : g.q.qtype === "short" ? g.val.text : `${(g.val.choice ?? 0) + 1}번`}</td>
-                    <td className="r n">{g.result?.correct ? (g.result.already ? "이미 푼 문제" : `+${g.result.points}`) : "0"}</td>
+                    <td className="r n">{g.result?.correct ? (g.result.already ? "이미 푼 문제" : `+${g.result.points}`) : g.result?.penalty ? <span className="res-wa">−{g.result.penalty}</span> : "0"}</td>
                     <td className="c">{!g.result?.correct && <Link className="link small" href={`/problem/${g.q.no}`}>풀기</Link>}</td>
                   </tr>
                 ))}

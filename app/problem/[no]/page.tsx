@@ -5,13 +5,13 @@ import { useCallback, useEffect, useState } from "react";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
 import NicknameCard from "@/components/NicknameCard";
-import { diffOf, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
+import { diffOf, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
 type Verdict =
-  | { kind: "ac"; points: number; answer: number | null; answerText: string | null; explanation: string; already?: boolean }
-  | { kind: "wa"; picked: number | null; text: string }
+  | { kind: "ac"; points: number; lost: number; answer: number | null; answerText: string | null; explanation: string; already?: boolean }
+  | { kind: "wa"; picked: number | null; text: string; penalty: number; repeat: boolean; nextPenalty: number }
   | { kind: "reveal"; answer: number | null; answerText: string | null; explanation: string };
 
 const QCOLS = "id,no,subject,unit,topic,qtype,difficulty,body,choices,source,author,author_nick";
@@ -72,8 +72,8 @@ export default function ProblemPage() {
     const r = data as GradeResult;
     setVerdict(
       r.correct
-        ? { kind: "ac", points: r.points, answer: r.answer ?? null, answerText: r.answer_text ?? null, explanation: r.explanation ?? "", already: r.already }
-        : { kind: "wa", picked: val.choice, text: val.text },
+        ? { kind: "ac", points: r.points, lost: r.lost ?? 0, answer: r.answer ?? null, answerText: r.answer_text ?? null, explanation: r.explanation ?? "", already: r.already }
+        : { kind: "wa", picked: val.choice, text: val.text, penalty: r.penalty ?? 0, repeat: !!r.repeat, nextPenalty: r.next_penalty ?? 0 },
     );
     await Promise.all([loadMine(q.id), loadStats(), refreshScore()]);
   }
@@ -174,7 +174,9 @@ export default function ProblemPage() {
             </button>
             <button className="btn line" type="button" disabled={busy} onClick={reveal}>정답 보기 (0점)</button>
             <span className="small muted">
-              {st === "tried" ? `${prog?.wrong}번 틀렸어. 지금 맞히면 ${Math.floor(d.points / 2)}점` : `처음 맞히면 ${d.points}점`}
+              {st === "tried"
+                ? `${prog?.wrong}번 틀렸어. 지금 맞히면 ${Math.floor(d.points / 2)}점${nextPenalty(d.points, prog?.wrong ?? 0) ? ` · 또 틀리면 −${nextPenalty(d.points, prog?.wrong ?? 0)}점` : ""}`
+                : `처음 맞히면 ${d.points}점 · 첫 오답은 감점 없음`}
             </span>
           </div>
         )}
@@ -183,7 +185,7 @@ export default function ProblemPage() {
           <div className="verdict">
             <span className="big res-ac">맞았습니다!!</span>{" "}
             <span className="muted">
-              {verdict.already ? "이미 푼 문제라 점수는 그대로야." : verdict.points > 0 ? `+${verdict.points}점` : isOwn ? "내가 낸 문제라 점수는 없어." : ""}
+              {verdict.already ? "이미 푼 문제라 점수는 그대로야." : verdict.points > 0 ? `+${verdict.points}점${verdict.lost ? ` (오답 감점 −${verdict.lost}점 · 이 문제 합계 ${verdict.points - verdict.lost > 0 ? "+" : ""}${verdict.points - verdict.lost}점)` : ""}` : isOwn ? "내가 낸 문제라 점수는 없어." : ""}
             </span>
           </div>
         )}
@@ -191,7 +193,9 @@ export default function ProblemPage() {
           <div className="verdict">
             <span className="big res-wa">틀렸습니다</span>{" "}
             <span className="muted">
-              {q.qtype === "short" ? `'${verdict.text}'은(는) 정답이 아니야.` : `${(verdict.picked ?? 0) + 1}번은 정답이 아니야.`} 다시 해 봐.
+              {q.qtype === "short" ? `'${verdict.text}'은(는) 정답이 아니야.` : `${(verdict.picked ?? 0) + 1}번은 정답이 아니야.`}{" "}
+              {verdict.repeat ? "아까 낸 답이라 감점은 없어." : verdict.penalty > 0 ? <b className="res-wa">−{verdict.penalty}점</b> : "첫 오답이라 감점은 없어."}
+              {verdict.nextPenalty > 0 && !verdict.repeat ? ` 또 틀리면 −${verdict.nextPenalty}점.` : ""}
             </span>
           </div>
         )}
