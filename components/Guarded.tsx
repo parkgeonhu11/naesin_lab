@@ -2,15 +2,15 @@
 import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 
 /**
- * 문제 복사 방지 (모든 문제).
+ * 어려운 문제 복사 방지 (난이도 4·5).
  * - 글자 사이사이에 눈에 안 보이는 가짜 글자(숫자·기호)를 끼워 넣는다.
  *   드래그해서 끌어다 놓거나, 화면 글자를 읽어 가는 프로그램이 가져가면 숫자가 뒤죽박죽이 된다.
  * - 복사(Ctrl+C, 길게 눌러 복사)하면 클립보드에 뒤섞인 글자와 안내 문구만 들어간다.
  * - 사진(스크린샷)을 찍어 가는 건 막을 수 없다. 그건 풀이 기록(시간·화면 이탈)으로 잡는다.
  */
 
-// 모든 문제에 적용 (특정 문제만 하려면 여기 조건을 바꾸면 돼)
-export const isGuarded = (_q: { difficulty?: number | null }) => true;
+// 난이도 4(어려움)·5(최상위) 문제에만 적용
+export const isGuarded = (q: { difficulty?: number | null }) => (q.difficulty ?? 0) >= 4;
 
 const JUNK = "0123456789+-=×÷√π²³/()ABCDHOPxy가나다라마바사";
 
