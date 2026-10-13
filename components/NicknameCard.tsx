@@ -42,7 +42,7 @@ export default function NicknameCard({
   /** 처음 들어온 사람: 'Google로 로그인' 안내도 같이 보여 줌 */
   firstTime?: boolean;
 }) {
-  const { isAnon } = useMe();
+  const { isAnon, googleOn } = useMe();
   const [v, setV] = useState(current && current !== "별명 변경 중" ? current : "");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -104,7 +104,7 @@ export default function NicknameCard({
           : check ? (check.ok ? <span className="ok">✓ 쓸 수 있는 별명이야</span> : <span className="no">✗ {check.reason}</span>)
           : null}
       </div>
-      {firstTime && isAnon && (
+      {firstTime && isAnon && googleOn && (
         <div className="nick-login">
           <span className="small">
             <b>전에 쓰던 계정이 있어?</b> Google로 로그인하면 다른 휴대폰·컴퓨터에서도 같은 계정으로 이어서 할 수 있어.

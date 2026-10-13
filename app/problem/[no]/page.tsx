@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
+import ReportButton from "@/components/ReportButton";
 import { diffOf, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -209,6 +210,7 @@ export default function ProblemPage() {
               <SubjBadge code={q.subject} /> <TypeBadge type={q.qtype} /> <DiffBadge level={q.difficulty} />
               <span className="small muted">배점 {d.points}점 · 정답률 {info?.submissions ? `${info.accuracy}%` : "–"}</span>
               {idx >= 0 && <span className="small faint">{idx + 1} / {unitList.length}</span>}
+              <ReportButton questionId={q.id} no={q.no} className="push-right" />
             </div>
           </div>
 

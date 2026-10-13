@@ -5,9 +5,10 @@ import { useMe } from "@/lib/useMe";
 
 /** 내 계정: Google 연결 상태 + 로그인/로그아웃 */
 export default function AccountCard({ compact = false }: { compact?: boolean }) {
-  const { isAnon, email, signOut, ready, user } = useMe();
+  const { isAnon, email, signOut, ready, user, googleOn } = useMe();
   const [sure, setSure] = useState(false);
   if (!ready || !user) return null;
+  if (isAnon && !googleOn) return null; // Google 로그인 설정 전
 
   if (isAnon) {
     return (

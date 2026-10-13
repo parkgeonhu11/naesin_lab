@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Icon from "@/components/Icon";
+import LoginGate from "@/components/LoginGate";
 import NicknameCard, { GoogleButton } from "@/components/NicknameCard";
 import { levelOf } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
@@ -28,7 +29,7 @@ export function Avatar({ name, className = "" }: { name?: string | null; classNa
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname } = useMe();
+  const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn } = useMe();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
 
@@ -68,7 +69,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         ))}
       </nav>
       <div className="side-foot">
-        {ready && user && isAnon && <GoogleButton className="side-google" />}
+        {ready && user && isAnon && googleOn && <GoogleButton className="side-google" />}
         <button type="button" className="theme-btn" onClick={toggleTheme}>
           <Icon name={theme === "dark" ? "sun" : "moon"} />
           {theme === "dark" ? "밝은 화면" : "어두운 화면"}
@@ -80,6 +81,18 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       </div>
     </>
   );
+
+  // 로그인 확인 중: 잠깐 로고만 / Google 로그인 필요: 로그인 화면 (관리자 페이지는 따로 로그인)
+  if (path !== "/admin") {
+    if (!authChecked) {
+      return (
+        <div className="gate gate-wait" aria-busy="true">
+          <span className="brand-mark"><Icon name="logo" /></span>
+        </div>
+      );
+    }
+    if (needLogin) return <LoginGate />;
+  }
 
   return (
     <div className={`app ${path.startsWith("/problem/") ? "solving" : ""}`}>

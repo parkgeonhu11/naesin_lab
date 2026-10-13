@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { DiffBadge, TypeBadge } from "@/components/Badges";
+import AdminReports from "@/components/AdminReports";
 import CategoryManager from "@/components/CategoryManager";
 import QuestionForm from "@/components/QuestionForm";
 import { ago, DIFF, subjectName } from "@/lib/data";
@@ -89,6 +90,8 @@ export default function AdminPage() {
         <span className="small muted">{user?.email}</span>
         <button className="btn line" style={{ marginLeft: "auto" }} onClick={() => sb().auth.signOut().then(() => location.assign("/"))}>로그아웃</button>
       </div>
+
+      <AdminReports />
 
       <section className="panel">
         <div className="panel-head"><h2>검토 대기 문제 <span className="num muted">{pending.length}</span></h2></div>

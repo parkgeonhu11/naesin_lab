@@ -572,3 +572,55 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .account-card .grow { flex: 1 1 280px; min-width: 0; word-break: keep-all; }
 .account-card.warn { border-color: #f3c76b; background: linear-gradient(0deg, rgba(242, 162, 12, .06), rgba(242, 162, 12, .06)), var(--surface); }
 @media (max-width: 720px) { .account-card { order: 1; } .account-card .btn { width: 100%; } }
+
+/* ================= 오류 신고 ================= */
+.report-btn { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--sub);
+  border-radius: 999px; padding: 4px 11px; font-size: 12.5px; font-weight: 600; cursor: pointer; min-height: 32px; }
+.report-btn:hover { color: var(--wa); border-color: var(--wa); }
+.report-btn.open { color: #9a6200; border-color: #f3c76b; background: #fff8e6; }
+.report-btn.fixed { color: var(--ac); border-color: var(--ac); background: var(--ac-soft); }
+:root[data-theme="dark"] .report-btn.open { background: #3a2e0e; color: #f0c25e; }
+.push-right { margin-left: auto; }
+.report-dlg { border: 0; border-radius: 16px; padding: 0; width: min(520px, calc(100vw - 32px)); background: var(--surface); color: var(--text);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+  max-height: calc(100dvh - 32px); overflow: auto; overscroll-behavior: contain; }
+.report-dlg::backdrop { background: rgba(10, 16, 32, .45); }
+.report-form { display: grid; gap: 10px; padding: 18px; }
+.report-head { display: flex; align-items: center; justify-content: space-between; }
+.report-head h2 { margin: 0; font-size: 17px; }
+.report-x { background: none; border: 0; color: var(--sub); font-size: 18px; padding: 6px 8px; cursor: pointer; }
+.report-kinds { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.report-kinds legend { margin-bottom: 6px; }
+.report-kinds label { display: flex; align-items: center; gap: 7px; border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 10px; font-size: 13.5px;
+  cursor: pointer; word-break: keep-all; min-height: 44px; }
+.report-kinds label.on { border-color: var(--brand); background: var(--brand-soft); font-weight: 600; }
+.report-form textarea { width: 100%; resize: vertical; font: inherit; font-size: 14px; }
+@media (max-width: 340px) { .report-kinds { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .report-form { padding: 16px 14px; gap: 8px; } .report-kinds label { padding: 8px; font-size: 13px; } }
+.admin-report { display: grid; gap: 10px; background: var(--head); }
+.report-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.report-list li { border-left: 3px solid var(--wa); padding: 4px 10px; background: var(--surface); border-radius: 0 8px 8px 0; word-break: keep-all; }
+.admin-edit { display: grid; gap: 8px; margin-top: 8px; }
+.admin-edit label { display: grid; gap: 4px; }
+.admin-edit textarea { width: 100%; resize: vertical; font: inherit; font-size: 14px; }
+
+/* ================= 로그인 화면 ================= */
+.gate { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px;
+  background: radial-gradient(1200px 600px at 10% -10%, #2f5be8 0%, transparent 60%), radial-gradient(900px 500px at 110% 110%, #7c5cf0 0%, transparent 55%), var(--navy); }
+.gate-wait .brand-mark { width: 56px; height: 56px; border-radius: 16px; animation: gate-pulse 1.2s ease-in-out infinite; }
+@keyframes gate-pulse { 50% { opacity: .5; transform: scale(.94); } }
+@media (prefers-reduced-motion: reduce) { .gate-wait .brand-mark { animation: none; } }
+.gate-card { width: min(440px, 100%); background: var(--surface); color: var(--text); border-radius: 22px; padding: 28px 24px; box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
+  display: grid; gap: 16px; }
+.gate-brand { display: flex; align-items: center; gap: 12px; }
+.gate-brand .brand-mark { width: 44px; height: 44px; border-radius: 13px; }
+.gate-brand b { display: block; font-size: 20px; letter-spacing: -.03em; }
+.gate-brand small { color: var(--sub); font-size: 12.5px; }
+.gate h1 { margin: 4px 0 0; font-size: 24px; letter-spacing: -.035em; line-height: 1.3; word-break: keep-all; }
+.gate-points { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: var(--sub); font-size: 14.5px; word-break: keep-all; }
+.gate-points b { color: var(--text); }
+.gate-google { width: 100%; min-height: 52px; font-size: 16px; }
+.gate-inapp { display: grid; gap: 8px; border: 1.5px solid #f3c76b; background: #fff8e6; border-radius: 14px; padding: 14px; word-break: keep-all; }
+.gate-inapp p { margin: 0; }
+:root[data-theme="dark"] .gate-inapp { background: #3a2e0e; }
+.gate-foot { margin: 0; word-break: keep-all; }

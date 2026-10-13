@@ -78,11 +78,27 @@ export async function handleOAuthReturn(): Promise<string | null> {
   return `Google 로그인을 못 했어: ${desc}`;
 }
 
-/** 로그아웃하면 새 익명 사용자로 다시 시작한다. */
-export async function signOutToAnon(): Promise<User> {
+/** 로그아웃. 로그인 필수가 아니면 새 임시(익명) 사용자로 다시 시작한다. */
+export async function signOutUser(startAnon: boolean): Promise<User | null> {
   await sb().auth.signOut();
   pending = null;
-  return ensureUser();
+  return startAnon ? ensureUser() : null;
+}
+
+/**
+ * Supabase에 Google 로그인이 켜져 있는지.
+ * 켜져 있으면 처음 들어올 때 Google 로그인을 꼭 하게 하고,
+ * 아직 안 켜져 있으면(설정 전) 예전처럼 임시 계정으로 들어가게 해서 사이트가 멈추지 않게 한다.
+ */
+export async function googleEnabled(): Promise<boolean> {
+  try {
+    const r = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } });
+    if (!r.ok) return false;
+    const j = (await r.json()) as { external?: Record<string, boolean> };
+    return !!j.external?.google;
+  } catch {
+    return false;
+  }
 }
 
 /** Supabase 오류를 학생이 읽을 수 있는 문장으로 바꾼다. */
