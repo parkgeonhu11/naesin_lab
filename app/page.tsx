@@ -112,6 +112,7 @@ export default function Home() {
           <Link href={nextProblem ? `/problem/${nextProblem.no}` : "/problems"} className="btn white">
             {nextProblem ? "안 푼 문제 바로 풀기" : "문제 목록 보기"}
           </Link>
+          <Link href="/mock" className="btn ghost">예상 시험 보기</Link>
           <Link href="/exam" className="btn ghost">시험지 만들기</Link>
           <Link href="/review" className="btn ghost">오답 노트{wrongOpen ? ` ${wrongOpen}` : ""}</Link>
         </div>

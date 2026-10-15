@@ -17,6 +17,7 @@ const NAV = [
   { href: "/", label: "홈", icon: "home" },
   { href: "/problems", label: "문제", icon: "book" },
   { href: "/exam", label: "시험지", icon: "paper" },
+  { href: "/mock", label: "예상 시험", icon: "timer" },
   { href: "/review", label: "오답 노트", icon: "note" },
   { href: "/qna", label: "질문방", icon: "chat" },
   { href: "/ranking", label: "랭킹", icon: "trophy" },
@@ -25,7 +26,7 @@ const NAV = [
   { href: "/suggest", label: "문제 제안", icon: "idea" },
 ];
 /** 휴대폰 아래 탭에 보이는 5개 */
-const TABS = ["/", "/problems", "/exam", "/review", "/ranking"];
+const TABS = ["/", "/problems", "/mock", "/review", "/ranking"];
 
 type Theme = "light" | "dark";
 
@@ -67,7 +68,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <nav className="side-nav" aria-label="메뉴">
         {NAV.map((n, i) => (
           <span key={n.href} style={{ display: "contents" }}>
-            {i === 6 && <span className="side-sep" />}
+            {i === 7 && <span className="side-sep" />}
             <Link href={n.href} aria-current={active(n.href) ? "page" : undefined}>
               <Icon name={n.icon} />
               {n.label}
