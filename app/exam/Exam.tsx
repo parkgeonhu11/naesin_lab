@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { GuardedText, isGuarded } from "@/components/Guarded";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, TypeBadge } from "@/components/Badges";
+import { refreshFrames } from "@/components/Framed";
 import Figure from "@/components/Figure";
 import { DIFF, diffOf, QTYPES, shuffle, stateOf, SUBJECTS, subjectName, type GradeResult, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
@@ -137,6 +138,7 @@ export default function Exam() {
     setGraded(out);
     const okCount = out.filter((g) => g.result?.correct).length;
     trace.submit(okCount > 0, `${okCount}/${paper.length}`);
+    if (okCount > 0) refreshFrames();
     await Promise.all([refreshScore(), refreshStatus()]);
     setPhase("result");
     window.scrollTo({ top: 0 });

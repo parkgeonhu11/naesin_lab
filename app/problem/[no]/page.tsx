@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { GuardedText, isGuarded } from "@/components/Guarded";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
+import { refreshFrames } from "@/components/Framed";
 import Figure from "@/components/Figure";
 import ReportButton from "@/components/ReportButton";
 import Scratchpad from "@/components/Scratchpad";
@@ -118,6 +119,7 @@ export default function ProblemPage() {
       setVerdict({ kind: "wa", picked: val.choice, text: val.text, penalty: r.penalty ?? 0, repeat: !!r.repeat, nextPenalty: r.next_penalty ?? 0 });
       buzz([20, 60, 20]);
     }
+    if (r.correct && !r.already) refreshFrames();
     await Promise.all([loadMine(), loadStats(), refreshScore(), refreshStatus()]);
   }
 

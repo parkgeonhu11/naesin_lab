@@ -1,5 +1,5 @@
 "use client";
-import { AdminChip, FramedAvatar, frameOf, useAdmins } from "@/components/Framed";
+import { NameBadges, FramedAvatar, frameOf, TitleCelebrate } from "@/components/Framed";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -34,7 +34,6 @@ export function Avatar({ name, className = "" }: { name?: string | null; classNa
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn, banned } = useMe();
-  const isAdmin = useAdmins();
   const qnaNew = useQnaUnread(!!user && authChecked && !needLogin);
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
@@ -83,7 +82,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </button>
         <Link href="/me" className="me-card">
           <FramedAvatar name={nickname} frame={frameOf(rank, points)} />
-          <span><b>{nickname ?? "별명 정하기"} <span className="lv-chip">Lv.{lv}</span><AdminChip show={isAdmin(user?.id)} /></b><small>{isAnon ? `${score} · 게스트` : score}</small></span>
+          <span><b>{nickname ?? "별명 정하기"} <span className="lv-chip">Lv.{lv}</span><NameBadges id={user?.id} max={1} /></b><small>{isAnon ? `${score} · 게스트` : score}</small></span>
         </Link>
       </div>
     </>
@@ -134,6 +133,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           )}
           {children}
         </main>
+        {ready && user && <TitleCelebrate userId={user.id} />}
         <footer className="site-foot">
           <span>내신랩 · 서연중 3학년 2학기 시험 대비</span>
           <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요. · <a className="link" href="/terms">이용약관</a> · <a className="link" href="/privacy">개인정보처리방침</a></span>

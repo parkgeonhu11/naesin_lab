@@ -981,3 +981,36 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .gate-check input { width: 18px; height: 18px; accent-color: var(--accent, #4f46e5); }
 .gate-guest-row { display: flex; gap: 8px; justify-content: flex-end; }
 .gate-guest-row .btn:last-child { flex: 1; }
+
+/* 과목 마스터 칭호 */
+.title-chip { display: inline-flex; align-items: center; gap: 3px; margin-left: 5px; padding: 1px 7px 1px 6px; border-radius: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: -.01em; vertical-align: 2px; line-height: 1.5; white-space: nowrap;
+  color: #fff; background: linear-gradient(135deg, var(--c, #4f46e5), color-mix(in srgb, var(--c, #4f46e5) 70%, #000)); box-shadow: 0 0 0 1px rgba(255,255,255,.3) inset, 0 2px 7px color-mix(in srgb, var(--c, #4f46e5) 40%, transparent); }
+.title-chip svg { color: #ffe27a; filter: drop-shadow(0 0 2px rgba(255, 220, 90, .7)); }
+.title-chip.title-all { background: linear-gradient(110deg, #ff4d6d, #ff9f1c, #2ec4b6, #3a86ff, #8338ec, #ff4d6d); background-size: 220% 100%; animation: title-shine 4s linear infinite; }
+@keyframes title-shine { to { background-position: -220% 0; } }
+@media (prefers-reduced-motion: reduce) { .title-chip.title-all { animation: none; } }
+.title-chip.title-more { background: var(--line-strong); color: var(--text); box-shadow: none; }
+.title-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 0 16px 16px; }
+.title-card { display: grid; gap: 6px; padding: 12px; border: 1.5px solid var(--line); border-radius: 12px; }
+.title-card.done { border-color: var(--c); background: var(--cs); }
+.title-card-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.title-card-top .title-chip { margin-left: 0; }
+.title-card-top b { font-size: 13.5px; color: var(--sub); }
+.title-bar { height: 7px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.title-bar i { display: block; height: 100%; border-radius: inherit; background: var(--c); }
+.title-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 90; width: min(440px, calc(100vw - 32px)); display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 16px; border-radius: 16px;
+  background: var(--surface); color: var(--text); border: 2px solid var(--c, #4f46e5); box-shadow: 0 18px 50px rgba(0,0,0,.28), 0 0 0 6px color-mix(in srgb, var(--c, #4f46e5) 15%, transparent); animation: title-pop .5s cubic-bezier(.2, 1.4, .4, 1); }
+.title-toast b { display: block; font-size: 15px; letter-spacing: -.02em; }
+.title-toast small { color: var(--sub); font-size: 12.5px; word-break: keep-all; }
+.title-toast-crown { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, var(--c, #4f46e5), color-mix(in srgb, var(--c, #4f46e5) 65%, #000)); }
+.title-toast-crown svg { width: 24px; height: 20px; color: #ffe27a; filter: drop-shadow(0 0 4px rgba(255, 220, 90, .8)); }
+.title-toast-x { flex: none; border: 0; background: none; color: var(--sub); font-size: 22px; line-height: 1; cursor: pointer; padding: 4px; }
+@keyframes title-pop { from { opacity: 0; transform: translate(-50%, 20px) scale(.9); } }
+@media (max-width: 1000px) { .title-toast { bottom: 84px; } }
+@media (prefers-reduced-motion: reduce) { .title-toast { animation: none; } }
+.pod-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: -2px; }
+.pod-badges:empty { display: none; }
+.pod-badges .admin-chip, .pod-badges .title-chip { margin-left: 0; }
+.title-card-top { flex-wrap: wrap; row-gap: 2px; }
+.title-card-top .num { white-space: nowrap; margin-left: auto; }
+@media (max-width: 600px) { .title-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0 12px 12px; } .title-card { padding: 10px; } }

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { AdminChip, FramedAvatar, useAdmins, useFrames } from "@/components/Framed";
+import { NameBadges, FramedAvatar, useFrames } from "@/components/Framed";
 import { ago, subjectName } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 
@@ -60,7 +60,6 @@ export function QnaThread({ id, done, onChanged }: { id: number; done: boolean; 
   const [peek, setPeek] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const frameFor = useFrames();
-  const isAdmin = useAdmins();
 
   const load = useCallback(async () => {
     const { data, error } = await sb().rpc("qna_thread", { p_thread: id });
@@ -101,7 +100,7 @@ export function QnaThread({ id, done, onChanged }: { id: number; done: boolean; 
               <div className="qna-a-main">
                 <div className="qna-meta">
                   <b>{a.nickname}</b>
-                  <AdminChip show={isAdmin(a.user_id)} />
+                  <NameBadges id={a.user_id} />
                   {a.is_asker && <span className="qna-tag">질문자</span>}
                   {best && <span className="qna-tag best">✓ 채택된 답변</span>}
                   <span className="faint">{ago(a.created_at)}</span>
@@ -142,7 +141,6 @@ export function QnaThread({ id, done, onChanged }: { id: number; done: boolean; 
 
 function ThreadItem({ r, done, showProblem, open, onToggle, onChanged }: { r: ThreadRow; done: boolean; showProblem?: boolean; open: boolean; onToggle: () => void; onChanged: () => void }) {
   const frameFor = useFrames();
-  const isAdmin = useAdmins();
   return (
     <li className={`qna-item ${open ? "open" : ""} ${r.is_mine ? "mine" : ""}`} id={`qna-${r.id}`}>
       <button type="button" className="qna-head" onClick={onToggle} aria-expanded={open}>
@@ -150,7 +148,7 @@ function ThreadItem({ r, done, showProblem, open, onToggle, onChanged }: { r: Th
         <span className="qna-head-main">
           <span className="qna-meta">
             <b>{r.nickname}{r.is_mine ? " (나)" : ""}</b>
-            <AdminChip show={isAdmin(r.user_id)} />
+            <NameBadges id={r.user_id} />
             {showProblem && <span className="qna-prob">{subjectName(r.subject)} {r.no}번</span>}
             <span className="faint">{ago(r.created_at)}</span>
           </span>

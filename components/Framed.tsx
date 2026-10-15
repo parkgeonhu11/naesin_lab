@@ -32,17 +32,32 @@ export function frameOf(rank?: number | null, points?: number | null): FrameKey 
 
 // 전체 누적 랭킹을 한 번만 불러와서 여러 화면이 같이 쓴다 (1분마다 새로)
 type Entry = { rank: number; points: number };
-let cache: { at: number; byId: Map<string, Entry>; byNick: Map<string, Entry>; adminIds: Set<string>; adminNicks: Set<string> } | null = null;
+let cache: {
+  at: number; byId: Map<string, Entry>; byNick: Map<string, Entry>; adminIds: Set<string>; adminNicks: Set<string>;
+  /** 과목 마스터 칭호 (user_id / 별명 → 과목 코드들, 'all'이면 전과목) */
+  titlesById: Map<string, string[]>; titlesByNick: Map<string, string[]>;
+} | null = null;
 let inflight: Promise<void> | null = null;
 const listeners = new Set<() => void>();
+
+/** 점수·칭호가 바뀌었을 때 바로 다시 불러오기 (예: 문제를 맞힌 뒤) */
+export function refreshFrames() {
+  refresh();
+}
 
 function refresh() {
   if (!isConfigured || inflight) return;
   inflight = (async () => {
-    const [{ data }, { data: adm }] = await Promise.all([
+    const [{ data }, { data: adm }, { data: tit }] = await Promise.all([
       sb().rpc("leaderboard", { p_subject: "all", p_period: "all", p_limit: 500 }),
       sb().rpc("admin_people"),
+      sb().rpc("subject_masters"),
     ]);
+    const titlesById = new Map<string, string[]>(), titlesByNick = new Map<string, string[]>();
+    ((tit as { user_id: string; nickname: string | null; subject: string }[]) ?? []).forEach((r) => {
+      titlesById.set(r.user_id, [...(titlesById.get(r.user_id) ?? []), r.subject]);
+      if (r.nickname) titlesByNick.set(r.nickname, [...(titlesByNick.get(r.nickname) ?? []), r.subject]);
+    });
     const adminIds = new Set<string>(), adminNicks = new Set<string>();
     ((adm as { user_id: string; nickname: string | null }[]) ?? []).forEach((r) => {
       adminIds.add(r.user_id);
@@ -54,7 +69,7 @@ function refresh() {
       byId.set(r.user_id, e);
       byNick.set(r.nickname, e);
     });
-    cache = { at: Date.now(), byId, byNick, adminIds, adminNicks };
+    cache = { at: Date.now(), byId, byNick, adminIds, adminNicks, titlesById, titlesByNick };
     inflight = null;
     listeners.forEach((f) => f());
   })();
@@ -161,6 +176,97 @@ export function useAdmins() {
 export function AdminChip({ show = true }: { show?: boolean }) {
   if (!show) return null;
   return <span className="admin-chip" title="내신랩 관리자">ADMIN</span>;
+}
+
+/** 과목 마스터 칭호 목록 (user_id나 별명으로). 'all'이 있으면 전과목 마스터 */
+export function useTitles() {
+  useFrames();
+  return (userId?: string | null, nickname?: string | null): string[] =>
+    (userId && cache?.titlesById.get(userId)) || (nickname && cache?.titlesByNick.get(nickname)) || [];
+}
+
+const SUBJ_NAME: Record<string, string> = { ko: "국어", ma: "수학", sc: "과학", so: "사회", en: "영어", hi: "역사", hm: "한문" };
+export const titleName = (s: string) => (s === "all" ? "전과목 마스터" : `${SUBJ_NAME[s] ?? s} 마스터`);
+
+function Crown() {
+  return (
+    <svg viewBox="0 0 12 10" width="10" height="9" aria-hidden="true">
+      <path d="M1 8.6h10L10.2 2.8 7.6 5 6 1.2 4.4 5 1.8 2.8z" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** 과목 마스터 칭호 하나 */
+export function TitleChip({ subject }: { subject: string }) {
+  return (
+    <span className={`title-chip${subject === "all" ? " title-all" : ""}`} data-s={subject} title={`${titleName(subject)}: 지금 있는 ${subject === "all" ? "모든" : SUBJ_NAME[subject] ?? ""} 문제를 전부 맞혔어`}>
+      <Crown />
+      {titleName(subject)}
+    </span>
+  );
+}
+
+/** 칭호 여러 개: 전과목이면 하나만, 많으면 2개 + 나머지 개수 */
+export function TitleChips({ titles, max = 2 }: { titles: string[]; max?: number }) {
+  if (!titles.length) return null;
+  if (titles.includes("all")) return <TitleChip subject="all" />;
+  const order = Object.keys(SUBJ_NAME);
+  const t = [...titles].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  const rest = t.slice(max);
+  return (
+    <>
+      {t.slice(0, max).map((s) => <TitleChip key={s} subject={s} />)}
+      {rest.length > 0 && <span className="title-chip title-more" title={rest.map(titleName).join(", ")}>+{rest.length}</span>}
+    </>
+  );
+}
+
+/** 내가 새 칭호를 얻으면 축하 알림 (이 브라우저에서 처음 볼 때 한 번) */
+export function TitleCelebrate({ userId }: { userId?: string | null }) {
+  const titles = useTitles();
+  const mine = userId ? titles(userId) : [];
+  const key = [...mine].sort().join(",");
+  const loaded = !!cache;
+  const [fresh, setFresh] = useState<string[]>([]);
+  useEffect(() => {
+    if (!userId || !loaded) return;
+    const k = `nl-titles-${userId}`;
+    let prev: string[] = [];
+    try { prev = JSON.parse(localStorage.getItem(k) ?? "[]"); } catch {}
+    const now = key ? key.split(",") : [];
+    try { localStorage.setItem(k, JSON.stringify(now)); } catch {}
+    const got = now.filter((t) => !prev.includes(t));
+    if (got.length) setFresh(got.includes("all") ? ["all"] : got);
+  }, [userId, key, loaded]);
+  useEffect(() => {
+    if (!fresh.length) return;
+    const t = setTimeout(() => setFresh([]), 9000);
+    return () => clearTimeout(t);
+  }, [fresh]);
+  if (!fresh.length) return null;
+  const all = fresh.includes("all");
+  return (
+    <div className="title-toast" role="status" data-s={fresh[0]}>
+      <span className="title-toast-crown"><Crown /></span>
+      <div className="grow">
+        <b>{fresh.map(titleName).join(", ")} 칭호를 얻었어!</b>
+        <small>{all ? "지금 있는 모든 과목 문제를 전부 맞혔어. 진짜 대단해" : `지금 있는 ${fresh.map((s) => SUBJ_NAME[s]).join("·")} 문제를 전부 맞혔어. 이제 이름 옆에 칭호가 붙어`}</small>
+      </div>
+      <button type="button" className="title-toast-x" aria-label="닫기" onClick={() => setFresh([])}>×</button>
+    </div>
+  );
+}
+
+/** 이름 옆 배지 묶음: ADMIN + 과목 마스터 칭호 */
+export function NameBadges({ id, nick, max }: { id?: string | null; nick?: string | null; max?: number }) {
+  const isAdmin = useAdmins();
+  const titles = useTitles();
+  return (
+    <>
+      <AdminChip show={isAdmin(id, nick)} />
+      <TitleChips titles={titles(id, nick)} max={max} />
+    </>
+  );
 }
 
 /** 이름 옆에 붙이는 작은 테두리 이름표 */

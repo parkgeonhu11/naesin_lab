@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DiffBadge, SubjBadge } from "@/components/Badges";
-import { AdminChip, FrameChip, FramedAvatar, useAdmins, useFrames } from "@/components/Framed";
+import { NameBadges, FrameChip, FramedAvatar, TitleChip, useFrames } from "@/components/Framed";
 import { ago, levelOf, SUBJECTS, subjectName } from "@/lib/data";
 import { sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -19,12 +19,13 @@ export default function UserPage() {
   const rowLink = useRowLink();
   const [info, setInfo] = useState<Info | null | undefined>(undefined);
   const frameFor = useFrames();
-  const isAdmin = useAdmins();
   const [subject, setSubject] = useState("all");
+  const [prog, setProg] = useState<{ subject: string; solved: number; total: number }[]>([]);
 
   useEffect(() => {
     if (!user) return;
     sb().rpc("user_solved", { p_user: id }).then(({ data }) => setInfo((data as Info) ?? null));
+    sb().rpc("title_progress", { p_user: id }).then(({ data }) => setProg(((data as { subject: string; solved: number; total: number }[]) ?? []).map((r) => ({ ...r, solved: Number(r.solved), total: Number(r.total) }))));
   }, [user, id]);
 
   const bySubj = useMemo(() => {
@@ -43,7 +44,7 @@ export default function UserPage() {
     <>
       <div className="page-title user-head">
         <FramedAvatar name={info.nickname} className="big" frame={frame} />
-        <h1>{info.nickname}{info.is_me ? " (나)" : ""} <span className="lv-chip">Lv.{lv}</span><AdminChip show={isAdmin(id)} /><FrameChip frame={frame} /></h1>
+        <h1>{info.nickname}{info.is_me ? " (나)" : ""} <span className="lv-chip">Lv.{lv}</span><NameBadges id={id} max={7} /><FrameChip frame={frame} /></h1>
         <Link className="btn line" style={{ marginLeft: "auto" }} href="/ranking">← 랭킹</Link>
       </div>
 
@@ -53,6 +54,30 @@ export default function UserPage() {
         <div className="stat"><small>제출</small><b>{info.submissions}</b></div>
         <div className="stat"><small>정답률</small><b>{info.submissions ? `${Math.round((100 * info.correct) / info.submissions)}%` : "–"}</b></div>
       </section>
+
+      {prog.length > 0 && (
+        <section className="panel">
+          <div className="panel-head">
+            <h2>과목 마스터 칭호</h2>
+            <span className="small muted">한 과목의 지금 있는 문제를 전부 맞히면 칭호가 붙어. 새 문제가 나오면 그것까지 풀어야 해.</span>
+          </div>
+          <div className="title-grid">
+            {SUBJECTS.map((sj) => prog.find((r) => r.subject === sj.code)).filter((r): r is { subject: string; solved: number; total: number } => !!r).map((r) => {
+              const done = r.solved >= r.total;
+              return (
+                <div key={r.subject} className={`title-card${done ? " done" : ""}`} data-s={r.subject}>
+                  <div className="title-card-top">
+                    {done ? <TitleChip subject={r.subject} /> : <b>{subjectName(r.subject)} 마스터</b>}
+                    <span className="small num">{r.solved} / {r.total}</span>
+                  </div>
+                  <div className="title-bar"><i style={{ width: `${Math.min(100, (100 * r.solved) / r.total)}%` }} /></div>
+                  <span className="small muted">{done ? "획득!" : `${r.total - r.solved}문제 남음`}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section className="panel">
         <div className="panel-head"><h2>맞힌 문제 <span className="num muted">{list.length}</span></h2></div>
