@@ -14,9 +14,9 @@ export default function AccountCard({ compact = false }: { compact?: boolean }) 
     return (
       <section className={`panel panel-body account-card warn${compact ? " compact" : ""}`}>
         <div className="grow">
-          <b>지금은 이 기기에만 저장되는 임시 계정이야</b>
+          <b>지금은 게스트 계정이야 — 이 브라우저에만 저장돼</b>
           <div className="small muted">
-            Google로 로그인하면 지금까지 푼 기록과 별명이 그대로 Google 계정에 묶여서, 다른 기기나 브라우저에서도 같은 계정으로 들어올 수 있어.
+            인터넷 기록을 지우거나 다른 기기·브라우저로 가면 이 계정은 <b>다시 찾을 수 없어</b>. Google로 로그인하면 지금까지 푼 기록·점수·별명이 그대로 Google 계정에 묶여.
           </div>
         </div>
         <GoogleButton label="Google로 로그인하고 기록 지키기" />

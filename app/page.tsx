@@ -5,7 +5,7 @@ import { ResultText } from "@/components/Badges";
 import Icon from "@/components/Icon";
 import AccountCard from "@/components/AccountCard";
 import ExamDday from "@/components/ExamDday";
-import { FramedAvatar, frameOf, useFrames } from "@/components/Framed";
+import { AdminChip, FramedAvatar, frameOf, useAdmins, useFrames } from "@/components/Framed";
 import { ago, levelOf, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -16,6 +16,7 @@ const pct = (a: number, b: number) => (b ? Math.round((100 * a) / b) : 0);
 
 export default function Home() {
   const frameFor = useFrames();
+  const isAdmin = useAdmins();
   const { user, nickname, error, isAnon, ready } = useMe();
   const { rows, prog } = useProblems();
   const [sum, setSum] = useState<MySummary | null>(null);
@@ -253,7 +254,7 @@ export default function Home() {
                 <Link key={s.id} href={`/problem/${s.problem_no}`} className={`list-item ${s.is_me ? "mine" : ""}`}>
                   <FramedAvatar name={s.nickname} frame={frameFor(null, s.nickname)} />
                   <span className="li-main">
-                    <b>{s.nickname}</b>
+                    <b>{s.nickname}<AdminChip show={isAdmin(null, s.nickname)} /></b>
                     <small>{subjectName(s.subject)} {s.problem_no}번 · {ago(s.created_at)}</small>
                   </span>
                   <ResultText correct={s.is_correct} />
@@ -278,7 +279,7 @@ export default function Home() {
                   <span className={`medal m${r.rank}`}>{r.rank}</span>
                   <FramedAvatar name={r.nickname} frame={frameFor(r.user_id)} />
                   <span className="li-main">
-                    <b>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}</b>
+                    <b>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}<AdminChip show={isAdmin(r.user_id)} /></b>
                     <small>맞힌 문제 {r.solved}개</small>
                   </span>
                   <span className="pts">{r.points}점</span>

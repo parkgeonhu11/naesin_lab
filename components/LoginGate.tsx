@@ -5,10 +5,49 @@ import { GoogleButton } from "@/components/NicknameCard";
 import { detectInApp, openExternal, type InApp } from "@/lib/inapp";
 import { useMe } from "@/lib/useMe";
 
-/** 처음 들어오면 보이는 로그인 화면 (Google 로그인 필수) */
+/** 게스트로 시작: 경고를 읽고 확인해야 들어갈 수 있음 */
+function GuestStart({ onEnter }: { onEnter: () => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [ok, setOk] = useState(false);
+  const [busy, setBusy] = useState(false);
+  if (!open) {
+    return (
+      <button type="button" className="btn line big gate-guest" onClick={() => setOpen(true)}>
+        구글 계정이 없어? 게스트로 시작하기
+      </button>
+    );
+  }
+  return (
+    <div className="gate-guest-box">
+      <b>게스트로 시작하기 전에 꼭 읽어 줘</b>
+      <ul>
+        <li>문제 풀이·점수·랭킹은 Google 계정이랑 <b>똑같이 저장돼</b>.</li>
+        <li>대신 계정이 <b>이 브라우저에만</b> 기억돼. 인터넷 기록·쿠키를 지우거나, 다른 휴대폰·컴퓨터·브라우저로 들어가면 <b>이 계정은 다시 찾을 수 없어</b>.</li>
+        <li>잃어버린 게스트 계정은 관리자도 <b>되찾아 줄 수 없어</b>.</li>
+        <li>나중에 Google로 로그인하면 지금까지 기록이 <b>그대로 옮겨져</b>.</li>
+      </ul>
+      <label className="gate-check">
+        <input type="checkbox" checked={ok} onChange={(e) => setOk(e.target.checked)} />
+        <span>잃어버리면 못 찾는다는 거 이해했어</span>
+      </label>
+      <div className="gate-guest-row">
+        <button type="button" className="btn line" onClick={() => { setOpen(false); setOk(false); }}>취소</button>
+        <button
+          type="button"
+          className="btn"
+          disabled={!ok || busy}
+          onClick={async () => { setBusy(true); await onEnter(); setBusy(false); }}
+        >
+          {busy ? "들어가는 중…" : "게스트로 시작"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** 처음 들어오면 보이는 로그인 화면 (Google 로그인 또는 게스트) */
 export default function LoginGate() {
-  const { user, notice, googleOn, enterAsGuest } = useMe();
-  const [entering, setEntering] = useState(false);
+  const { notice, googleOn, enterAsGuest } = useMe();
   const [app, setApp] = useState<InApp>(null);
   const [copied, setCopied] = useState(false);
 
@@ -24,8 +63,6 @@ export default function LoginGate() {
     } catch {}
   }, []);
 
-  const hasAnonRecord = !!user?.is_anonymous;
-
   return (
     <div className="gate">
       <div className="gate-card">
@@ -37,7 +74,6 @@ export default function LoginGate() {
         <ul className="gate-points">
           <li>휴대폰, 컴퓨터 어디서 들어와도 <b>같은 기록·점수</b>가 이어져.</li>
           <li>순위표에는 <b>별명만</b> 보여. 이메일은 다른 친구에게 안 보여.</li>
-          {hasAnonRecord && <li>이 기기에서 지금까지 푼 기록은 로그인하면 <b>그대로 옮겨져</b>.</li>}
         </ul>
 
         {notice && <div className="notice warn">{notice}</div>}
@@ -65,21 +101,24 @@ export default function LoginGate() {
             </button>
           </div>
         ) : googleOn ? (
-          <GoogleButton label="Google로 계속하기" className="big gate-google" />
+          <>
+            <GoogleButton label="Google로 계속하기" className="big gate-google" />
+            <div className="gate-or"><span>또는</span></div>
+            <GuestStart onEnter={enterAsGuest} />
+          </>
         ) : (
           <div className="gate-inapp">
             <b>Google 로그인은 관리자가 준비하는 중이야</b>
-            <p className="small">준비되면 이 화면에서 바로 Google로 로그인할 수 있어. 그 전에는 임시 계정으로 먼저 풀어 두고, 나중에 Google로 로그인하면 기록이 그대로 옮겨져.</p>
+            <p className="small">준비되면 이 화면에서 바로 Google로 로그인할 수 있어. 그 전에는 게스트로 먼저 풀어 두고, 나중에 Google로 로그인하면 기록이 그대로 옮겨져.</p>
             <button type="button" className="btn google big gate-google" disabled aria-disabled="true">Google로 계속하기 (준비 중)</button>
-            <button
-              type="button"
-              className="btn big"
-              disabled={entering}
-              onClick={async () => { setEntering(true); await enterAsGuest(); setEntering(false); }}
-            >
-              {entering ? "들어가는 중…" : "임시 계정으로 들어가기"}
-            </button>
           </div>
+        )}
+        {!app && !googleOn && <GuestStart onEnter={enterAsGuest} />}
+        {app && (
+          <>
+            <div className="gate-or"><span>또는</span></div>
+            <GuestStart onEnter={enterAsGuest} />
+          </>
         )}
 
         <p className="gate-foot small faint">

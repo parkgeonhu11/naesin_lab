@@ -1,5 +1,5 @@
 "use client";
-import { FramedAvatar, frameOf } from "@/components/Framed";
+import { AdminChip, FramedAvatar, frameOf, useAdmins } from "@/components/Framed";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -34,6 +34,7 @@ export function Avatar({ name, className = "" }: { name?: string | null; classNa
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn, banned } = useMe();
+  const isAdmin = useAdmins();
   const qnaNew = useQnaUnread(!!user && authChecked && !needLogin);
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
@@ -82,7 +83,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </button>
         <Link href="/me" className="me-card">
           <FramedAvatar name={nickname} frame={frameOf(rank, points)} />
-          <span><b>{nickname ?? "별명 정하기"} <span className="lv-chip">Lv.{lv}</span></b><small>{isAnon ? `${score} · 임시 계정` : score}</small></span>
+          <span><b>{nickname ?? "별명 정하기"} <span className="lv-chip">Lv.{lv}</span><AdminChip show={isAdmin(user?.id)} /></b><small>{isAnon ? `${score} · 게스트` : score}</small></span>
         </Link>
       </div>
     </>

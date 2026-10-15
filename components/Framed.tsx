@@ -32,21 +32,29 @@ export function frameOf(rank?: number | null, points?: number | null): FrameKey 
 
 // 전체 누적 랭킹을 한 번만 불러와서 여러 화면이 같이 쓴다 (1분마다 새로)
 type Entry = { rank: number; points: number };
-let cache: { at: number; byId: Map<string, Entry>; byNick: Map<string, Entry> } | null = null;
+let cache: { at: number; byId: Map<string, Entry>; byNick: Map<string, Entry>; adminIds: Set<string>; adminNicks: Set<string> } | null = null;
 let inflight: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 
 function refresh() {
   if (!isConfigured || inflight) return;
   inflight = (async () => {
-    const { data } = await sb().rpc("leaderboard", { p_subject: "all", p_period: "all", p_limit: 500 });
+    const [{ data }, { data: adm }] = await Promise.all([
+      sb().rpc("leaderboard", { p_subject: "all", p_period: "all", p_limit: 500 }),
+      sb().rpc("admin_people"),
+    ]);
+    const adminIds = new Set<string>(), adminNicks = new Set<string>();
+    ((adm as { user_id: string; nickname: string | null }[]) ?? []).forEach((r) => {
+      adminIds.add(r.user_id);
+      if (r.nickname) adminNicks.add(r.nickname);
+    });
     const byId = new Map<string, Entry>(), byNick = new Map<string, Entry>();
     ((data as { user_id: string; nickname: string; rank: number; points: number }[]) ?? []).forEach((r) => {
       const e = { rank: r.rank, points: r.points };
       byId.set(r.user_id, e);
       byNick.set(r.nickname, e);
     });
-    cache = { at: Date.now(), byId, byNick };
+    cache = { at: Date.now(), byId, byNick, adminIds, adminNicks };
     inflight = null;
     listeners.forEach((f) => f());
   })();
@@ -140,6 +148,19 @@ export function FramedAvatar({ name, frame, className = "" }: { name?: string | 
       <Avatar name={name} className={className} />
     </span>
   );
+}
+
+/** 관리자인지 (user_id나 별명으로) */
+export function useAdmins() {
+  useFrames(); // 같은 캐시를 불러오고 갱신되면 다시 그린다
+  return (userId?: string | null, nickname?: string | null) =>
+    !!cache && ((!!userId && cache.adminIds.has(userId)) || (!!nickname && cache.adminNicks.has(nickname)));
+}
+
+/** 이름 옆 'ADMIN' 배지 */
+export function AdminChip({ show = true }: { show?: boolean }) {
+  if (!show) return null;
+  return <span className="admin-chip" title="내신랩 관리자">ADMIN</span>;
 }
 
 /** 이름 옆에 붙이는 작은 테두리 이름표 */

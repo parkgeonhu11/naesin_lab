@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DiffBadge, SubjBadge } from "@/components/Badges";
-import { FrameChip, FramedAvatar, useFrames } from "@/components/Framed";
+import { AdminChip, FrameChip, FramedAvatar, useAdmins, useFrames } from "@/components/Framed";
 import { ago, levelOf, SUBJECTS, subjectName } from "@/lib/data";
 import { sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -19,6 +19,7 @@ export default function UserPage() {
   const rowLink = useRowLink();
   const [info, setInfo] = useState<Info | null | undefined>(undefined);
   const frameFor = useFrames();
+  const isAdmin = useAdmins();
   const [subject, setSubject] = useState("all");
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function UserPage() {
     <>
       <div className="page-title user-head">
         <FramedAvatar name={info.nickname} className="big" frame={frame} />
-        <h1>{info.nickname}{info.is_me ? " (나)" : ""} <span className="lv-chip">Lv.{lv}</span><FrameChip frame={frame} /></h1>
+        <h1>{info.nickname}{info.is_me ? " (나)" : ""} <span className="lv-chip">Lv.{lv}</span><AdminChip show={isAdmin(id)} /><FrameChip frame={frame} /></h1>
         <Link className="btn line" style={{ marginLeft: "auto" }} href="/ranking">← 랭킹</Link>
       </div>
 

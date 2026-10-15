@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRowLink } from "@/lib/useRowLink";
 import { useEffect, useState } from "react";
-import { FramedAvatar, useFrames } from "@/components/Framed";
+import { AdminChip, FramedAvatar, useAdmins, useFrames } from "@/components/Framed";
 import { SUBJECTS, type BoardRow } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -11,6 +11,7 @@ export default function RankingPage() {
   const { user } = useMe();
   const rowLink = useRowLink();
   const frameFor = useFrames();
+  const isAdmin = useAdmins();
   const [scope, setScope] = useState("all");
   const [period, setPeriod] = useState<"all" | "week">("all");
   const [rows, setRows] = useState<BoardRow[] | null>(null);
@@ -55,7 +56,7 @@ export default function RankingPage() {
                 <div key={i} className={`pod p${i + 1} ${r ? "" : "empty"}`}>
                   {r && <Link href={`/user/${r.user_id}`} className="pod-link" aria-label={`${r.nickname}이(가) 푼 문제 보기`} />}
                   <FramedAvatar name={r?.nickname ?? "?"} frame={r ? frameFor(r.user_id) : null} />
-                  <b>{r ? r.nickname + (r.user_id === user?.id ? " (나)" : "") : "비어 있음"}</b>
+                  <b>{r ? r.nickname + (r.user_id === user?.id ? " (나)" : "") : "비어 있음"}{r && <AdminChip show={isAdmin(r.user_id)} />}</b>
                   <small>{r ? `${r.points}점 · ${r.solved}문제` : "도전해 봐"}</small>
                   <div className="step">{i + 1}</div>
                 </div>
@@ -74,7 +75,7 @@ export default function RankingPage() {
               {rows?.map((r) => (
                 <tr key={r.user_id} {...rowLink(`/user/${r.user_id}`, r.user_id === user?.id ? "mine" : "")}>
                   <td className="c n"><span className={`medal m${r.rank}`} style={{ margin: "0 auto" }}>{r.rank}</span></td>
-                  <td><Link className="cell-link rank-name" href={`/user/${r.user_id}`}><FramedAvatar name={r.nickname} frame={frameFor(r.user_id)} /><span>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}</span></Link></td>
+                  <td><Link className="cell-link rank-name" href={`/user/${r.user_id}`}><FramedAvatar name={r.nickname} frame={frameFor(r.user_id)} /><span>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}<AdminChip show={isAdmin(r.user_id)} /></span></Link></td>
                   <td className="r n"><b>{r.points}</b></td>
                   <td className="r n">{r.solved}</td>
                   <td className="r n hide-m">{r.submissions}</td>

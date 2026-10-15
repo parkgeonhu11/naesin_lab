@@ -18,14 +18,14 @@ type MeState = {
   ready: boolean;
   /** 로그인 상태 확인이 끝났는지 (이게 false면 아직 화면을 정하지 않음) */
   authChecked: boolean;
-  /** Google 로그인이 필요해서 로그인 화면을 보여 줘야 함 */
+  /** 아직 계정이 없어서 로그인 화면(Google 또는 게스트)을 보여 줘야 함 */
   needLogin: boolean;
   /** Supabase에 Google 로그인이 켜져 있는지 (Google로 로그인한 사람은 항상 true) */
   googleOn: boolean;
   saveNickname: (n: string) => Promise<void>;
   signInGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-  /** Google 로그인 설정 전에만: 임시 계정으로 들어가기 */
+  /** 게스트(익명) 계정으로 들어가기. 이 브라우저에만 저장되고, 잃어버리면 되찾을 수 없음 */
   enterAsGuest: () => Promise<void>;
   notice: string | null;
   /** 너무 빨리 맞힌 답이 쌓여서 받은 경고 (아직 확인 안 함) */
@@ -175,7 +175,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
 
   return createElement(Ctx.Provider, { value: {
     user, nickname, mustRename, isAnon: user?.is_anonymous ?? true, email: user?.email ?? null,
-    points, rank, error, ready, authChecked, needLogin: !user || (loginRequired && !!user.is_anonymous), googleOn: loginRequired || (!!user && !user.is_anonymous), saveNickname, signInGoogle, signOut, enterAsGuest, notice, refreshScore,
+    points, rank, error, ready, authChecked, needLogin: !user, googleOn: loginRequired || (!!user && !user.is_anonymous), saveNickname, signInGoogle, signOut, enterAsGuest, notice, refreshScore,
     warned, banned, ackWarning, refreshStatus,
   } }, children);
 }

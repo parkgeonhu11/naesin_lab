@@ -966,3 +966,18 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .qna-answer:has(.fr-top) { gap: 18px; padding-left: 18px; }
 .qna-head .fr-top .fr-wings, .qna-answer .fr-top .fr-wings { width: 205%; height: 133%; }
 .qna-head .fr-embers, .qna-answer .fr-embers { display: none; }
+
+/* 관리자 배지 */
+.admin-chip { display: inline-block; margin-left: 5px; padding: 1px 7px; border-radius: 6px; font-size: 10.5px; font-weight: 900; letter-spacing: .06em; vertical-align: 2px; color: #fff; background: linear-gradient(135deg, #ff3d6e, #7a3cff); box-shadow: 0 0 0 1px rgba(255,255,255,.35) inset, 0 2px 8px rgba(122,60,255,.35); white-space: nowrap; line-height: 1.5; }
+
+/* 게스트로 시작 */
+.gate-or { display: flex; align-items: center; gap: 10px; color: var(--sub); font-size: 12.5px; }
+.gate-or::before, .gate-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.gate-guest { width: 100%; min-height: 46px; font-size: 14.5px; }
+.gate-guest-box { display: grid; gap: 10px; border: 1.5px solid var(--line); border-radius: 14px; padding: 14px; word-break: keep-all; }
+.gate-guest-box ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; color: var(--sub); font-size: 13.5px; line-height: 1.5; }
+.gate-guest-box ul b { color: var(--text); }
+.gate-check { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.gate-check input { width: 18px; height: 18px; accent-color: var(--accent, #4f46e5); }
+.gate-guest-row { display: flex; gap: 8px; justify-content: flex-end; }
+.gate-guest-row .btn:last-child { flex: 1; }
