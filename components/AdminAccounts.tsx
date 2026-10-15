@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ago } from "@/lib/data";
 import { sb } from "@/lib/supabase";
@@ -84,7 +85,7 @@ export default function AdminAccounts() {
           {rows && shown.length === 0 && <tr><td colSpan={9} className="empty-cell">조건에 맞는 계정이 없어.</td></tr>}
           {shown.map((r) => (
             <tr key={r.user_id}>
-              <td>{r.nickname ?? <span className="faint">별명 없음</span>}</td>
+              <td>{r.nickname ? <Link className="link" href={`/user/${r.user_id}`} title="프로필에서 점수 주기">{r.nickname}</Link> : <span className="faint">별명 없음</span>}</td>
               <td className="small">{r.email ?? <span className="faint">–</span>}</td>
               <td><span className={`badge ${r.is_anonymous ? "subj" : "type-short"}`}>{provName(r.provider)}</span></td>
               <td className="small faint nowrap">{fmt(r.created_at)}</td>

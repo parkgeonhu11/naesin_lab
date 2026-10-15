@@ -1014,3 +1014,30 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .title-card-top { flex-wrap: wrap; row-gap: 2px; }
 .title-card-top .num { white-space: nowrap; margin-left: auto; }
 @media (max-width: 600px) { .title-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0 12px 12px; } .title-card { padding: 10px; } }
+
+/* 관리자 점수 주기 */
+.grant-panel { border: 1.5px solid color-mix(in srgb, #7a3cff 45%, var(--line)); }
+.grant-panel .panel-head h2 .admin-chip { vertical-align: 3px; }
+.grant-form { display: grid; gap: 10px; }
+.grant-sign { margin: 0; }
+.grant-quick { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.chip-btn { border: 1.5px solid var(--line); background: var(--surface); color: var(--text); border-radius: 999px; padding: 6px 12px; font-weight: 700; font-size: 13.5px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.chip-btn.on { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, var(--surface)); color: var(--brand); }
+.grant-amount { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.grant-amount .input { width: 96px; }
+.grant-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.grant-row select.input { width: auto; }
+.grant-row .grow { flex: 1 1 220px; min-width: 0; }
+.grant-pts { font-weight: 800; }
+.grant-pts.plus { color: var(--ac, #12a150); }
+.grant-pts.minus { color: var(--wa, #d23a3a); }
+tr.grant-off td { opacity: .5; }
+tr.grant-off .grant-pts { text-decoration: line-through; }
+.small-btn { padding: 4px 10px !important; min-height: 0 !important; font-size: 12.5px !important; box-shadow: none; }
+.grant-toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); z-index: 91; width: min(440px, calc(100vw - 32px)); display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 16px; background: var(--surface); color: var(--text); border: 2px solid #7a3cff; box-shadow: 0 18px 50px rgba(0,0,0,.28); animation: title-pop .5s cubic-bezier(.2, 1.4, .4, 1); }
+.grant-toast.minus { border-color: var(--wa, #d23a3a); }
+.grant-toast b { display: block; font-size: 15px; }
+.grant-toast ul { margin: 2px 0 0; padding-left: 16px; color: var(--sub); font-size: 12.5px; word-break: keep-all; }
+.grant-toast-pts { flex: none; min-width: 52px; height: 44px; padding: 0 8px; border-radius: 12px; display: grid; place-items: center; font-weight: 900; font-size: 17px; color: #fff; background: linear-gradient(135deg, #ff3d6e, #7a3cff); font-variant-numeric: tabular-nums; }
+.grant-toast.minus .grant-toast-pts { background: var(--wa, #d23a3a); }
+@media (max-width: 1000px) { .grant-toast { top: 76px; } }

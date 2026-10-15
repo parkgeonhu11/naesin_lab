@@ -1,4 +1,5 @@
 "use client";
+import { GrantNotice } from "@/components/AdminGrant";
 import { NameBadges, FramedAvatar, frameOf, TitleCelebrate } from "@/components/Framed";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -134,6 +135,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         {ready && user && <TitleCelebrate userId={user.id} />}
+        {ready && user && <GrantNotice />}
         <footer className="site-foot">
           <span>내신랩 · 서연중 3학년 2학기 시험 대비</span>
           <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요. · <a className="link" href="/terms">이용약관</a> · <a className="link" href="/privacy">개인정보처리방침</a></span>

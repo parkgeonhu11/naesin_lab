@@ -3,7 +3,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DiffBadge, SubjBadge } from "@/components/Badges";
-import { NameBadges, FrameChip, FramedAvatar, TitleChip, useFrames } from "@/components/Framed";
+import { GrantPanel } from "@/components/AdminGrant";
+import { NameBadges, FrameChip, FramedAvatar, TitleChip, useAdmins, useFrames } from "@/components/Framed";
 import { ago, levelOf, SUBJECTS, subjectName } from "@/lib/data";
 import { sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -21,12 +22,14 @@ export default function UserPage() {
   const frameFor = useFrames();
   const [subject, setSubject] = useState("all");
   const [prog, setProg] = useState<{ subject: string; solved: number; total: number }[]>([]);
+  const isAdmin = useAdmins();
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     sb().rpc("user_solved", { p_user: id }).then(({ data }) => setInfo((data as Info) ?? null));
     sb().rpc("title_progress", { p_user: id }).then(({ data }) => setProg(((data as { subject: string; solved: number; total: number }[]) ?? []).map((r) => ({ ...r, solved: Number(r.solved), total: Number(r.total) }))));
-  }, [user, id]);
+  }, [user, id, tick]);
 
   const bySubj = useMemo(() => {
     const m: Record<string, number> = {};
@@ -54,6 +57,10 @@ export default function UserPage() {
         <div className="stat"><small>제출</small><b>{info.submissions}</b></div>
         <div className="stat"><small>정답률</small><b>{info.submissions ? `${Math.round((100 * info.correct) / info.submissions)}%` : "–"}</b></div>
       </section>
+
+      {user && isAdmin(user.id) && !info.is_me && (
+        <GrantPanel userId={id} nickname={info.nickname} onChanged={() => setTick((t) => t + 1)} />
+      )}
 
       {prog.length > 0 && (
         <section className="panel">
