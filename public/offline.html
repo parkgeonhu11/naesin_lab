@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1d44">
+<title>연결이 끊겼어 · 내신랩</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px;
+    background: radial-gradient(120% 80% at 50% 0%, #1d3fb8 0%, #0f1d44 60%); color: #fff;
+    font-family: Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; text-align: center; }
+  .card { width: min(380px, 100%); display: grid; gap: 14px; justify-items: center; }
+  img { width: 72px; height: 72px; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  h1 { margin: 6px 0 0; font-size: 22px; letter-spacing: -.03em; }
+  p { margin: 0; color: #b9c6ea; font-size: 15px; line-height: 1.55; word-break: keep-all; }
+  button { margin-top: 6px; border: 0; border-radius: 12px; padding: 13px 22px; font: inherit; font-weight: 700; font-size: 15px;
+    background: #fff; color: #1d3fb8; cursor: pointer; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <img src="/icons/icon-192.png" alt="">
+    <h1>인터넷 연결이 끊겼어</h1>
+    <p>와이파이나 데이터가 켜져 있는지 확인해 줘.<br>연결되면 푼 기록과 점수는 그대로 이어져.</p>
+    <button type="button" onclick="location.reload()">다시 시도</button>
+  </div>
+  <script>window.addEventListener("online", function () { location.reload(); });</script>
+</body>
+</html>

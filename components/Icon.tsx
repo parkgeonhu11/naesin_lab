@@ -19,6 +19,10 @@ const P: Record<string, string> = {
   chart: "M4 20V10M10 20V4M16 20v-7M22 20H2",
   rank: "M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z",
   logo: "M5 19V7l7-4 7 4v12M9 21v-6h6v6M9 10h6",
+  install: "M12 3v11m0 0-4-4m4 4 4-4M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4",
+  share: "M12 15V3m0 0-4 4m4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1",
+  plusbox: "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM12 8v8M8 12h8",
+  dots: "M12 5h.01M12 12h.01M12 19h.01",
 };
 
 export default function Icon({ name, size }: { name: keyof typeof P | string; size?: number }) {

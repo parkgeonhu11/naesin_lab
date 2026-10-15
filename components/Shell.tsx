@@ -1,5 +1,6 @@
 "use client";
 import { GrantNotice } from "@/components/AdminGrant";
+import { InstallBanner, InstallButton } from "@/components/InstallApp";
 import { NameBadges, FramedAvatar, frameOf, TitleCelebrate } from "@/components/Framed";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -77,6 +78,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       </nav>
       <div className="side-foot">
         {ready && user && isAnon && googleOn && <GoogleButton className="side-google" />}
+        <InstallButton />
         <button type="button" className="theme-btn" onClick={toggleTheme}>
           <Icon name={theme === "dark" ? "sun" : "moon"} />
           {theme === "dark" ? "밝은 화면" : "어두운 화면"}
@@ -124,6 +126,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         <main className="content">
           {notice && <div className="notice warn">{notice}</div>}
           <WarningModal />
+          {path === "/" && <InstallBanner />}
           {ready && user && path !== "/admin" && (!nickname || mustRename) && (
             <NicknameCard
               current={nickname}
