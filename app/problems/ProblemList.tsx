@@ -7,6 +7,8 @@ import { DIFF, QTYPES, stateOf, SUBJECTS, subjectName } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 import { buildTree, useProblems } from "@/lib/useProblems";
 import { useRowLink } from "@/lib/useRowLink";
+import { useMustPicks } from "@/lib/useMustPicks";
+import { MustPicksChips, MustPicksPanel } from "@/components/MustPicks";
 
 /** 주소에 쓸 분류 링크 (?subject=ma&unit=...&topic=...) */
 const href = (subject?: string, unit?: string, topic?: string) => {
@@ -31,6 +33,7 @@ export default function ProblemList() {
   const type = params.get("type") ?? "";
   const mine = params.get("mine") ?? "";
   const [q, setQ] = useState("");
+  const picks = useMustPicks();
 
   /** 필터를 주소창에 저장해서 새로고침·공유해도 그대로 보이게 */
   const setParam = (patch: Record<string, string>) => {
@@ -76,6 +79,10 @@ export default function ProblemList() {
           </Link>
         )}
       </div>
+
+      {picks && rows && !unit && !topic && (subject
+        ? <MustPicksPanel subject={subject} rows={rows} picks={picks} prog={prog} />
+        : <MustPicksChips rows={rows} picks={picks} prog={prog} />)}
 
       <div className="list-grid">
         {/* 왼쪽: 분류 (과목 → 대단원 → 세부 유형) */}
@@ -168,7 +175,7 @@ export default function ProblemList() {
                 {shown.map((r) => (
                   <tr key={r.id} {...rowLink(`/problem/${r.no}`)}>
                     <td className="c n"><Link className="link" href={`/problem/${r.no}`}>{r.no}</Link></td>
-                    <td className="title-cell"><Link className="cell-link" href={`/problem/${r.no}`}>{r.title}</Link></td>
+                    <td className="title-cell"><Link className="cell-link" href={`/problem/${r.no}`}>{picks?.has(r.id) && <span className="must-tag" title="꼭 풀어야 할 20문제">필수</span>}{r.title}</Link></td>
                     <td className="unit-cell hide-m">
                       {!subject && <><SubjBadge code={r.subject} /> </>}
                       <span className="small muted">{topic ? r.topic : unit ? r.topic : r.unit}</span>
