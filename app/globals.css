@@ -1147,3 +1147,125 @@ tr.grant-off .grant-pts { text-decoration: line-through; }
   .mock-promo { flex-wrap: wrap; gap: 12px; padding: 16px; }
   .mock-promo-go { width: 100%; text-align: center; }
 }
+
+/* ================= 글래스 테마 =================
+   반투명 유리 카드 + 부드러운 색 번짐 배경. 구조·간격은 그대로 두고 겉모습만 바꾼다.
+   backdrop-filter가 안 되는 브라우저에선 그냥 밝은 카드로 보인다. */
+:root {
+  --glass: rgba(255, 255, 255, .62);
+  --glass-2: rgba(255, 255, 255, .42);
+  --glass-line: rgba(255, 255, 255, .75);
+  --glass-edge: rgba(70, 90, 160, .14);
+  --glass-shadow: 0 8px 30px rgba(50, 70, 140, .10), inset 0 1px 0 rgba(255, 255, 255, .8);
+  --blur: 18px;
+  --bg: #e9eefc;
+  --surface-2: rgba(255, 255, 255, .5);
+  --head: rgba(255, 255, 255, .4);
+  --line: rgba(70, 90, 160, .12);
+  --line-strong: rgba(70, 90, 160, .22);
+  --gray-soft: rgba(70, 90, 160, .08);
+  --radius: 18px;
+  --radius-s: 13px;
+  --blob-1: #8fb3ff; --blob-2: #d6b4ff; --blob-3: #a8f0dc; --blob-4: #ffd3e3;
+}
+:root[data-theme="dark"], :root:not([data-theme="light"]) { }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --glass: rgba(22, 30, 56, .58); --glass-2: rgba(22, 30, 56, .4); --glass-line: rgba(255, 255, 255, .12); --glass-edge: rgba(0, 0, 0, .35);
+    --glass-shadow: 0 10px 34px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .08);
+    --bg: #0b1226; --surface-2: rgba(255, 255, 255, .04); --head: rgba(255, 255, 255, .05);
+    --line: rgba(255, 255, 255, .09); --line-strong: rgba(255, 255, 255, .18); --gray-soft: rgba(255, 255, 255, .07);
+    --blob-1: #2a4db3; --blob-2: #5a2fa6; --blob-3: #126a5c; --blob-4: #7a2f58;
+  }
+}
+:root[data-theme="dark"] {
+  --glass: rgba(22, 30, 56, .58); --glass-2: rgba(22, 30, 56, .4); --glass-line: rgba(255, 255, 255, .12); --glass-edge: rgba(0, 0, 0, .35);
+  --glass-shadow: 0 10px 34px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .08);
+  --bg: #0b1226; --surface-2: rgba(255, 255, 255, .04); --head: rgba(255, 255, 255, .05);
+  --line: rgba(255, 255, 255, .09); --line-strong: rgba(255, 255, 255, .18); --gray-soft: rgba(255, 255, 255, .07);
+  --blob-1: #2a4db3; --blob-2: #5a2fa6; --blob-3: #126a5c; --blob-4: #7a2f58;
+}
+
+/* 배경: 고정된 색 번짐 */
+body { background: var(--bg); }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(42% 38% at 12% 8%, var(--blob-1) 0%, transparent 70%),
+    radial-gradient(40% 40% at 88% 12%, var(--blob-2) 0%, transparent 70%),
+    radial-gradient(38% 34% at 80% 90%, var(--blob-3) 0%, transparent 70%),
+    radial-gradient(34% 32% at 10% 92%, var(--blob-4) 0%, transparent 70%);
+  opacity: .75; }
+@media (prefers-reduced-transparency: reduce) { body::before { opacity: .35; } }
+
+/* 유리 카드 */
+.panel, .kpi, .dday, .exam-bar, .mock-card, .install-banner, .side-card, .tabbar, .gate-card, .grant-toast, .title-toast, .install-card, .warn-modal, .qna-card {
+  background: var(--glass); border: 1px solid var(--glass-line); box-shadow: var(--glass-shadow), 0 0 0 1px var(--glass-edge);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.4); backdrop-filter: blur(var(--blur)) saturate(1.4); }
+.tile { background: color-mix(in srgb, var(--cs) 55%, var(--glass)); border-color: var(--glass-line); box-shadow: var(--glass-shadow), 0 0 0 1px var(--glass-edge);
+  -webkit-backdrop-filter: blur(var(--blur)); backdrop-filter: blur(var(--blur)); }
+.tile:hover { border-color: var(--c); }
+.tile .subj-icon { background: rgba(255, 255, 255, .7); }
+.panel-head { border-bottom-color: var(--line); }
+.tbl th { background: var(--head); }
+.tbl tbody tr:hover td { background: rgba(255, 255, 255, .35); }
+.choice { background: var(--glass-2); border-color: var(--glass-line); box-shadow: 0 0 0 1px var(--glass-edge); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.choice:hover:not(:disabled) { background: var(--glass); border-color: var(--line-strong); }
+.choice[aria-pressed="true"] { background: color-mix(in srgb, var(--brand) 14%, var(--glass)); border-color: var(--brand); }
+.notice { background: color-mix(in srgb, var(--brand) 10%, var(--glass)); border-color: var(--glass-line); box-shadow: 0 0 0 1px var(--glass-edge); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.notice.warn { background: color-mix(in srgb, var(--wa) 10%, var(--glass)); border-color: color-mix(in srgb, var(--wa) 40%, transparent); }
+.input, .field input, .field select, .field textarea { background: var(--glass-2); border-color: var(--line-strong); }
+.input:focus, .field input:focus, .field select:focus, .field textarea:focus { background: var(--glass); }
+.btn.line { background: var(--glass-2); border-color: var(--line-strong); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.btn.line:hover { background: var(--glass); }
+.btn { border-radius: 12px; background: linear-gradient(135deg, #4f7bff, #2f5be8); border-color: transparent; box-shadow: 0 6px 18px rgba(47, 91, 232, .28), inset 0 1px 0 rgba(255, 255, 255, .25); }
+.btn:hover { background: linear-gradient(135deg, #3d6bff, #244fd6); border-color: transparent; }
+.btn.line, .btn.danger, .btn.white, .btn.ghost, .btn.google { background-image: none; }
+.btn.line { background: var(--glass-2); } .btn.danger { background: var(--wa-soft); } .btn.white { background: #fff; } .btn.ghost { background: rgba(255, 255, 255, .14); }
+.tabs button, .tabs a { background: var(--glass-2); border-color: var(--glass-line); }
+.tabs [aria-pressed="true"], .tabs [aria-current="page"] { background: var(--brand); border-color: var(--brand); }
+
+/* 사이드바: 어두운 유리 */
+.app { background: none; }
+.side { background: linear-gradient(180deg, rgba(14, 24, 66, .92), rgba(16, 26, 70, .86)); -webkit-backdrop-filter: blur(24px) saturate(1.3); backdrop-filter: blur(24px) saturate(1.3); border-right: 1px solid rgba(255, 255, 255, .08); }
+.side-nav a[aria-current="page"] { background: rgba(255, 255, 255, .14); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 0 0 1px rgba(255, 255, 255, .08); }
+.side-nav a:hover { background: rgba(255, 255, 255, .08); }
+.me-card { background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .1); }
+.me-card:hover { background: rgba(255, 255, 255, .14); }
+.theme-btn, .install-btn { border-radius: 10px; }
+.side.drawer { border-radius: 24px 0 0 24px; }
+
+/* 인사 배너 */
+.hero { border-radius: 24px; border: 1px solid rgba(255, 255, 255, .22);
+  background: radial-gradient(120% 140% at 100% 0%, rgba(120, 160, 255, .55) 0%, rgba(120, 160, 255, 0) 55%), linear-gradient(120deg, rgba(27, 45, 120, .95) 0%, rgba(43, 70, 180, .92) 60%, rgba(84, 92, 226, .9) 100%);
+  box-shadow: 0 16px 44px rgba(40, 60, 160, .3), inset 0 1px 0 rgba(255, 255, 255, .25); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.mock-promo { border: 1px solid rgba(255, 255, 255, .28); box-shadow: 0 14px 36px rgba(90, 70, 220, .28), inset 0 1px 0 rgba(255, 255, 255, .3); border-radius: var(--radius); }
+
+/* 휴대폰 위·아래 바 */
+@media (max-width: 900px) {
+  .topbar { background: rgba(14, 24, 66, .82); -webkit-backdrop-filter: blur(20px) saturate(1.3); backdrop-filter: blur(20px) saturate(1.3); border-bottom: 1px solid rgba(255, 255, 255, .08); }
+  .top-me { background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .12); }
+  .tabbar { background: color-mix(in srgb, var(--glass) 100%, #fff 25%); border-top: 1px solid var(--glass-line); border-radius: 0; box-shadow: 0 -8px 30px rgba(50, 70, 140, .12); -webkit-backdrop-filter: blur(28px) saturate(1.6); backdrop-filter: blur(28px) saturate(1.6); }
+  .tabbar { background: rgba(255, 255, 255, .88); }
+  :root[data-theme="dark"] .tabbar { background: rgba(14, 22, 46, .96); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tabbar { background: rgba(14, 22, 46, .96); } }
+  .tabbar a[aria-current="page"] { position: relative; }
+  .tabbar a[aria-current="page"]::before { content: ""; position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 44px; height: 30px; border-radius: 12px; background: color-mix(in srgb, var(--brand) 14%, transparent); z-index: -1; }
+  .tabbar a { position: relative; z-index: 0; }
+}
+
+/* 로그인 화면 */
+.gate { background: var(--bg); }
+.gate::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(45% 40% at 15% 10%, var(--blob-1) 0%, transparent 70%), radial-gradient(45% 45% at 85% 15%, var(--blob-2) 0%, transparent 70%),
+    radial-gradient(40% 36% at 80% 90%, var(--blob-3) 0%, transparent 70%), radial-gradient(36% 34% at 12% 92%, var(--blob-4) 0%, transparent 70%); }
+.gate > * { position: relative; z-index: 1; }
+.gate-card { border-radius: 26px; box-shadow: 0 24px 70px rgba(40, 60, 160, .22), inset 0 1px 0 rgba(255, 255, 255, .8); }
+
+/* 모의고사 */
+.mock-q { border-bottom-color: var(--line); }
+.mock-bogi, .mock-fig .bogi { background: var(--glass-2); border-color: var(--line-strong); }
+.mock-bogi::before { background: var(--glass); border-radius: 6px; }
+.mock-intro-grid > div { background: var(--glass-2); border-color: var(--glass-line); }
+.mock-mine { background: color-mix(in srgb, var(--brand) 12%, var(--glass)); }
+.mock-bar .mock-timer { background: color-mix(in srgb, var(--brand) 14%, transparent); }
+.dday-day { background: var(--glass-2); border-color: var(--glass-line); }
