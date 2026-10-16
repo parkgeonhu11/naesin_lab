@@ -6,6 +6,7 @@ import { GuardedText, isGuarded } from "@/components/Guarded";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
 import { refreshFrames } from "@/components/Framed";
+import Explain from "@/components/Explain";
 import Figure from "@/components/Figure";
 import ReportButton from "@/components/ReportButton";
 import Scratchpad from "@/components/Scratchpad";
@@ -284,7 +285,7 @@ export default function ProblemPage() {
           {explanation && (
             <details className="section explain" open>
               <summary><h2>해설</h2></summary>
-              <p className="statement" style={{ fontSize: 15.5 }}>{explanation}</p>
+              <Explain text={explanation} style={{ fontSize: 15.5 }} />
             </details>
           )}
           {err && <div className="verdict res-wa">{err}</div>}
