@@ -26,7 +26,7 @@ const NAV = [
   { href: "/suggest", label: "문제 제안", icon: "idea" },
 ];
 /** 휴대폰 아래 탭에 보이는 5개 */
-const TABS = ["/", "/problems", "/mock", "/review", "/ranking"];
+const TABS = ["/", "/problems", "/exam", "/review", "/ranking"];
 
 type Theme = "light" | "dark";
 

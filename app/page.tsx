@@ -5,6 +5,7 @@ import { ResultText } from "@/components/Badges";
 import Icon from "@/components/Icon";
 import AccountCard from "@/components/AccountCard";
 import ExamDday from "@/components/ExamDday";
+import MockPromo from "@/components/MockPromo";
 import { NameBadges, FramedAvatar, frameOf, useFrames } from "@/components/Framed";
 import { ago, levelOf, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
@@ -117,6 +118,9 @@ export default function Home() {
           <Link href="/review" className="btn ghost">오답 노트{wrongOpen ? ` ${wrongOpen}` : ""}</Link>
         </div>
       </section>
+
+      {/* 예상 시험 안내 */}
+      <MockPromo />
 
       {/* 시험 D-day */}
       <ExamDday counts={bySubject} />

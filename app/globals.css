@@ -516,6 +516,7 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
   /* 휴대폰 홈: 바로 할 일(배너 버튼) → 내 숫자 → 과목 고르기 → 나머지 */
   .hero { order: 1; }
   .dday { order: 1; }
+  .mock-promo { order: 1; }
   .kpis { order: 2; }
   .subj-tiles { order: 3; }
   .dash { order: 4; }
@@ -1123,4 +1124,26 @@ tr.grant-off .grant-pts { text-decoration: line-through; }
 @media (max-width: 640px) {
   .mock-q { padding: 16px; }
   .mock-choices.five { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); }
+}
+
+/* 예상 시험 안내 카드 */
+.mock-promo { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-radius: var(--radius); color: #fff; text-decoration: none;
+  background: linear-gradient(120deg, #2f5be8 0%, #6b4ef0 60%, #b24be0 100%); box-shadow: 0 10px 28px rgba(64, 70, 220, .28); position: relative; overflow: hidden; }
+.mock-promo::after { content: ""; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255, 255, 255, .08); pointer-events: none; }
+.mock-promo:hover { filter: brightness(1.05); }
+.mock-promo-ic { flex: none; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: rgba(255, 255, 255, .18); }
+.mock-promo-ic svg.ic { stroke: #fff; }
+.mock-promo-txt { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.mock-promo-txt b { font-size: 17px; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; }
+.mock-promo-txt small { font-size: 13.5px; opacity: .9; line-height: 1.45; }
+.mock-new { font-size: 10.5px; font-weight: 900; letter-spacing: .06em; background: #ffd23f; color: #3b2a00; border-radius: 999px; padding: 2px 7px; }
+.mock-promo-subs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.mock-promo-subs > span { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 700; background: rgba(255, 255, 255, .14); border-radius: 999px; padding: 3px 10px 3px 3px; }
+.mock-promo-subs .subject-badge { width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-style: normal; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .5); }
+.mock-promo-go { flex: none; font-weight: 800; font-size: 14px; background: #fff; color: #3b3fd8; border-radius: 999px; padding: 9px 16px; white-space: nowrap; position: relative; z-index: 1; }
+.mock-promo.compact { padding: 14px 16px; }
+.mock-promo.compact .mock-promo-ic { width: 44px; height: 44px; }
+@media (max-width: 640px) {
+  .mock-promo { flex-wrap: wrap; gap: 12px; padding: 16px; }
+  .mock-promo-go { width: 100%; text-align: center; }
 }

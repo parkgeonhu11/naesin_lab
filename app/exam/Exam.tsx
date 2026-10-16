@@ -7,6 +7,7 @@ import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/compone
 import { DiffBadge, TypeBadge } from "@/components/Badges";
 import { refreshFrames } from "@/components/Framed";
 import Figure from "@/components/Figure";
+import MockPromo from "@/components/MockPromo";
 import { DIFF, diffOf, QTYPES, shuffle, stateOf, SUBJECTS, subjectName, type GradeResult, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -254,6 +255,7 @@ export default function Exam() {
         <h1>시험지 만들기</h1>
         <span className="muted small">범위와 난이도를 고르면 모의고사처럼 한 번에 풀고 채점해.</span>
       </div>
+      {!fixedNos && <MockPromo compact />}
       {!user && <div className="notice">불러오는 중…</div>}
 
       {fixedNos ? (
