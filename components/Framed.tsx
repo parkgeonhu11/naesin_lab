@@ -188,7 +188,7 @@ export function useTitles() {
 const SUBJ_NAME: Record<string, string> = { ko: "국어", ma: "수학", sc: "과학", so: "사회", en: "영어", hi: "역사", hm: "한문" };
 export const titleName = (s: string) => (s === "all" ? "전과목 마스터" : s === "acc" ? "정답률왕" : `${SUBJ_NAME[s] ?? s} 마스터`);
 const titleDesc = (s: string) =>
-  s === "acc" ? "정답률왕: 제출 정답률이 가장 높은 사람 (제출 50번 이상)" : `${titleName(s)}: 지금 있는 ${s === "all" ? "모든" : SUBJ_NAME[s] ?? ""} 문제를 전부 맞혔어`;
+  s === "acc" ? "정답률왕: 제출 정답률이 가장 높은 학생 (제출 50번 이상, 관리자 제외)" : `${titleName(s)}: 지금 있는 ${s === "all" ? "모든" : SUBJ_NAME[s] ?? ""} 문제를 전부 맞혔어`;
 
 function Crown() {
   return (

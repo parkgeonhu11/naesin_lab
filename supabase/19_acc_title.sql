@@ -1,6 +1,6 @@
 -- 19. 정답률왕 칭호: 제출 정답률(맞은 제출 ÷ 전체 제출)이 가장 높은 한 명에게 'acc' 칭호를 준다.
 --     제출이 50번 이상인 사람만 대상(몇 문제만 풀고 100%가 되는 걸 막으려고). 같으면 제출이 많은 사람.
---     기록이 바뀌면 칭호도 자동으로 옮겨 가. subject_masters()에 한 줄로 같이 내려보낸다.
+--     관리자 계정은 대상에서 뺀다. 기록이 바뀌면 칭호도 자동으로 옮겨 가. subject_masters()에 한 줄로 같이 내려보낸다.
 create or replace function public.subject_masters()
 returns table(user_id uuid, nickname text, subject text)
 language sql stable security definer set search_path = public as $$
@@ -16,6 +16,7 @@ language sql stable security definer set search_path = public as $$
   ), acc as (
     select a.user_id, count(*) as subs, count(*) filter (where a.is_correct) as ok
     from attempts a join profiles p on p.user_id = a.user_id and p.banned_at is null
+    where a.user_id not in (select ap.user_id from admin_people() ap)
     group by a.user_id
     having count(*) >= 50
     order by count(*) filter (where a.is_correct)::numeric / count(*) desc, count(*) desc
