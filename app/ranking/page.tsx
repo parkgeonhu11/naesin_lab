@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRowLink } from "@/lib/useRowLink";
 import { useEffect, useState } from "react";
-import { NameBadges, FramedAvatar, useFrames } from "@/components/Framed";
+import { NameBadges, FramedAvatar, TitleChip, useFrames } from "@/components/Framed";
 import { SUBJECTS, type BoardRow } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -47,6 +47,7 @@ export default function RankingPage() {
             <button key={s.code} aria-pressed={scope === s.code} onClick={() => setScope(s.code)}>{s.name}</button>
           ))}
         </div>
+        <p className="title-legend"><TitleChip subject="acc" />제출 50번 이상 학생 중 정답률 1등이 받아 (관리자 제외). 칭호는 누르면 설명이 나와.</p>
         {rows && rows.length > 0 && (
           <div className="podium" aria-label="1~3위">
             {[1, 0, 2].map((i) => {

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { levelOf } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 
@@ -198,13 +199,41 @@ function Crown() {
   );
 }
 
-/** 과목 마스터 칭호 하나 */
+/** 과목 마스터 칭호 하나. 눌러도(폰) 설명이 화면 아래에 잠깐 떠 */
 export function TitleChip({ subject }: { subject: string }) {
+  const [tip, setTip] = useState(false);
+  useEffect(() => {
+    if (!tip) return;
+    const t = setTimeout(() => setTip(false), 3500);
+    return () => clearTimeout(t);
+  }, [tip]);
+  const show = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTip(true);
+  };
   return (
-    <span className={`title-chip${subject === "all" ? " title-all" : subject === "acc" ? " title-acc" : ""}`} data-s={subject} title={titleDesc(subject)}>
-      <Crown />
-      {titleName(subject)}
-    </span>
+    <>
+      <span
+        className={`title-chip${subject === "all" ? " title-all" : subject === "acc" ? " title-acc" : ""}`}
+        data-s={subject}
+        title={titleDesc(subject)}
+        role="button"
+        tabIndex={0}
+        onClick={show}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") show(e); }}
+      >
+        <Crown />
+        {titleName(subject)}
+      </span>
+      {tip && typeof document !== "undefined" && createPortal(
+        <div className="title-tip" role="status" onClick={() => setTip(false)}>
+          <span className={`title-chip${subject === "all" ? " title-all" : subject === "acc" ? " title-acc" : ""}`} data-s={subject}><Crown />{titleName(subject)}</span>
+          <span>{titleDesc(subject).replace(/^[^:]+:\s*/, "")}</span>
+        </div>,
+        document.body,
+      )}
+    </>
   );
 }
 

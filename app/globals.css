@@ -1331,3 +1331,15 @@ body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-even
 .explain-body .qfig { justify-items: stretch; }
 .explain-body .qfig-svg { padding: 8px 6px; }
 .explain-body .qfig-svg svg { max-height: none; width: 100%; min-width: 0; margin: 0 auto; max-width: 460px; }
+
+/* 칭호를 누르면 뜨는 설명 (폰에서도 보이게) */
+.title-chip[role="button"] { cursor: pointer; }
+.title-tip { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 95; width: max-content; max-width: calc(100vw - 32px);
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.45; word-break: keep-all;
+  background: var(--surface); color: var(--text); border: 1px solid var(--line-strong); box-shadow: 0 10px 30px rgba(15, 23, 42, .22); animation: title-tip-in .18s ease-out; }
+.title-tip .title-chip { margin-left: 0; flex: none; }
+@keyframes title-tip-in { from { opacity: 0; transform: translate(-50%, 6px); } }
+@media (max-width: 1000px) { .title-tip { bottom: 84px; } }
+@media (prefers-reduced-motion: reduce) { .title-tip { animation: none; } }
+.title-legend { margin: 0; padding: 10px 16px 0; font-size: 12.5px; line-height: 1.7; color: var(--sub); word-break: keep-all; }
+.title-legend .title-chip { margin: 0 4px 0 0; }
