@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { loadProblemRows, type ProblemRow, type Progress } from "./data";
+import { loadProblemRows, rpcAll, type ProblemRow, type Progress } from "./data";
 import { isConfigured, sb } from "./supabase";
 import { useMe } from "./useMe";
 
@@ -31,7 +31,7 @@ export function useProblems() {
     if (!isConfigured) return;
     const [list, mine] = await Promise.all([
       loadProblemRows(sb()),
-      user ? sb().rpc("my_progress") : Promise.resolve({ data: [] }),
+      user ? rpcAll(sb(), "my_progress").then((data) => ({ data })) : Promise.resolve({ data: [] }),
     ]);
     setRows(list);
     const m: Record<string, Progress> = {};

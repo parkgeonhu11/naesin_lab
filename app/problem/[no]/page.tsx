@@ -11,7 +11,7 @@ import Figure from "@/components/Figure";
 import ReportButton from "@/components/ReportButton";
 import Scratchpad from "@/components/Scratchpad";
 import { ProblemQna } from "@/components/Qna";
-import { diffOf, loadProblemRows, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
+import { diffOf, loadProblemRows, rpcAll, nextPenalty, stateOf, subjectName, type GradeResult, type Progress, type ProblemRow, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 import { useTrace } from "@/lib/useTrace";
@@ -57,7 +57,7 @@ export default function ProblemPage() {
   const trace = useTrace(q?.id, q?.id ?? null);
 
   const loadMine = useCallback(async () => {
-    const { data } = await sb().rpc("my_progress");
+    const data = await rpcAll<Progress>(sb(), "my_progress");
     const m: Record<string, Progress> = {};
     ((data as Progress[]) ?? []).forEach((p) => (m[p.question_id] = p));
     setProgAll(m);

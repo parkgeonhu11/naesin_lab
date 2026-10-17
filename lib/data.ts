@@ -53,9 +53,22 @@ export type ProblemRow = {
 };
 
 type People = { question_id: string; tried: number; solved: number };
+type RangeRpc = { rpc: (fn: string) => { range: (from: number, to: number) => PromiseLike<{ data: unknown; error: unknown }> } };
+/** 행이 많은 RPC를 1000줄씩 끝까지 불러온다 (서버가 한 번에 1000줄까지만 돌려줘서) */
+export async function rpcAll<T>(client: RangeRpc, fn: string): Promise<T[]> {
+  const out: T[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await client.rpc(fn).range(from, from + 999);
+    if (error) break;
+    const rows = (data as T[]) ?? [];
+    out.push(...rows);
+    if (rows.length < 1000) break;
+  }
+  return out;
+}
 /** 문제 목록 + 푼 사람/맞힌 사람 수를 함께 불러온다 */
-export async function loadProblemRows(client: { rpc: (fn: string) => PromiseLike<{ data: unknown }> }): Promise<ProblemRow[]> {
-  const [{ data: list }, { data: people }] = await Promise.all([client.rpc("problem_list"), client.rpc("problem_people")]);
+export async function loadProblemRows(client: RangeRpc): Promise<ProblemRow[]> {
+  const [list, people] = await Promise.all([rpcAll<ProblemRow>(client, "problem_list"), rpcAll<People>(client, "problem_people")]);
   const m = new Map(((people as People[]) ?? []).map((p) => [p.question_id, p]));
   return ((list as ProblemRow[]) ?? []).map((r) => ({ ...r, tried: +(m.get(r.id)?.tried ?? 0), solved_people: +(m.get(r.id)?.solved ?? 0) }));
 }

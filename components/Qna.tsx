@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { NameBadges, FramedAvatar, useFrames } from "@/components/Framed";
-import { ago, subjectName } from "@/lib/data";
+import { ago, rpcAll, subjectName } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
 
 /**
@@ -239,7 +239,7 @@ export function QnaBoard() {
     load();
   }, [load]);
   useEffect(() => {
-    sb().rpc("my_progress").then(({ data }) => {
+    rpcAll(sb(), "my_progress").then((data) => {
       const s = new Set<string>();
       ((data as { question_id: string; points: number | null }[]) ?? []).forEach((p) => { if (p.points != null) s.add(p.question_id); });
       setDoneSet(s);
