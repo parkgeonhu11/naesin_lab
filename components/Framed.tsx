@@ -186,7 +186,9 @@ export function useTitles() {
 }
 
 const SUBJ_NAME: Record<string, string> = { ko: "국어", ma: "수학", sc: "과학", so: "사회", en: "영어", hi: "역사", hm: "한문" };
-export const titleName = (s: string) => (s === "all" ? "전과목 마스터" : `${SUBJ_NAME[s] ?? s} 마스터`);
+export const titleName = (s: string) => (s === "all" ? "전과목 마스터" : s === "acc" ? "정답률왕" : `${SUBJ_NAME[s] ?? s} 마스터`);
+const titleDesc = (s: string) =>
+  s === "acc" ? "정답률왕: 제출 정답률이 가장 높은 사람 (제출 50번 이상)" : `${titleName(s)}: 지금 있는 ${s === "all" ? "모든" : SUBJ_NAME[s] ?? ""} 문제를 전부 맞혔어`;
 
 function Crown() {
   return (
@@ -199,7 +201,7 @@ function Crown() {
 /** 과목 마스터 칭호 하나 */
 export function TitleChip({ subject }: { subject: string }) {
   return (
-    <span className={`title-chip${subject === "all" ? " title-all" : ""}`} data-s={subject} title={`${titleName(subject)}: 지금 있는 ${subject === "all" ? "모든" : SUBJ_NAME[subject] ?? ""} 문제를 전부 맞혔어`}>
+    <span className={`title-chip${subject === "all" ? " title-all" : subject === "acc" ? " title-acc" : ""}`} data-s={subject} title={titleDesc(subject)}>
       <Crown />
       {titleName(subject)}
     </span>
@@ -209,8 +211,9 @@ export function TitleChip({ subject }: { subject: string }) {
 /** 칭호 여러 개: 전과목이면 하나만, 많으면 2개 + 나머지 개수 */
 export function TitleChips({ titles, max = 2 }: { titles: string[]; max?: number }) {
   if (!titles.length) return null;
-  if (titles.includes("all")) return <TitleChip subject="all" />;
-  const order = Object.keys(SUBJ_NAME);
+  const acc = titles.includes("acc");
+  if (titles.includes("all")) return <>{acc && <TitleChip subject="acc" />}<TitleChip subject="all" /></>;
+  const order = ["acc", ...Object.keys(SUBJ_NAME)];
   const t = [...titles].sort((a, b) => order.indexOf(a) - order.indexOf(b));
   const rest = t.slice(max);
   return (
@@ -250,7 +253,7 @@ export function TitleCelebrate({ userId }: { userId?: string | null }) {
       <span className="title-toast-crown"><Crown /></span>
       <div className="grow">
         <b>{fresh.map(titleName).join(", ")} 칭호를 얻었어!</b>
-        <small>{all ? "지금 있는 모든 과목 문제를 전부 맞혔어. 진짜 대단해" : `지금 있는 ${fresh.map((s) => SUBJ_NAME[s]).join("·")} 문제를 전부 맞혔어. 이제 이름 옆에 칭호가 붙어`}</small>
+        <small>{all ? "지금 있는 모든 과목 문제를 전부 맞혔어. 진짜 대단해" : fresh.length === 1 && fresh[0] === "acc" ? "지금 내신랩에서 정답률이 가장 높아. 이름 옆에 칭호가 붙어" : `지금 있는 ${fresh.filter((s) => s !== "acc").map((s) => SUBJ_NAME[s]).join("·")} 문제를 전부 맞혔어. 이제 이름 옆에 칭호가 붙어`}</small>
       </div>
       <button type="button" className="title-toast-x" aria-label="닫기" onClick={() => setFresh([])}>×</button>
     </div>

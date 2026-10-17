@@ -990,6 +990,7 @@ details.explain:not([open]) > summary h2::after { content: "펼치기"; font-siz
 .title-chip.title-all { background: linear-gradient(110deg, #ff4d6d, #ff9f1c, #2ec4b6, #3a86ff, #8338ec, #ff4d6d); background-size: 220% 100%; animation: title-shine 4s linear infinite; }
 @keyframes title-shine { to { background-position: -220% 0; } }
 @media (prefers-reduced-motion: reduce) { .title-chip.title-all { animation: none; } }
+.title-chip.title-acc { background: linear-gradient(135deg, #10b981, #0e7490); box-shadow: 0 0 0 1px rgba(255,255,255,.3) inset, 0 2px 7px rgba(16, 185, 129, .45); }
 .title-chip.title-more { background: var(--line-strong); color: var(--text); box-shadow: none; }
 .title-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 0 16px 16px; }
 .title-card { display: grid; gap: 6px; padding: 12px; border: 1.5px solid var(--line); border-radius: 12px; }
