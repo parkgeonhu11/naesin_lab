@@ -1,7 +1,7 @@
 "use client";
 import { GrantNotice } from "@/components/AdminGrant";
 import { InstallBanner, InstallButton } from "@/components/InstallApp";
-import { NameBadges, FramedAvatar, frameOf, TitleCelebrate } from "@/components/Framed";
+import { NameBadges, FramedAvatar, frameOf, TitleCelebrate, useAdmins } from "@/components/Framed";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -36,7 +36,9 @@ export function Avatar({ name, className = "" }: { name?: string | null; classNa
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const isAdminOf = useAdmins();
   const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn, banned } = useMe();
+  const amAdmin = !!user && !user.is_anonymous && isAdminOf(user.id);
   const qnaNew = useQnaUnread(!!user && authChecked && !needLogin);
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
@@ -76,6 +78,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             </Link>
           </span>
         ))}
+        {amAdmin && (
+          <Link href="/admin/allback" aria-current={path === "/admin/allback" ? "page" : undefined}>
+            <Icon name="target" />
+            올백 문제 모음
+          </Link>
+        )}
       </nav>
       <div className="side-foot">
         {ready && user && isAnon && googleOn && <GoogleButton className="side-google" />}
