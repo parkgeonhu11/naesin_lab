@@ -110,6 +110,10 @@ export function stateOf(p?: Progress): MyState {
   return p.tried ? "tried" : "none";
 }
 
+/** 관리자 계정의 공개 정답률은 98%로 고정해서 보여 준다 (틀린 기록 자체는 그대로 남음) */
+export const ADMIN_ACC = 98;
+export const accOf = (ok: number, subs: number, admin: boolean) => (admin ? ADMIN_ACC : subs ? Math.round((100 * ok) / subs) : null);
+
 export type BoardRow = { rank: number; user_id: string; nickname: string; points: number; solved: number; submissions: number; school_name?: string | null; grade?: number | null };
 
 export type Submission = {
