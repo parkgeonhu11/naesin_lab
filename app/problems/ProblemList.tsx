@@ -71,7 +71,7 @@ export default function ProblemList() {
         <h1>{crumbs.length ? crumbs[crumbs.length - 1] : "전체 문제"}</h1>
         <span className="muted small">
           {crumbs.length > 1 && <>{crumbs.slice(0, -1).join(" › ")} · </>}
-          {shown.length}문제 중 {solvedHere}개 해결
+          {rows === null ? "불러오는 중" : `${shown.length}문제 중 ${solvedHere}개 해결`}
         </span>
         {shown.length > 0 && (
           <Link className="btn line" style={{ marginLeft: "auto" }} href={`/exam?${new URLSearchParams({ ...(subject && { subject }), ...(unit && { unit }), ...(topic && { topic }) })}`}>
@@ -152,7 +152,7 @@ export default function ProblemList() {
             <input id="search" type="search" placeholder="번호·제목·단원 검색" value={q} onChange={(e) => setQ(e.target.value)} aria-label="검색" />
           </div>
           <div className="table-wrap">
-            <table className="tbl">
+            <table className="tbl plist">
               <thead>
                 <tr>
                   <th className="c" style={{ width: 64 }}>번호</th>
@@ -166,7 +166,19 @@ export default function ProblemList() {
                 </tr>
               </thead>
               <tbody>
-                {rows === null && <tr><td colSpan={8} className="empty-cell">불러오는 중…</td></tr>}
+                {rows === null && Array.from({ length: 8 }, (_, i) => (
+                  <tr key={i} className="skel-row" aria-hidden="true">
+                    <td className="c"><span className="skel" style={{ width: 36 }} /></td>
+                    <td className="title-cell"><span className="skel" style={{ width: `${55 + (i % 3) * 12}%` }} /></td>
+                    <td className="hide-m"><span className="skel" style={{ width: 70 }} /></td>
+                    <td className="c hide-m"><span className="skel" style={{ width: 40 }} /></td>
+                    <td className="c"><span className="skel" style={{ width: 40 }} /></td>
+                    <td className="r"><span className="skel" style={{ width: 44 }} /></td>
+                    <td className="r hide-m"><span className="skel" style={{ width: 36 }} /></td>
+                    <td className="c"><span className="skel" style={{ width: 28 }} /></td>
+                  </tr>
+                ))}
+                {rows === null && <tr className="sr-only-row"><td colSpan={8} className="sr-only">불러오는 중</td></tr>}
                 {rows && shown.length === 0 && (
                   <tr><td colSpan={8} className="empty-cell">
                     {rows.length === 0 || (!diff && !type && !mine && !q) ? <>이 분류에는 아직 문제가 없어. <Link className="link" href="/suggest">문제를 제안</Link>하면 관리자가 확인하고 올려 줘.</> : "조건에 맞는 문제가 없어."}

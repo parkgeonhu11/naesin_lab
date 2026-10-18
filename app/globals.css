@@ -1316,6 +1316,7 @@ body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-even
 @media (max-width: 720px) {
   .must { padding: 16px; }
   .must-list { grid-template-columns: minmax(0, 1fr); }
+  .must-list a b, .must-list a .mp-title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .must-prog { justify-items: start; width: 100%; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; }
   .must-bar { width: 100%; }
   .must-foot .btn { flex: 1 1 auto; }
@@ -1465,3 +1466,35 @@ details.rules[open] > summary .more::after { content: " 접기"; }
   .result-actions .small { display: none; }
 }
 .choice.wrong[aria-pressed="true"] { border-color: var(--wa); background: color-mix(in srgb, var(--wa) 10%, var(--glass)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--wa) 16%, transparent); }
+
+/* 자리 표시(스켈레톤): 글자 대신 자리만 먼저 보여 준다 */
+.skel { display: inline-block; height: 14px; border-radius: 6px; background: var(--gray-soft); vertical-align: middle; max-width: 100%; }
+.skel.round { border-radius: 50%; }
+.skel-row td { padding-top: 14px; padding-bottom: 14px; }
+@media (prefers-reduced-motion: no-preference) {
+  .skel { background: linear-gradient(90deg, var(--gray-soft) 25%, color-mix(in srgb, var(--gray-soft) 40%, var(--surface)) 50%, var(--gray-soft) 75%); background-size: 200% 100%; animation: skel 1.4s ease-in-out infinite; }
+  @keyframes skel { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sr-only-row { position: absolute; }
+
+/* 휴대폰: 표의 제목은 줄여서 자르지 말고 두 줄까지 보여 준다 */
+@media (max-width: 720px) {
+  .tbl .title-cell { white-space: normal; max-width: none; min-width: 140px; line-height: 1.4; }
+  .tbl .title-cell .cell-link { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  /* 문제 목록은 표 대신 카드처럼 */
+  .plist thead { display: none; }
+  .plist, .plist tbody { display: block; width: 100%; }
+  .plist tr { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "no title title state" "no diff people state"; column-gap: 10px; row-gap: 6px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .plist tr:last-child { border-bottom: 0; }
+  .plist td { display: block; padding: 0 !important; border: 0 !important; background: none !important; }
+  .plist td:nth-child(1) { grid-area: no; align-self: start; padding-top: 2px !important; }
+  .plist td:nth-child(1) .link { font-size: 13px; font-weight: 800; color: var(--brand); background: var(--brand-soft); border-radius: 7px; padding: 2px 7px; }
+  .plist td:nth-child(2) { grid-area: title; font-size: 15px; font-weight: 600; }
+  .plist td:nth-child(2) .cell-link { -webkit-line-clamp: 2; }
+  .plist td:nth-child(5) { grid-area: diff; text-align: left; }
+  .plist td:nth-child(6) { grid-area: people; text-align: left; font-size: 12.5px; }
+  .plist td:nth-child(8) { grid-area: state; align-self: center; }
+  .plist .skel-row { grid-template-areas: "no title title state" "no diff people state"; }
+  .plist .must-tag { margin-right: 6px; }
+}

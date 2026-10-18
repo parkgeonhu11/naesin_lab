@@ -77,7 +77,16 @@ export default function RankingPage() {
               <tr><th className="c">순위</th><th>닉네임</th><th className="r">점수</th><th className="r">맞힌 문제</th><th className="r hide-m">제출</th><th className="r">정답률</th></tr>
             </thead>
             <tbody>
-              {rows === null && <tr><td colSpan={6} className="empty-cell">불러오는 중…</td></tr>}
+              {rows === null && Array.from({ length: 6 }, (_, i) => (
+                <tr key={i} className="skel-row" aria-hidden="true">
+                  <td className="c"><span className="skel" style={{ width: 24 }} /></td>
+                  <td><span className="row" style={{ alignItems: "center", gap: 10 }}><span className="skel round" style={{ width: 36, height: 36 }} /><span className="skel" style={{ width: `${40 + (i % 3) * 15}%` }} /></span></td>
+                  <td className="r"><span className="skel" style={{ width: 48 }} /></td>
+                  <td className="r"><span className="skel" style={{ width: 28 }} /></td>
+                  <td className="r hide-m"><span className="skel" style={{ width: 28 }} /></td>
+                  <td className="r"><span className="skel" style={{ width: 36 }} /></td>
+                </tr>
+              ))}
               {rows?.length === 0 && <tr><td colSpan={6} className="empty-cell">아직 점수가 있는 사람이 없어.</td></tr>}
               {rows?.map((r) => (
                 <tr key={r.user_id} {...rowLink(`/user/${r.user_id}`, r.user_id === user?.id ? "mine" : "")}>
