@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { DiffBadge, TypeBadge } from "@/components/Badges";
 import AdminAccounts from "@/components/AdminAccounts";
-import { AdminGrants } from "@/components/AdminGrant";
+import { AdminGrants, GrantPanel } from "@/components/AdminGrant";
 import AdminFairplay from "@/components/AdminFairplay";
 import AdminQna from "@/components/AdminQna";
 import AdminReports from "@/components/AdminReports";
@@ -18,7 +18,7 @@ const KIND: Record<string, string> = { bad: "욕설·비속어", adult: "19금",
 type Stat = { user_id: string; nickname: string; total: number; week: number; solved: number; gave_up: number; submissions: number; correct_submissions: number; penalty: number; last_at: string | null };
 
 export default function AdminPage() {
-  const { user, ready } = useMe();
+  const { user, ready, nickname } = useMe();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
@@ -100,6 +100,7 @@ export default function AdminPage() {
       <AdminFairplay />
       <AdminQna />
 
+      {user && <GrantPanel userId={user.id} nickname={`${nickname ?? "나"} (내 계정)`} />}
       <AdminGrants />
 
       <AdminAccounts />

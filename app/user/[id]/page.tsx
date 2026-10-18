@@ -58,7 +58,7 @@ export default function UserPage() {
         <div className="stat"><small>정답률</small><b>{(() => { const a = accOf(info.correct, info.submissions, isAdmin(id, info.nickname)); return a === null ? "–" : `${a}%`; })()}</b></div>
       </section>
 
-      {user && isAdmin(user.id) && !info.is_me && (
+      {user && isAdmin(user.id) && (
         <GrantPanel userId={id} nickname={info.nickname} onChanged={() => setTick((t) => t + 1)} />
       )}
 
