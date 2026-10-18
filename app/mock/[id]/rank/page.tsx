@@ -21,7 +21,7 @@ export default function MockRankPage() {
     if (!isConfigured) return;
     let alive = true;
     const load = async () => {
-      const [{ data: b }, { data: l }] = await Promise.all([sb().rpc("mock_board", { p_exam: id, p_limit: 200 }), sb().rpc("mock_list")]);
+      const [{ data: b }, { data: l }] = await Promise.all([sb().rpc("mock_board", { p_exam: id, p_limit: 200 }), sb().rpc("mock_list_v2")]);
       if (!alive) return;
       setRows((b as MockBoardRow[]) ?? []);
       const list = (l as MockExam[]) ?? [];

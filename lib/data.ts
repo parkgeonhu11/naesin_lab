@@ -68,7 +68,7 @@ export async function rpcAll<T>(client: RangeRpc, fn: string): Promise<T[]> {
 }
 /** 문제 목록 + 푼 사람/맞힌 사람 수를 함께 불러온다 */
 export async function loadProblemRows(client: RangeRpc): Promise<ProblemRow[]> {
-  const [list, people] = await Promise.all([rpcAll<ProblemRow>(client, "problem_list"), rpcAll<People>(client, "problem_people")]);
+  const [list, people] = await Promise.all([rpcAll<ProblemRow>(client, "problem_list_v2"), rpcAll<People>(client, "problem_people")]);
   const m = new Map(((people as People[]) ?? []).map((p) => [p.question_id, p]));
   return ((list as ProblemRow[]) ?? []).map((r) => ({ ...r, tried: +(m.get(r.id)?.tried ?? 0), solved_people: +(m.get(r.id)?.solved ?? 0) }));
 }
@@ -110,7 +110,7 @@ export function stateOf(p?: Progress): MyState {
   return p.tried ? "tried" : "none";
 }
 
-export type BoardRow = { rank: number; user_id: string; nickname: string; points: number; solved: number; submissions: number };
+export type BoardRow = { rank: number; user_id: string; nickname: string; points: number; solved: number; submissions: number; school_name?: string | null; grade?: number | null };
 
 export type Submission = {
   id: number;

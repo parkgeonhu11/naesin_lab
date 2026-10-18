@@ -8,18 +8,19 @@ import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
 export default function RankingPage() {
-  const { user } = useMe();
+  const { user, school, grade } = useMe();
   const rowLink = useRowLink();
   const frameFor = useFrames();
   const [scope, setScope] = useState("all");
   const [period, setPeriod] = useState<"all" | "week">("all");
+  const [area, setArea] = useState<"school" | "grade" | "all">("school");
   const [rows, setRows] = useState<BoardRow[] | null>(null);
 
   useEffect(() => {
     if (!isConfigured) return;
     let alive = true;
     const load = async () => {
-      const { data } = await sb().rpc("leaderboard", { p_subject: scope, p_period: period, p_limit: 200 });
+      const { data } = await sb().rpc("leaderboard_v2", { p_subject: scope, p_period: period, p_limit: 200, p_scope: area });
       if (alive) setRows((data as BoardRow[]) ?? []);
     };
     setRows(null);
@@ -29,7 +30,7 @@ export default function RankingPage() {
       alive = false;
       clearInterval(t);
     };
-  }, [scope, period]);
+  }, [scope, period, area]);
 
   return (
     <>
@@ -38,6 +39,11 @@ export default function RankingPage() {
         <span className="muted small">주간 랭킹은 매주 월요일 0시에 새로 시작해. 누적 점수는 그대로야.</span>
       </div>
       <section className="panel">
+        <div className="tabs">
+          <button aria-pressed={area === "school"} onClick={() => setArea("school")}>{school ? `${school.name.replace(/학교$/, "")} ${grade ?? ""}학년` : "우리 학교"}</button>
+          <button aria-pressed={area === "grade"} onClick={() => setArea("grade")}>{grade ? `전국 ${grade}학년` : "같은 학년"}</button>
+          <button aria-pressed={area === "all"} onClick={() => setArea("all")}>전체</button>
+        </div>
         <div className="tabs">
           <button aria-pressed={period === "all"} onClick={() => setPeriod("all")}>누적</button>
           <button aria-pressed={period === "week"} onClick={() => setPeriod("week")}>이번 주</button>
@@ -76,7 +82,7 @@ export default function RankingPage() {
               {rows?.map((r) => (
                 <tr key={r.user_id} {...rowLink(`/user/${r.user_id}`, r.user_id === user?.id ? "mine" : "")}>
                   <td className="c n"><span className={`medal m${r.rank}`} style={{ margin: "0 auto" }}>{r.rank}</span></td>
-                  <td><Link className="cell-link rank-name" href={`/user/${r.user_id}`}><FramedAvatar name={r.nickname} frame={frameFor(r.user_id)} /><span>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}<NameBadges id={r.user_id} /></span></Link></td>
+                  <td><Link className="cell-link rank-name" href={`/user/${r.user_id}`}><FramedAvatar name={r.nickname} frame={frameFor(r.user_id)} /><span>{r.nickname}{r.user_id === user?.id ? " (나)" : ""}<NameBadges id={r.user_id} />{area !== "school" && r.school_name && <small className="rank-school">{r.school_name.replace(/학교$/, "")}{area === "all" && r.grade ? ` ${r.grade}학년` : ""}</small>}</span></Link></td>
                   <td className="r n"><b>{r.points}</b></td>
                   <td className="r n">{r.solved}</td>
                   <td className="r n hide-m">{r.submissions}</td>

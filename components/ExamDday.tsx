@@ -2,8 +2,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { subjectName } from "@/lib/data";
+import { useMe } from "@/lib/useMe";
 
-/** 시험 일정 (한국 시간 기준 날짜) */
+/** 시험 일정 (한국 시간 기준 날짜) · 지금은 서연중 3학년 일정만 있어 */
+const EXAM_FOR = { school: "seoyeon", grade: 3 };
 export const EXAM_DAYS = [
   { date: "2026-10-20", label: "10/20 (화)", subjects: ["sc", "ma", "ko"] },
   { date: "2026-10-21", label: "10/21 (수)", subjects: ["en", "so", "hi"] },
@@ -18,6 +20,7 @@ const dayDiff = (a: string, b: string) => Math.round((Date.parse(b) - Date.parse
 type Count = Record<string, { total: number; solved: number }>;
 
 export default function ExamDday({ counts }: { counts: Count }) {
+  const { school, grade } = useMe();
   const [today, setToday] = useState<string | null>(null);
   useEffect(() => {
     setToday(todayKST());
@@ -25,6 +28,7 @@ export default function ExamDday({ counts }: { counts: Count }) {
     return () => clearInterval(t);
   }, []);
   if (!today) return null;
+  if (school?.id !== EXAM_FOR.school || grade !== EXAM_FOR.grade) return null;
 
   const last = EXAM_DAYS[EXAM_DAYS.length - 1].date;
   if (today > last) return null; // 시험 끝나면 숨김
@@ -42,7 +46,7 @@ export default function ExamDday({ counts }: { counts: Count }) {
       <div className="dday-head">
         <b className="dday-big">{big}</b>
         <div>
-          <strong>2학기 시험</strong>
+          <strong>{school.name.replace(/학교$/, "")} {grade}학년 2학기 시험</strong>
           <small>{msg}</small>
         </div>
       </div>

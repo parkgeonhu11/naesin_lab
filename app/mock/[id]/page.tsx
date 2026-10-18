@@ -93,7 +93,7 @@ export default function MockExamPage() {
 
   // 시험 정보 + 내 기록
   const loadInfo = useCallback(async () => {
-    const [{ data: list }, { data: mine }] = await Promise.all([sb().rpc("mock_list"), user ? sb().rpc("mock_my_attempts", { p_exam: id }) : Promise.resolve({ data: [] })]);
+    const [{ data: list }, { data: mine }] = await Promise.all([sb().rpc("mock_list_v2"), user ? sb().rpc("mock_my_attempts", { p_exam: id }) : Promise.resolve({ data: [] })]);
     const e = ((list as (typeof info & { id: string })[]) ?? []).find((x) => x.id === id) ?? null;
     setInfo(e);
     setPrev((mine as Prev[]) ?? []);

@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "내신랩",
     short_name: "내신랩",
-    description: "시험 범위 문제 풀고 친구들이랑 랭킹 대결 · 서연중 3학년 2학기",
+    description: "중학생 내신 시험 범위 문제 풀고 친구들이랑 랭킹 대결",
     lang: "ko",
     start_url: "/?source=app",
     scope: "/",

@@ -1365,3 +1365,21 @@ body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-even
 .ab-ans { margin: 0; font-size: 15.5px; }
 .ab-ans b { color: var(--ac); margin-right: 6px; }
 @media (max-width: 600px) { .ab-count { margin-left: 0; width: 100%; } .ab-card { padding: 14px; } }
+
+/* 학교·학년 고르기 */
+.school-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: flex-end; }
+.school-pick { position: relative; flex: 1 1 220px; min-width: 0; display: grid; gap: 4px; }
+.school-grade { display: grid; gap: 4px; }
+.school-list { position: absolute; z-index: 30; top: 100%; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; max-height: 260px; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: 12px; box-shadow: 0 12px 30px rgba(15, 23, 42, .18); }
+.school-list button { width: 100%; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; text-align: left; border: 0; background: none; padding: 9px 10px; border-radius: 8px; color: var(--text); font: inherit; cursor: pointer; }
+.school-list button:hover, .school-list button[aria-selected="true"] { background: var(--brand-soft); }
+.school-list small { color: var(--faint); font-size: 12px; white-space: nowrap; }
+.school-list .school-new b { color: var(--brand); }
+.seg { display: inline-flex; border: 1.5px solid var(--line-strong); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); color: var(--sub); padding: 9px 14px; font: 600 14px/1 inherit; font-family: inherit; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button[aria-checked="true"], .seg button[aria-pressed="true"] { background: var(--brand); color: #fff; }
+.seg button:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+.rank-school { display: block; font-size: 11.5px; color: var(--faint); font-weight: 500; }
+.school-card.compact { border-color: var(--line); }

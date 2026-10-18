@@ -12,6 +12,12 @@ type MeState = {
   /** Google 계정에 연결 안 된 임시(익명) 계정인지 */
   isAnon: boolean;
   email: string | null;
+  /** 내 학교·학년 (아직 안 골랐으면 null) */
+  school: { id: string; name: string } | null;
+  grade: number | null;
+  /** 별명은 정했는데 학교·학년을 아직 안 골랐음 */
+  needSchool: boolean;
+  saveSchool: (name: string, grade: number) => Promise<void>;
   points: number;
   rank: number | null;
   error: string | null;
@@ -45,6 +51,8 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [nickname, setNickname] = useState<string | null>(null);
   const [mustRename, setMustRename] = useState(false);
+  const [school, setSchool] = useState<{ id: string; name: string } | null>(null);
+  const [grade, setGrade] = useState<number | null>(null);
   const [warned, setWarned] = useState(false);
   const [banned, setBanned] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -56,7 +64,8 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
   const [loginRequired, setLoginRequired] = useState(false);
 
   const refreshScore = useCallback(async () => {
-    const { data } = await sb().rpc("leaderboard", { p_subject: "all", p_period: "all", p_limit: 500 });
+    // 머리글의 순위는 우리 학교·학년 안에서
+    const { data } = await sb().rpc("leaderboard_v2", { p_subject: "all", p_period: "all", p_limit: 500, p_scope: "school" });
     const { data: s } = await sb().auth.getSession();
     const uid = s.session?.user.id;
     const mine = ((data as { user_id: string; points: number; rank: number }[]) ?? []).find((r) => r.user_id === uid);
@@ -76,6 +85,10 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
 
   const loadNick = useCallback(async (uid: string) => {
     const { data } = await sb().from("profiles").select("nickname,must_rename").eq("user_id", uid).maybeSingle();
+    const { data: sc } = await sb().rpc("my_scope");
+    const row = ((sc as { school_id: string | null; school_name: string | null; grade: number | null }[]) ?? [])[0];
+    setSchool(row?.school_id ? { id: row.school_id, name: row.school_name ?? "" } : null);
+    setGrade(row?.grade ?? null);
     setNickname(data?.nickname ?? null);
     setMustRename(!!data?.must_rename);
     const { data: st } = await sb().rpc("my_status");
@@ -133,6 +146,15 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     setMustRename(false);
   }, []);
 
+  const saveSchool = useCallback(async (name: string, g: number) => {
+    const { data, error } = await sb().rpc("set_my_school", { p_school_name: name, p_grade: g });
+    if (error) throw error;
+    const r = data as { school_id: string; school_name: string; grade: number };
+    setSchool({ id: r.school_id, name: r.school_name });
+    setGrade(r.grade);
+    refreshScore();
+  }, [refreshScore]);
+
   const refreshStatus = useCallback(async () => {
     const { data: st } = await sb().rpc("my_status");
     setWarned(!!(st as { warned?: boolean } | null)?.warned);
@@ -168,6 +190,8 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     setUser(u);
     setNickname(null);
     setMustRename(false);
+    setSchool(null);
+    setGrade(null);
     setPoints(0);
     setRank(null);
     if (u) await refreshScore();
@@ -175,6 +199,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
 
   return createElement(Ctx.Provider, { value: {
     user, nickname, mustRename, isAnon: user?.is_anonymous ?? true, email: user?.email ?? null,
+    school, grade, needSchool: !!nickname && (!school || !grade), saveSchool,
     points, rank, error, ready, authChecked, needLogin: !user, googleOn: loginRequired || (!!user && !user.is_anonymous), saveNickname, signInGoogle, signOut, enterAsGuest, notice, refreshScore,
     warned, banned, ackWarning, refreshStatus,
   } }, children);

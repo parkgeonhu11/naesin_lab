@@ -45,7 +45,7 @@ export function BanScreen() {
       <div className="gate-card">
         <div className="gate-brand">
           <span className="brand-mark"><Icon name="logo" /></span>
-          <span><b>내신랩</b><small>서연중 3학년 2학기 시험 대비</small></span>
+          <span><b>내신랩</b><small>중학생 내신 시험 대비</small></span>
         </div>
         <h1>이용이 정지된 계정이야</h1>
         <p className="muted" style={{ margin: 0 }}>

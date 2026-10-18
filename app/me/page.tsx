@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import SchoolCard from "@/components/SchoolCard";
 import AccountCard from "@/components/AccountCard";
 import NicknameCard from "@/components/NicknameCard";
 import { SUBJECTS, subjectName, type BoardRow, type UnitStat } from "@/lib/data";
@@ -28,7 +29,7 @@ export default function MePage() {
     if (!user) return;
     (async () => {
       const [{ data: wk }, { data: us }] = await Promise.all([
-        sb().rpc("leaderboard", { p_subject: "all", p_period: "week", p_limit: 500 }),
+        sb().rpc("leaderboard_v2", { p_subject: "all", p_period: "week", p_limit: 500, p_scope: "school" }),
         sb().rpc("my_unit_stats"),
       ]);
       setWeek(((wk as BoardRow[]) ?? []).find((r) => r.user_id === user.id)?.points ?? 0);
@@ -74,6 +75,7 @@ export default function MePage() {
         <span className="muted small">내 정보 · 성적 분석</span>
       </div>
       <AccountCard />
+      <SchoolCard title="학교·학년" compact />
 
       <section className="panel stat-row">
         <div className="stat"><small>누적 점수</small><b>{points}</b></div>

@@ -15,7 +15,7 @@ export default function MockListPage() {
   useEffect(() => {
     if (!isConfigured) return;
     let alive = true;
-    sb().rpc("mock_list").then(({ data, error }) => {
+    sb().rpc("mock_list_v2").then(({ data, error }) => {
       if (!alive) return;
       if (error) setErr(friendly(error));
       setRows((data as MockExam[]) ?? []);

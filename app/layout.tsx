@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "내신랩", template: "%s · 내신랩" },
-  description: "시험 범위 문제 풀고 친구들이랑 랭킹 대결 · 서연중 3학년 2학기",
+  description: "중학생 내신 시험 범위 문제 풀고 친구들이랑 랭킹 대결",
   openGraph: { title: "내신랩", description: "시험 범위 문제 풀고 친구들이랑 랭킹 대결", type: "website" },
   applicationName: "내신랩",
   icons: { icon: [{ url: "/icons/favicon-32.png", sizes: "32x32" }, { url: "/icons/icon-192.png", sizes: "192x192" }], apple: "/icons/apple-touch-icon.png" },

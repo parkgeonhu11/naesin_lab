@@ -32,6 +32,10 @@ export default function AdminPage() {
   const [word, setWord] = useState("");
   const [kind, setKind] = useState("bad");
   const [wordMsg, setWordMsg] = useState("");
+  const [qGrade, setQGrade] = useState(3);
+  const [qSchool, setQSchool] = useState("seoyeon");
+  const [schools, setSchools] = useState<{ id: string; name: string; students: number }[]>([]);
+  useEffect(() => { sb().rpc("school_search", { p_q: "" }).then(({ data }) => setSchools((data as { id: string; name: string; students: number }[]) ?? [])); }, []);
 
   const emailUser = user && !user.is_anonymous && user.email;
 
@@ -145,16 +149,28 @@ export default function AdminPage() {
 
       <section style={{ display: "grid", gap: 8 }}>
         <h2 style={{ fontSize: 16, margin: 0 }}>문제 직접 추가 (바로 공개)</h2>
+        <div className="row small" style={{ alignItems: "center" }}>
+          <span className="muted">대상</span>
+          <div className="seg" role="radiogroup" aria-label="학년">
+            {[1, 2, 3].map((n) => <button key={n} type="button" role="radio" aria-checked={qGrade === n} onClick={() => setQGrade(n)}>{n}학년</button>)}
+          </div>
+          <select id="q-school" className="input" style={{ width: "auto" }} value={qSchool} onChange={(e) => setQSchool(e.target.value)}>
+            <option value="">모든 학교 공통</option>
+            {schools.map((x) => <option key={x.id} value={x.id}>{x.name} 전용 ({x.students}명)</option>)}
+          </select>
+        </div>
         <QuestionForm
           maxDifficulty={5}
           showSource
           submitLabel="공개하기"
           onSubmit={async (q) => {
-            const { error } = await sb().rpc("admin_add_question", {
+            const { data: qid, error } = await sb().rpc("admin_add_question", {
               p_subject: q.subject, p_unit: q.unit, p_topic: q.topic, p_qtype: q.qtype, p_difficulty: q.difficulty, p_body: q.body,
               p_choices: q.choices, p_answer: q.answer, p_answer_text: q.answerText, p_explanation: q.explanation, p_source: q.source,
             });
             if (error) throw error;
+            const { error: e2 } = await sb().rpc("admin_set_question_scope", { p_question: qid, p_grade: qGrade, p_school: qSchool || null });
+            if (e2) throw e2;
             return "공개했어.";
           }}
         />

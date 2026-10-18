@@ -10,6 +10,7 @@ import { useQnaUnread } from "@/components/Qna";
 import { BanScreen, WarningModal } from "@/components/FairPlay";
 import LoginGate from "@/components/LoginGate";
 import NicknameCard, { GoogleButton } from "@/components/NicknameCard";
+import SchoolCard from "@/components/SchoolCard";
 import { levelOf } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 
@@ -37,7 +38,8 @@ export function Avatar({ name, className = "" }: { name?: string | null; classNa
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const isAdminOf = useAdmins();
-  const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn, banned } = useMe();
+  const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn, banned, school, grade, needSchool } = useMe();
+  const scopeLabel = school ? `${school.name.replace(/학교$/, "")} ${grade ?? ""}학년` : "중학생 내신 대비";
   const amAdmin = !!user && !user.is_anonymous && isAdminOf(user.id);
   const qnaNew = useQnaUnread(!!user && authChecked && !needLogin);
   const [open, setOpen] = useState(false);
@@ -65,7 +67,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     <>
       <Link href="/" className="brand" aria-label="내신랩 홈">
         <span className="brand-mark"><Icon name="logo" /></span>
-        <span><b>내신랩</b><small>서연중 3학년 2학기</small></span>
+        <span><b>내신랩</b><small>{scopeLabel}</small></span>
       </Link>
       <nav className="side-nav" aria-label="메뉴">
         {NAV.map((n, i) => (
@@ -144,12 +146,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               title={mustRename ? "지금 별명은 쓸 수 없어서 바꿔야 해. 새 별명을 정해 줘" : "랭킹에 쓸 별명을 정해 줘"}
             />
           )}
+          {ready && user && path !== "/admin" && nickname && !mustRename && needSchool && <SchoolCard />}
           {children}
         </main>
         {ready && user && <TitleCelebrate userId={user.id} />}
         {ready && user && <GrantNotice />}
         <footer className="site-foot">
-          <span>내신랩 · 서연중 3학년 2학기 시험 대비</span>
+          <span>내신랩 · 중학생 내신 시험 대비</span>
           <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요. · <a className="link" href="/terms">이용약관</a> · <a className="link" href="/privacy">개인정보처리방침</a></span>
         </footer>
 
