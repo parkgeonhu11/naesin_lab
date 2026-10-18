@@ -54,6 +54,7 @@ export default function ProblemPage() {
   const [err, setErr] = useState("");
   const [burst, setBurst] = useState(0);
   const touch = useRef<{ x: number; y: number; ok: boolean } | null>(null);
+  const resultRef = useRef<HTMLElement>(null);
   const trace = useTrace(q?.id, q?.id ?? null);
 
   const loadMine = useCallback(async () => {
@@ -121,6 +122,8 @@ export default function ProblemPage() {
       buzz([20, 60, 20]);
     }
     if (r.correct && !r.already) refreshFrames();
+    // 휴대폰에서는 결과 카드가 보이게 살짝 내려 준다
+    requestAnimationFrame(() => { if (window.innerWidth <= 1000) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); });
     await Promise.all([loadMine(), loadStats(), refreshScore(), refreshStatus()]);
   }
 
@@ -134,6 +137,7 @@ export default function ProblemPage() {
     trace.reveal();
     if (q.qtype === "mc") setVal({ ...val, choice: r.answer ?? null });
     setVerdict({ kind: "reveal", answer: r.answer ?? null, answerText: r.answer_text ?? null, explanation: r.explanation ?? "" });
+    requestAnimationFrame(() => { if (window.innerWidth <= 1000) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); });
     await loadMine();
   }
 
@@ -199,10 +203,11 @@ export default function ProblemPage() {
       ? `${prog?.wrong}번 틀렸어. 지금 맞히면 ${Math.floor(d.points / 2)}점${pen ? ` · 또 틀리면 −${pen}점` : ""}`
       : `처음 맞히면 ${d.points}점 · 첫 오답은 감점 없음`;
 
+  const sameWrong = verdict?.kind === "wa" && (q.qtype === "mc" ? verdict.picked === val.choice : verdict.text === val.text);
   const actions = shown === null && (
     <>
-      <button className="btn big" type="button" disabled={!hasAnswer(q, val) || busy} onClick={submit}>
-        {busy ? "채점 중…" : "제출"}
+      <button className="btn big" type="button" disabled={!hasAnswer(q, val) || busy || sameWrong} onClick={submit}>
+        {busy ? "채점 중…" : sameWrong ? "다른 보기를 골라 줘" : hasAnswer(q, val) ? "제출하기" : q.qtype === "mc" ? "보기를 골라 줘" : "답을 입력해 줘"}
       </button>
       <button className="btn line" type="button" disabled={busy} onClick={reveal}>정답 보기 (0점)</button>
     </>
@@ -219,16 +224,23 @@ export default function ProblemPage() {
               {q.unit && <> › <Link href={`/problems?subject=${q.subject}&unit=${encodeURIComponent(q.unit)}`}>{q.unit}</Link></>}
               {q.topic && <> › <Link href={`/problems?subject=${q.subject}&unit=${encodeURIComponent(q.unit)}&topic=${encodeURIComponent(q.topic)}`}>{q.topic}</Link></>}
             </div>
-            <h1><span className="pno">{q.no}번</span>{q.topic || q.unit || subjectName(q.subject)}</h1>
-            <div className="prob-tags">
-              <SubjBadge code={q.subject} /> <TypeBadge type={q.qtype} /> <DiffBadge level={q.difficulty} />
-              <span className="small muted">배점 {d.points}점 · 정답률 {info?.submissions ? `${info.accuracy}%` : "–"}</span>
-              <span className="people-chip" title="이 문제를 풀어 본 사람 중 맞힌 사람">
-                <b>{info?.solved_people ?? 0}</b>명 맞힘 <span className="faint">/ {info?.tried ?? 0}명 풀어 봄</span>
-              </span>
-              {idx >= 0 && <span className="small faint">{idx + 1} / {unitList.length}</span>}
+            <div className="prob-title">
+              <h1><span className="pno">{q.no}</span>{q.topic || q.unit || subjectName(q.subject)}</h1>
               <ReportButton questionId={q.id} no={q.no} className="push-right" />
             </div>
+            <div className="prob-tags">
+              <SubjBadge code={q.subject} /> <TypeBadge type={q.qtype} /> <DiffBadge level={q.difficulty} />
+              <span className="prob-pts"><b>{d.points}</b>점</span>
+              <span className="prob-stat" title="이 문제를 풀어 본 사람 중 맞힌 사람">
+                {info?.tried ? <>{info.solved_people ?? 0}명 맞힘 <i>/</i> {info.tried}명 중{info.submissions ? <> <i>·</i> 정답률 {info.accuracy}%</> : null}</> : "아직 아무도 안 풀었어"}
+              </span>
+            </div>
+            {idx >= 0 && unitList.length > 1 && (
+              <div className="prob-prog" aria-label={`단원 ${idx + 1} / ${unitList.length}번째 문제`}>
+                <span style={{ width: `${(100 * (idx + 1)) / unitList.length}%` }} />
+                <small>{idx + 1} / {unitList.length}</small>
+              </div>
+            )}
           </div>
 
           <section className="section">
@@ -256,37 +268,49 @@ export default function ProblemPage() {
             />
           </section>
 
-          {verdict?.kind === "ac" && (
-            <div className="verdict ok">
-              <span className="big res-ac">맞았습니다!!</span>{" "}
-              <span className="muted">
-                {verdict.already ? "이미 푼 문제라 점수는 그대로야." : verdict.points > 0 ? `+${verdict.points}점${verdict.lost ? ` (오답 감점 −${verdict.lost}점 · 이 문제 합계 ${verdict.points - verdict.lost > 0 ? "+" : ""}${verdict.points - verdict.lost}점)` : ""}` : isOwn ? "내가 낸 문제라 점수는 없어." : ""}
-              </span>
-            </div>
-          )}
-          {verdict?.kind === "wa" && (
-            <div className="verdict no">
-              <span className="big res-wa">틀렸습니다</span>{" "}
-              <span className="muted">
-                {q.qtype === "short" ? `'${verdict.text}'은(는) 정답이 아니야.` : `${(verdict.picked ?? 0) + 1}번은 정답이 아니야.`}{" "}
-                {verdict.repeat ? "아까 낸 답이라 감점은 없어." : verdict.penalty > 0 ? <b className="res-wa">−{verdict.penalty}점</b> : "첫 오답이라 감점은 없어."}
-                {verdict.nextPenalty > 0 && !verdict.repeat ? ` 또 틀리면 −${verdict.nextPenalty}점.` : ""}
-              </span>
-            </div>
-          )}
-          {verdict?.kind === "reveal" && (
-            <div className="verdict"><span className="big res-rv">정답을 확인했어</span> <span className="muted">(0점 처리)</span></div>
-          )}
-          {!verdict && done && (
-            <div className="verdict">
-              {st === "solved" ? <span className="res-ac">맞힌 문제야 ({prog?.points}점 받음)</span> : <span className="res-rv">정답을 확인한 문제야 (0점)</span>}
-            </div>
-          )}
-          {explanation && (
-            <details className="section explain" open>
-              <summary><h2>해설</h2></summary>
-              <Explain text={explanation} style={{ fontSize: 15.5 }} />
-            </details>
+          {(verdict || done) && (
+            <section className={`result ${verdict?.kind === "ac" || (!verdict && st === "solved") ? "ok" : verdict?.kind === "wa" ? "no" : "rv"}`} ref={resultRef} aria-live="polite">
+              <div className="result-head">
+                <span className="result-ic" aria-hidden="true">
+                  {verdict?.kind === "wa" ? "✕" : verdict?.kind === "ac" || (!verdict && st === "solved") ? "✓" : "👁"}
+                </span>
+                <div className="grow">
+                  <b className="result-title">
+                    {verdict?.kind === "ac" ? (verdict.already ? "맞았어 (이미 푼 문제)" : "정답이야!") :
+                     verdict?.kind === "wa" ? "틀렸어" :
+                     verdict?.kind === "reveal" ? "정답을 확인했어" :
+                     st === "solved" ? "맞힌 문제야" : "정답을 확인한 문제야"}
+                  </b>
+                  <span className="result-sub">
+                    {verdict?.kind === "ac" && (verdict.already ? "점수는 그대로야." : verdict.points > 0 ? (verdict.lost ? `오답 감점 −${verdict.lost}점 · 이 문제 합계 ${verdict.points - verdict.lost > 0 ? "+" : ""}${verdict.points - verdict.lost}점` : "첫 시도에 맞혔어.") : isOwn ? "내가 낸 문제라 점수는 없어." : "")}
+                    {verdict?.kind === "wa" && <>
+                      {q.qtype === "short" ? `'${verdict.text}'은(는) 정답이 아니야. ` : `${(verdict.picked ?? 0) + 1}번은 정답이 아니야. `}
+                      {verdict.repeat ? "아까 낸 답이라 감점은 없어." : verdict.penalty > 0 ? `−${verdict.penalty}점.` : "첫 오답이라 감점은 없어."}
+                      {verdict.nextPenalty > 0 && !verdict.repeat ? ` 또 틀리면 −${verdict.nextPenalty}점.` : " 다시 골라 봐."}
+                    </>}
+                    {verdict?.kind === "reveal" && "0점 처리됐어. 해설을 읽고 다음 문제로 가자."}
+                    {!verdict && done && (st === "solved" ? "이 문제로 받은 점수야." : "0점 처리된 문제야.")}
+                  </span>
+                </div>
+                {(verdict?.kind === "ac" && !verdict.already && verdict.points > 0) ? (
+                  <b className="result-pts num">+{verdict.points}<em>점</em></b>
+                ) : (!verdict && st === "solved") ? (
+                  <b className="result-pts num">{prog?.points ?? 0}<em>점</em></b>
+                ) : null}
+              </div>
+              {explanation && (
+                <details className="result-explain" open>
+                  <summary>해설</summary>
+                  <Explain text={explanation} style={{ fontSize: 15.5 }} />
+                </details>
+              )}
+              {shown !== null && (
+                <div className="result-actions">
+                  {next ? <Link className="btn" href={`/problem/${next}`}>다음 문제 ({next}번) →</Link> : <Link className="btn" href={`/problems?subject=${q.subject}&unit=${encodeURIComponent(q.unit)}`}>단원 목록으로</Link>}
+                  {verdict?.kind === "ac" && !verdict.already && <span className="small muted">잘했어. 이 기세로 하나 더.</span>}
+                </div>
+              )}
+            </section>
           )}
           {err && <div className="verdict res-wa">{err}</div>}
 
@@ -352,8 +376,8 @@ export default function ProblemPage() {
         </button>
         {prev ? <Link className="btn line" href={`/problem/${prev}`} aria-label="이전 문제">←</Link> : <span className="btn line" aria-hidden="true" style={{ visibility: "hidden" }}>←</span>}
         {shown === null ? (
-          <button className="btn grow" type="button" disabled={!hasAnswer(q, val) || busy} onClick={submit}>
-            {busy ? "채점 중…" : hasAnswer(q, val) ? "제출" : q.qtype === "mc" ? "보기를 골라 줘" : "답을 입력해 줘"}
+          <button className="btn grow" type="button" disabled={!hasAnswer(q, val) || busy || sameWrong} onClick={submit}>
+            {busy ? "채점 중…" : sameWrong ? "다른 보기를 골라 줘" : hasAnswer(q, val) ? "제출하기" : q.qtype === "mc" ? "보기를 골라 줘" : "답을 입력해 줘"}
           </button>
         ) : next ? (
           <Link className="btn grow" href={`/problem/${next}`}>다음 문제</Link>

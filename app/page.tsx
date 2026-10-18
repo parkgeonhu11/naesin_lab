@@ -109,21 +109,20 @@ export default function Home() {
             <small>다음 레벨까지 {lv.toNext}점</small>
           </span>
         </div>
-        <div className="row">
-          <Link href={nextProblem ? `/problem/${nextProblem.no}` : "/problems"} className="btn white">
-            {nextProblem ? "안 푼 문제 바로 풀기" : "문제 목록 보기"}
+        <div className="hero-cta">
+          <Link href={nextProblem ? `/problem/${nextProblem.no}` : "/problems"} className="btn white big">
+            {nextProblem ? <>이어서 풀기 <small>{subjectName(nextProblem.subject)} {nextProblem.no}번</small></> : "문제 목록 보기"}
           </Link>
-          <Link href="/mock" className="btn ghost">예상 시험 보기</Link>
-          <Link href="/exam" className="btn ghost">시험지 만들기</Link>
-          <Link href="/review" className="btn ghost">오답 노트{wrongOpen ? ` ${wrongOpen}` : ""}</Link>
+          <Link href="/mock" className="hero-link">예상 시험</Link>
+          <Link href="/review" className="hero-link">오답 노트{wrongOpen ? <b>{wrongOpen}</b> : null}</Link>
         </div>
       </section>
 
-      {/* 예상 시험 안내 */}
-      <MockPromo />
-
       {/* 시험 D-day */}
       <ExamDday counts={bySubject} />
+
+      {/* 예상 시험 안내 */}
+      <MockPromo />
 
       {/* 임시(익명) 계정이면 Google 로그인 권하기 */}
       {ready && nickname && isAnon && <AccountCard compact />}
@@ -297,8 +296,8 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="panel pc-only">
-            <div className="panel-head"><h2>점수 규칙</h2></div>
+          <details className="panel rules">
+            <summary className="panel-head"><h2>점수 규칙</h2><span className="more">보기</span></summary>
             <div className="panel-body">
               <ol className="howto">
                 <li>처음에 맞히면 <b>만점</b>, 틀린 뒤 맞히면 <b>절반</b>.</li>
@@ -308,7 +307,7 @@ export default function Home() {
                 <li>문제 <b>오류를 신고</b>해서 진짜 오류면 +5점 (먼저 신고한 사람, 뒤이어 신고하면 +2점).</li>
               </ol>
             </div>
-          </section>
+          </details>
         </div>
       </div>
 
