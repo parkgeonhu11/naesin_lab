@@ -6,8 +6,8 @@ import Icon from "@/components/Icon";
 import AccountCard from "@/components/AccountCard";
 import ExamDday from "@/components/ExamDday";
 import MockPromo from "@/components/MockPromo";
-import { NameBadges, FramedAvatar, frameOf, useFrames } from "@/components/Framed";
-import { ago, levelOf, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
+import { NameBadges, FramedAvatar, frameOf, useAdmins, useFrames } from "@/components/Framed";
+import { ADMIN_ACC, ago, levelOf, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 import { useProblems } from "@/lib/useProblems";
@@ -17,6 +17,7 @@ const pct = (a: number, b: number) => (b ? Math.round((100 * a) / b) : 0);
 
 export default function Home() {
   const frameFor = useFrames();
+  const isAdmin = useAdmins();
   const { user, nickname, error, isAnon, ready } = useMe();
   const { rows, prog } = useProblems();
   const [sum, setSum] = useState<MySummary | null>(null);
@@ -75,7 +76,9 @@ export default function Home() {
   const subjects = SUBJECTS.filter((s) => s.code !== "hm" || bySubject.hm?.total);
   const nextProblem = (rows ?? []).find((r) => stateOf(prog[r.id]) === "none");
   const wrongOpen = (rows ?? []).filter((r) => stateOf(prog[r.id]) === "tried").length;
-  const acc = sum ? pct(sum.correct_submissions, sum.submissions) : 0;
+  const meAdmin = isAdmin(user?.id, nickname);
+  const acc = sum ? (meAdmin ? ADMIN_ACC : pct(sum.correct_submissions, sum.submissions)) : 0;
+  const okShown = sum ? (meAdmin ? Math.round((sum.submissions * ADMIN_ACC) / 100) : sum.correct_submissions) : 0;
   const today = Math.min(sum?.today_solved ?? 0, DAILY_GOAL);
   const name = nickname ?? "친구";
   const lv = levelOf(sum?.points ?? 0);
@@ -159,7 +162,7 @@ export default function Home() {
           <div>
             <small>정답률</small>
             <b>{acc}<em>%</em></b>
-            <span className="k-sub">{sum?.submissions ? `제출 ${sum.submissions}번 중 ${sum.correct_submissions}번 정답` : "아직 제출이 없어"}</span>
+            <span className="k-sub">{sum?.submissions ? `제출 ${sum.submissions}번 중 ${okShown}번 정답` : "아직 제출이 없어"}</span>
           </div>
         </div>
       </section>

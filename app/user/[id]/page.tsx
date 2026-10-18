@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DiffBadge, SubjBadge } from "@/components/Badges";
 import { GrantPanel } from "@/components/AdminGrant";
 import { NameBadges, FrameChip, FramedAvatar, TitleChip, useAdmins, useFrames } from "@/components/Framed";
-import { ago, levelOf, SUBJECTS, subjectName } from "@/lib/data";
+import { ago, levelOf, SUBJECTS, subjectName, accOf } from "@/lib/data";
 import { sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 import { useRowLink } from "@/lib/useRowLink";
@@ -55,7 +55,7 @@ export default function UserPage() {
         <div className="stat"><small>점수</small><b>{info.points}</b></div>
         <div className="stat"><small>맞힌 문제</small><b>{info.solved.length}</b></div>
         <div className="stat"><small>제출</small><b>{info.submissions}</b></div>
-        <div className="stat"><small>정답률</small><b>{info.submissions ? `${Math.round((100 * info.correct) / info.submissions)}%` : "–"}</b></div>
+        <div className="stat"><small>정답률</small><b>{(() => { const a = accOf(info.correct, info.submissions, isAdmin(id, info.nickname)); return a === null ? "–" : `${a}%`; })()}</b></div>
       </section>
 
       {user && isAdmin(user.id) && !info.is_me && (

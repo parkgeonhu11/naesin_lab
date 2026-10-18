@@ -1,9 +1,10 @@
 "use client";
+import { useAdmins } from "@/components/Framed";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import AccountCard from "@/components/AccountCard";
 import NicknameCard from "@/components/NicknameCard";
-import { SUBJECTS, subjectName, type BoardRow, type UnitStat } from "@/lib/data";
+import { SUBJECTS, subjectName, type BoardRow, type UnitStat, ADMIN_ACC } from "@/lib/data";
 import { sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
@@ -20,6 +21,7 @@ function Meter({ value }: { value: number | null }) {
 
 export default function MePage() {
   const { user, nickname, points, rank, error, saveNickname } = useMe();
+  const isAdmin = useAdmins();
   const [week, setWeek] = useState(0);
   const [stats, setStats] = useState<UnitStat[] | null>(null);
   const [subject, setSubject] = useState("all");
@@ -80,7 +82,7 @@ export default function MePage() {
         <div className="stat"><small>전체 등수</small><b>{rank ? `${rank}위` : "–"}</b></div>
         <div className="stat"><small>이번 주 점수</small><b>{week}</b></div>
         <div className="stat"><small>맞힌 문제</small><b>{totalSolved}</b></div>
-        <div className="stat"><small>제출 정답률</small><b>{pct(totalOk, totalSubs) ?? "–"}{totalSubs ? "%" : ""}</b></div>
+        <div className="stat"><small>제출 정답률</small><b>{totalSubs ? `${isAdmin(user?.id, nickname) ? ADMIN_ACC : pct(totalOk, totalSubs)}%` : "–"}</b></div>
       </section>
 
       <section className="panel">

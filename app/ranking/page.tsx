@@ -2,13 +2,14 @@
 import Link from "next/link";
 import { useRowLink } from "@/lib/useRowLink";
 import { useEffect, useState } from "react";
-import { NameBadges, FramedAvatar, TitleChip, useFrames } from "@/components/Framed";
-import { SUBJECTS, type BoardRow } from "@/lib/data";
+import { NameBadges, FramedAvatar, TitleChip, useAdmins, useFrames } from "@/components/Framed";
+import { accOf, SUBJECTS, type BoardRow } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
 export default function RankingPage() {
   const { user } = useMe();
+  const isAdmin = useAdmins();
   const rowLink = useRowLink();
   const frameFor = useFrames();
   const [scope, setScope] = useState("all");
@@ -80,7 +81,7 @@ export default function RankingPage() {
                   <td className="r n"><b>{r.points}</b></td>
                   <td className="r n">{r.solved}</td>
                   <td className="r n hide-m">{r.submissions}</td>
-                  <td className="r n">{r.submissions ? `${Math.round((100 * r.solved) / r.submissions)}%` : "–"}</td>
+                  <td className="r n">{(() => { const a = accOf(r.solved, r.submissions, isAdmin(r.user_id, r.nickname)); return a === null ? "–" : `${a}%`; })()}</td>
                 </tr>
               ))}
             </tbody>
