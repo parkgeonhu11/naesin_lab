@@ -1,4 +1,5 @@
 "use client";
+import PageInk from "@/components/PageInk";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -203,6 +204,7 @@ export default function Exam() {
           <h1>{fixedNos ? "오답 다시 풀기" : `${subjectName(subject)} 시험지`}</h1>
           <span className="muted small">{paper.length}문항 · 제출하면 한 번에 채점돼</span>
         </div>
+        <PageInk storageKey={`exam:${startedAt}`}>
         <section className="panel">
           {paper.map((q, i) => (
             <div key={q.id} className="exam-q">
@@ -229,6 +231,7 @@ export default function Exam() {
             </div>
           ))}
         </section>
+        </PageInk>
         <div className="exam-bar">
           <span className="num"><b>{answeredCount}</b> / {paper.length} 답함</span>
           <span className="faint num">{mmss(now - startedAt)}</span>

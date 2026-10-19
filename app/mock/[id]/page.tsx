@@ -1,4 +1,5 @@
 "use client";
+import PageInk from "@/components/PageInk";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -232,9 +233,11 @@ export default function MockExamPage() {
           <h1>{start.title}</h1>
           <span className="muted small">{start.ranked ? "랭킹 응시 · 첫 번째 시도야, 집중!" : "연습 응시 · 랭킹에는 안 들어가"}</span>
         </div>
+        <PageInk storageKey={`mock:${start.attempt}`}>
         <section className="panel">
           {start.items.map((q, i) => <Item key={q.no} q={q} idx={i} picked={answers[i] ?? null} onPick={(k) => pick(i, k)} graded={false} />)}
         </section>
+        </PageInk>
         {err && <p className="small res-wa">{err}</p>}
         <div className={`exam-bar mock-bar ${urgent ? "urgent" : ""}`}>
           <span className="mock-timer num" aria-live={urgent ? "assertive" : "off"}>{mmss(left)}</span>
