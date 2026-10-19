@@ -24,3 +24,7 @@ begin
 end $$;
 revoke all on function public.mock_reward(bigint) from public, anon, authenticated;
 -- mock_grade: 마지막 줄에 perform mock_reward(p_attempt); 추가 (DB에 적용됨)
+
+-- 문항당 점수는 시험마다 mock_exams.reward_per 로 정함 (실전 ② = 20, 최고난도 ③ = 40). null 이면 보상 없음.
+alter table public.mock_exams add column if not exists reward_per int;
+-- mock_reward: pts := a.correct * e.reward_per  (reward_per 가 없거나 공개 시험이면 지급 안 함)
