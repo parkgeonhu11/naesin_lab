@@ -101,7 +101,13 @@ export default function PageInk({ storageKey, children }: { storageKey: string; 
       const target = el?.closest("button, label, input, a, [role=button]") as HTMLElement | null;
       if (target) { target.focus?.(); target.click(); }
     };
+    // 두 손가락 이상 닿으면(필기 켜기/끄기 제스처) 스크롤·보기 누르기를 하지 않음
+    const touching = new Set<number>(); let multi = false;
     const finger = (e: PointerEvent) => {
+      if (e.type === "pointerdown") touching.add(e.pointerId);
+      else if (e.type !== "pointermove") { touching.delete(e.pointerId); if (!touching.size) { const m = multi; multi = false; if (m) { drag = null; return; } } }
+      if (touching.size >= 2) { multi = true; drag = null; return; }
+      if (multi) return;
       if (e.type === "pointerdown") {
         drag = { id: e.pointerId, y: e.clientY, t: e.timeStamp, v: 0, x0: e.clientX, y0: e.clientY, t0: e.timeStamp, moved: false };
         try { layer.setPointerCapture(e.pointerId); } catch {}
@@ -171,6 +177,56 @@ export default function PageInk({ storageKey, children }: { storageKey: string; 
     };
   }, [storageKey]);
 
+  // 필기 켜기/끄기 단축키
+  // - 키보드: P = 켜기/끄기, Esc = 끄기, Ctrl+Z = 되돌리기
+  // - S펜 옆 버튼을 누른 채 화면 톡 = 켜기/끄기
+  // - 두 손가락으로 화면 톡 = 켜기/끄기
+  useEffect(() => {
+    const typing = (t: EventTarget | null) => !!(t as HTMLElement | null)?.closest?.("input, textarea, select, [contenteditable=true]");
+    const key = (e: KeyboardEvent) => {
+      if (typing(e.target) || e.altKey || e.metaKey) return;
+      if (e.key === "Escape" && tool.current.on) { e.preventDefault(); setOn(false); return; }
+      if (!e.ctrlKey && (e.key === "p" || e.key === "P" || e.key === "ㅔ")) { e.preventDefault(); setOn((o) => !o); return; }
+      if (e.ctrlKey && (e.key === "z" || e.key === "Z") && tool.current.on) { e.preventDefault(); api.current?.undo(); }
+    };
+    const penBtn = (e: PointerEvent) => {
+      if (e.pointerType !== "pen" || !(e.button === 2 || (e.buttons & 2))) return;
+      e.preventDefault(); e.stopPropagation();
+      setOn((o) => !o);
+    };
+    const noPenMenu = (e: MouseEvent) => { if ((e as PointerEvent).pointerType === "pen") e.preventDefault(); };
+    let two: { t: number; x: number; y: number } | null = null;
+    const mid = (ts: TouchList) => ({ x: (ts[0].clientX + ts[1].clientX) / 2, y: (ts[0].clientY + ts[1].clientY) / 2 });
+    const tStart = (e: TouchEvent) => { two = e.touches.length === 2 ? { t: e.timeStamp, ...mid(e.touches) } : null; };
+    const tMove = (e: TouchEvent) => {
+      if (!two || e.touches.length !== 2) return;
+      const m = mid(e.touches);
+      if (Math.abs(m.x - two.x) > 14 || Math.abs(m.y - two.y) > 14) two = null;
+    };
+    const tEnd = (e: TouchEvent) => {
+      if (!two) return;
+      const d = two;
+      if (e.touches.length === 0) {
+        two = null;
+        if (e.timeStamp - d.t < 350) setOn((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", key);
+    window.addEventListener("pointerdown", penBtn, true);
+    window.addEventListener("contextmenu", noPenMenu, true);
+    window.addEventListener("touchstart", tStart, { passive: true });
+    window.addEventListener("touchmove", tMove, { passive: true });
+    window.addEventListener("touchend", tEnd, { passive: true });
+    return () => {
+      window.removeEventListener("keydown", key);
+      window.removeEventListener("pointerdown", penBtn, true);
+      window.removeEventListener("contextmenu", noPenMenu, true);
+      window.removeEventListener("touchstart", tStart);
+      window.removeEventListener("touchmove", tMove);
+      window.removeEventListener("touchend", tEnd);
+    };
+  }, []);
+
   return (
     <div className={`ink-host${on ? " ink-on" : ""}${on && finger ? " ink-finger" : ""}`} ref={hostRef}>
       {children}
@@ -196,11 +252,12 @@ export default function PageInk({ storageKey, children }: { storageKey: string; 
             <button type="button" title="켜면 손가락으로도 그려져 (끄면 손가락은 스크롤·보기 누르기)" aria-pressed={finger} onClick={() => setFinger(!finger)}>손</button>
           </>
         )}
-        <button type="button" className="ink-toggle" aria-pressed={on} onClick={() => setOn(!on)}>
+        <button type="button" className="ink-toggle" aria-pressed={on} onClick={() => setOn(!on)}
+          title="단축키: 두 손가락으로 톡 · S펜 버튼 누르고 톡 · 키보드 P (Esc는 끄기)">
           {on ? "필기 끄기" : "✏️ 필기"}
         </button>
       </div>
-      {on && <p className="ink-hint">펜으로 시험지에 바로 써. 손가락은 스크롤, 톡 누르면 보기 선택.</p>}
+      {on && <p className="ink-hint">펜으로 시험지에 바로 써. 손가락은 스크롤, 톡 누르면 보기 선택. <b>끄기 단축키: 두 손가락으로 톡 · S펜 버튼 누르고 톡 · 키보드 P/Esc</b></p>}
     </div>
   );
 }

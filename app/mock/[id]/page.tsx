@@ -52,6 +52,87 @@ function Item({ q, idx, picked, onPick, graded }: { q: MockItem; idx: number; pi
   );
 }
 
+type Retry = { pick: number; st: "fixed" | "revealed" };
+
+/** 틀린 문제 다시 풀기: 한 번 더 틀리면 정답 처리하고 해설 보여 줌 */
+function RetryItem({ q, idx, first, done, onPick }: { q: MockItem; idx: number; first: number | null; done?: Retry; onPick: (k: number) => void }) {
+  return (
+    <section className={`mock-q ${done ? "ok" : ""}`} id={`r${q.no}`}>
+      <div className="mock-q-head">
+        <span className="qn">{idx + 1}.</span>
+        <span className="mock-stem" dangerouslySetInnerHTML={{ __html: q.stem }} />
+        <span className={`retry-tag ${done ? (done.st === "fixed" ? "fixed" : "rev") : ""}`}>{done ? (done.st === "fixed" ? "다시 풀어 맞힘" : "정답 처리") : "다시 풀기"}</span>
+      </div>
+      {q.fig && <div className="mock-fig" dangerouslySetInnerHTML={{ __html: figHtml(q.fig) }} />}
+      {q.bogi && (
+        <div className="mock-bogi">
+          {q.bogi.map((b, i) => (b.startsWith("───") ? <hr key={i} /> : <p key={i} dangerouslySetInnerHTML={{ __html: b }} />))}
+        </div>
+      )}
+      <div className={`mock-choices ${q.lay === "five" ? "five" : ""}`} role="group" aria-label={`${idx + 1}번 다시 풀기`}>
+        {q.choices.map((c, k) => {
+          const isFirst = k === first;
+          const cls = done
+            ? `${k === q.ans ? "right" : ""} ${done.pick === k && k !== q.ans ? "wrong" : ""} ${isFirst && k !== q.ans ? "tried" : ""}`
+            : isFirst ? "tried" : "";
+          return (
+            <button key={k} type="button" className={`choice ${cls}`} disabled={!!done || isFirst} onClick={() => onPick(k)}
+              title={isFirst ? "처음에 고른 답 (틀림)" : undefined}>
+              <span className="cn">{k + 1}</span>
+              <span className="ct" dangerouslySetInnerHTML={{ __html: c }} />
+            </button>
+          );
+        })}
+      </div>
+      {!done && <p className="small faint" style={{ margin: 0 }}>{first === null ? "처음엔 비워 뒀어. 이번엔 골라 봐." : `처음 고른 ${CIRC[first]}은 틀렸어. 다른 답을 골라 봐.`}</p>}
+      {done && (
+        <div className="mock-expl ok">
+          <b>정답 {CIRC[q.ans ?? 0]}</b>{done.st === "fixed" ? " · 두 번째에 맞혔어" : ` · 두 번째도 ${CIRC[done.pick]} 골라서 틀렸어 → 정답 처리하고 해설 확인`}
+          <p>{q.expl}</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function RetryRound({ r, onAllDone }: { r: MockResult; onAllDone: (v: boolean) => void }) {
+  const key = `mock-retry:${r.attempt}`;
+  const wrong = useMemo(() => r.items.map((q, i) => ({ q, i })).filter(({ q, i }) => (r.answers?.[i] ?? null) !== q.ans), [r]);
+  const [st, setSt] = useState<Record<number, Retry>>(() => {
+    try { return JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch { return {}; }
+  });
+  const doneN = wrong.filter(({ q }) => st[q.no]).length;
+  const fixedN = wrong.filter(({ q }) => st[q.no]?.st === "fixed").length;
+  const all = doneN === wrong.length;
+  useEffect(() => { onAllDone(all); }, [all, onAllDone]);
+  const pick = (q: MockItem, k: number) => {
+    setSt((s) => {
+      if (s[q.no]) return s;
+      const n = { ...s, [q.no]: { pick: k, st: k === q.ans ? "fixed" : "revealed" } as Retry };
+      try { localStorage.setItem(key, JSON.stringify(n)); } catch {}
+      return n;
+    });
+  };
+  if (wrong.length === 0) return null;
+  return (
+    <section className="panel">
+      <div className="panel-head">
+        <h2>틀린 문제 다시 풀기</h2>
+        <span className="small faint">{doneN} / {wrong.length} 정리 · 한 번 더 틀리면 정답 처리하고 해설을 보여 줄게</span>
+      </div>
+      {all && (
+        <div className="retry-done">
+          <b>정리 끝! 전부 맞음 처리 ✓</b>
+          <span>처음 {r.correct}/{r.total} → 다시 풀어 맞힘 {fixedN}개 · 해설 보고 정답 처리 {wrong.length - fixedN}개</span>
+        </div>
+      )}
+      {wrong.map(({ q, i }) => (
+        <RetryItem key={q.no} q={q} idx={i} first={r.answers?.[i] ?? null} done={st[q.no]} onPick={(k) => pick(q, k)} />
+      ))}
+    </section>
+  );
+}
+
 function Essay({ e, idx }: { e: MockEssay; idx: number }) {
   const [open, setOpen] = useState(false);
   return (
@@ -87,6 +168,8 @@ export default function MockExamPage() {
   const [err, setErr] = useState("");
   const [result, setResult] = useState<MockResult | null>(null);
   const [confirm, setConfirm] = useState(false);
+  const [retryDone, setRetryDone] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const offset = useRef(0); // 서버 시각 - 내 시각
   const dirty = useRef(false);
   const answersRef = useRef<(number | null)[]>([]);
@@ -170,6 +253,7 @@ export default function MockExamPage() {
     const { data, error } = await sb().rpc("mock_submit", { p_attempt: start.attempt, p_answers: answersRef.current });
     submitting.current = false;
     if (error) { setErr(friendly(error)); setPhase("taking"); return; }
+    setShowAll(false);
     setResult(data as MockResult);
     setPhase("result");
     loadInfo();
@@ -179,6 +263,7 @@ export default function MockExamPage() {
   async function openResult(attempt: number) {
     const { data, error } = await sb().rpc("mock_result", { p_attempt: attempt });
     if (error) return setErr(friendly(error));
+    setShowAll(false);
     setResult(data as MockResult);
     setPhase("result");
     window.scrollTo({ top: 0 });
@@ -210,9 +295,17 @@ export default function MockExamPage() {
           <button type="button" className="btn line" onClick={() => { setPhase("intro"); setResult(null); }}>시험 소개로</button>
           <Link className="btn line" href="/mock">다른 예상 시험</Link>
         </div>
+        <RetryRound key={r.attempt} r={r} onAllDone={setRetryDone} />
         <section className="panel">
-          <div className="panel-head"><h2>선택형 풀이</h2><span className="small faint">정답과 해설을 확인해. 다시 풀기는 연습으로 기록돼.</span></div>
-          {r.items.map((q, i) => <Item key={q.no} q={q} idx={i} picked={r.answers?.[i] ?? null} graded />)}
+          <div className="panel-head"><h2>선택형 전체 풀이</h2><span className="small faint">정답과 해설을 확인해. 다시 풀기는 연습으로 기록돼.</span></div>
+          {retryDone || showAll ? (
+            r.items.map((q, i) => <Item key={q.no} q={q} idx={i} picked={r.answers?.[i] ?? null} graded />)
+          ) : (
+            <div className="panel-body retry-wait">
+              <p className="small muted" style={{ margin: 0 }}>틀린 문제를 위에서 다시 풀면 전체 풀이(정답 공개)가 열려.</p>
+              <button type="button" className="btn line mini" onClick={() => setShowAll(true)}>건너뛰고 지금 보기</button>
+            </div>
+          )}
         </section>
         {r.essays.length > 0 && (
           <section className="panel">
