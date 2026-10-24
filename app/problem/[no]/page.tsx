@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { GuardedText, isGuarded } from "@/components/Guarded";
 import AnswerInput, { emptyAnswer, hasAnswer, type AnswerValue } from "@/components/AnswerInput";
 import { DiffBadge, SubjBadge, TypeBadge } from "@/components/Badges";
+import { useSchoolNames } from "@/lib/useSchools";
 import { refreshFrames } from "@/components/Framed";
 import Explain from "@/components/Explain";
 import Figure from "@/components/Figure";
@@ -21,7 +22,7 @@ type Verdict =
   | { kind: "wa"; picked: number | null; text: string; penalty: number; repeat: boolean; nextPenalty: number }
   | { kind: "reveal"; answer: number | null; answerText: string | null; explanation: string };
 
-const QCOLS = "id,no,subject,unit,topic,qtype,difficulty,body,choices,figure,source,author,author_nick";
+const QCOLS = "id,no,subject,unit,topic,qtype,difficulty,body,choices,figure,source,author,author_nick,school_id";
 
 /** 맞혔을 때 잠깐 터지는 축하 효과 (움직임 줄이기 설정이면 안 보임) */
 function Burst() {
@@ -43,6 +44,7 @@ export default function ProblemPage() {
   const { no } = useParams<{ no: string }>();
   const router = useRouter();
   const { user, refreshScore, refreshStatus } = useMe();
+  const schoolNames = useSchoolNames();
   const [q, setQ] = useState<Question | null | undefined>(undefined);
   const [info, setInfo] = useState<ProblemRow | null>(null);
   const [unitList, setUnitList] = useState<ProblemRow[]>([]);
@@ -230,6 +232,7 @@ export default function ProblemPage() {
             </div>
             <div className="prob-tags">
               <SubjBadge code={q.subject} /> <TypeBadge type={q.qtype} /> <DiffBadge level={q.difficulty} />
+              {q.school_id && schoolNames[q.school_id] && <span className="school-tag" title="이 학교 시험 범위로 만든 문제">{schoolNames[q.school_id]} 범위</span>}
               <span className="prob-pts"><b>{d.points}</b>점</span>
               <span className="prob-stat" title="이 문제를 풀어 본 사람 중 맞힌 사람">
                 {info?.tried ? <>{info.solved_people ?? 0}명 맞힘 <i>/</i> {info.tried}명 중{info.submissions ? <> <i>·</i> 정답률 {info.accuracy}%</> : null}</> : "아직 아무도 안 풀었어"}

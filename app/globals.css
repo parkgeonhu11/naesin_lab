@@ -1537,3 +1537,8 @@ details.rules[open] > summary .more::after { content: " 접기"; }
 .retry-done b { color: var(--ac); font-size: 15px; }
 .retry-wait { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 @media (max-width: 640px) { .retry-done { margin: 12px 16px 4px; } }
+
+/* 다른 학교 범위 문제 표시 */
+.school-tag { display: inline-block; margin-right: 6px; padding: 0 7px; border-radius: 999px; font-size: 11px; font-weight: 700; vertical-align: 1px;
+  color: var(--sub, #5b6670); background: color-mix(in srgb, currentColor 10%, transparent); border: 1px solid color-mix(in srgb, currentColor 30%, transparent); white-space: nowrap; }
+.prob-tags .school-tag { font-size: 12px; padding: 1px 9px; vertical-align: 0; }

@@ -46,6 +46,8 @@ export type ProblemRow = {
   source: string;
   author_nick: string;
   from_student: boolean;
+  /** 학교 전용 문제면 그 학교 id (null이면 학년 공통) */
+  school_id?: string | null;
   /** 이 문제를 풀어 본 사람 수 (제출했거나 정답을 본 사람) */
   tried?: number;
   /** 이 문제를 맞힌 사람 수 */
@@ -90,6 +92,7 @@ export type Question = {
   author_nick: string;
   /** 문제 그림 (좌표 설명). 없으면 null */
   figure?: import("./figure").FigureSpec | null;
+  school_id?: string | null;
 };
 
 export type Progress = {

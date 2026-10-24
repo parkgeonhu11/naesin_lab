@@ -1,0 +1,6 @@
+-- 25. 문제는 학교로 막지 않는다: 같은 학년이면 모든 학교 문제가 보이고,
+--     학교 전용 문제는 목록에 학교 이름 태그로 표시 + "우리 학교 문제만" 필터로 고를 수 있다.
+--     (problem_list_v2의 학교 조건을 p_school을 직접 줄 때만 쓰도록 바꿈)
+-- 본문은 21_schools.sql의 problem_list_v2와 같고 where 절만 다름:
+--   where q.status = 'published' and q.grade = me.g
+--     and (p_school is null or q.school_id is null or q.school_id = p_school)

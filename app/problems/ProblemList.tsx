@@ -8,6 +8,7 @@ import { useMe } from "@/lib/useMe";
 import { buildTree, useProblems } from "@/lib/useProblems";
 import { useRowLink } from "@/lib/useRowLink";
 import { useMustPicks } from "@/lib/useMustPicks";
+import { useSchoolNames } from "@/lib/useSchools";
 import { MustPicksChips, MustPicksPanel } from "@/components/MustPicks";
 
 /** 주소에 쓸 분류 링크 (?subject=ma&unit=...&topic=...) */
@@ -20,8 +21,9 @@ const href = (subject?: string, unit?: string, topic?: string) => {
 };
 
 export default function ProblemList() {
-  const { error } = useMe();
-  const { rows, prog, cats } = useProblems();
+  const { error, school: mySchool } = useMe();
+  const { rows: allRows, prog, cats } = useProblems();
+  const schoolNames = useSchoolNames();
   const params = useSearchParams();
   const router = useRouter();
   const path = usePathname();
@@ -32,6 +34,12 @@ export default function ProblemList() {
   const diff = params.get("diff") ?? "";
   const type = params.get("type") ?? "";
   const mine = params.get("mine") ?? "";
+  const scope = params.get("school") ?? ""; // "" = 모든 학교, "mine" = 우리 학교 + 공통
+  /** 문제는 모든 학교 것이 다 보이고, 원하면 우리 학교 문제(+ 학년 공통)만 골라 볼 수 있다 */
+  const rows = useMemo(
+    () => (allRows && scope === "mine" ? allRows.filter((r) => !r.school_id || r.school_id === mySchool?.id) : allRows),
+    [allRows, scope, mySchool?.id],
+  );
   const [q, setQ] = useState("");
   const picks = useMustPicks();
 
@@ -56,10 +64,10 @@ export default function ProblemList() {
       if (mine === "unsolved" && (st === "solved" || st === "revealed")) return false;
       if (mine === "solved" && st !== "solved") return false;
       if (mine === "tried" && st !== "tried") return false;
-      if (kw && !`${r.no} ${r.title} ${r.unit} ${r.topic}`.toLowerCase().includes(kw)) return false;
+      if (kw && !`${r.no} ${r.title} ${r.unit} ${r.topic} ${(r.school_id && schoolNames[r.school_id]) || ""}`.toLowerCase().includes(kw)) return false;
       return true;
     });
-  }, [rows, subject, unit, topic, diff, type, mine, q, prog]);
+  }, [rows, subject, unit, topic, diff, type, mine, q, prog, schoolNames]);
 
   const solvedHere = shown.filter((r) => stateOf(prog[r.id]) === "solved").length;
   const crumbs = [subject && subjectName(subject), unit, topic].filter(Boolean) as string[];
@@ -149,7 +157,11 @@ export default function ProblemList() {
               <option value="solved">맞힌 문제</option>
               <option value="tried">틀린 문제</option>
             </select>
-            <input id="search" type="search" placeholder="번호·제목·단원 검색" value={q} onChange={(e) => setQ(e.target.value)} aria-label="검색" />
+            <select aria-label="학교" value={scope} onChange={(e) => setParam({ school: e.target.value })}>
+              <option value="">모든 학교 문제</option>
+              <option value="mine">{mySchool ? `${mySchool.name.replace(/학교$/, "")} 문제만` : "우리 학교 문제만"}</option>
+            </select>
+            <input id="search" type="search" placeholder="번호·제목·단원·학교 검색" value={q} onChange={(e) => setQ(e.target.value)} aria-label="검색" />
           </div>
           <div className="table-wrap">
             <table className="tbl plist">
@@ -187,7 +199,7 @@ export default function ProblemList() {
                 {shown.map((r) => (
                   <tr key={r.id} {...rowLink(`/problem/${r.no}`)}>
                     <td className="c n"><Link className="link" href={`/problem/${r.no}`}>{r.no}</Link></td>
-                    <td className="title-cell"><Link className="cell-link" href={`/problem/${r.no}`}>{picks?.has(r.id) && <span className="must-tag" title="꼭 풀어야 할 20문제">필수</span>}{r.title}</Link></td>
+                    <td className="title-cell"><Link className="cell-link" href={`/problem/${r.no}`}>{picks?.has(r.id) && <span className="must-tag" title="꼭 풀어야 할 20문제">필수</span>}{r.school_id && r.school_id !== mySchool?.id && schoolNames[r.school_id] && <span className="school-tag" title={`${schoolNames[r.school_id]} 시험 범위로 만든 문제`}>{schoolNames[r.school_id]}</span>}{r.title}</Link></td>
                     <td className="unit-cell hide-m">
                       {!subject && <><SubjBadge code={r.subject} /> </>}
                       <span className="small muted">{topic ? r.topic : unit ? r.topic : r.unit}</span>
