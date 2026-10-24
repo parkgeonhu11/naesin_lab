@@ -1526,3 +1526,14 @@ details.rules[open] > summary .more::after { content: " 접기"; }
   .ink-hint { bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); }
 }
 @media print { .ink-bar, .ink-hint { display: none !important; } }
+
+/* 틀린 문제 다시 풀기 */
+.retry-tag { margin-left: auto; flex: none; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--wa-soft); color: var(--wa); white-space: nowrap; }
+.retry-tag.fixed { background: var(--ac-soft); color: var(--ac); }
+.retry-tag.rev { background: var(--ac-soft); color: var(--ac); }
+.choice.tried { opacity: .55; text-decoration: line-through; text-decoration-color: var(--wa); }
+.choice.tried .cn { border-color: var(--wa); color: var(--wa); }
+.retry-done { margin: 14px 22px 4px; padding: 12px 16px; border-radius: 12px; background: var(--ac-soft); border: 1px solid var(--ac); display: grid; gap: 2px; font-size: 14px; }
+.retry-done b { color: var(--ac); font-size: 15px; }
+.retry-wait { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+@media (max-width: 640px) { .retry-done { margin: 12px 16px 4px; } }
