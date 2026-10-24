@@ -59,7 +59,9 @@ export function buildTree(rows: ProblemRow[], cats: Category[] = []): Tree {
     t[subject].units[u].count += n;
     t[subject].units[u].topics[tp] = (t[subject].units[u].topics[tp] ?? 0) + n;
   };
-  cats.forEach((c) => add(c.subject, c.unit, c.topic, 0));
+  // 분류는 학교·학년 구분이 없어서, 지금 보이는 문제가 있는 대단원만 뼈대로 쓴다 (다른 학교 단원은 숨김)
+  const shown = new Set(rows.map((r) => `${r.subject}|${r.unit || "기타"}`));
+  cats.filter((c) => shown.has(`${c.subject}|${c.unit || "기타"}`)).forEach((c) => add(c.subject, c.unit, c.topic, 0));
   rows.forEach((r) => add(r.subject, r.unit, r.topic, 1));
   return t;
 }
