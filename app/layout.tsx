@@ -4,7 +4,8 @@ import { MeProvider } from "@/lib/useMe";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "내신랩", template: "%s · 내신랩" },
+  title: { default: "[예비] 내신랩", template: "%s · [예비] 내신랩" },
+  robots: { index: false, follow: false },
   description: "중학생 내신 시험 범위 문제 풀고 친구들이랑 랭킹 대결",
   openGraph: { title: "내신랩", description: "시험 범위 문제 풀고 친구들이랑 랭킹 대결", type: "website" },
   applicationName: "내신랩",

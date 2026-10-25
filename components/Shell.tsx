@@ -12,6 +12,7 @@ import NicknameCard from "@/components/NicknameCard";
 import SchoolCard from "@/components/SchoolCard";
 import { levelOf } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
+import { IS_PREVIEW } from "@/lib/supabase";
 
 const NAV = [
   { href: "/", label: "홈", icon: "home" },
@@ -145,6 +146,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className="content">
+          {IS_PREVIEW && <div className="preview-bar" role="note"><b>예비 사이트</b> · 테스트 전용 DB라 여기서 푼 기록은 실제 랭킹에 안 들어가.</div>}
           {notice && <div className="notice warn">{notice}</div>}
           <WarningModal />
           {path === "/" && <InstallBanner />}

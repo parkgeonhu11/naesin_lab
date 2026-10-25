@@ -1580,3 +1580,5 @@ a.side-google { display: flex; justify-content: center; }
 .ad-text .ad-to { color: var(--faint); font-size: 12px; }
 .ad-report { justify-self: end; background: none; border: 0; color: var(--faint); font-size: 12px; text-decoration: underline; padding: 6px 0; min-height: 32px; }
 .ad-thanks { margin: 6px 0 0; }
+
+.preview-bar { background: repeating-linear-gradient(-45deg, #fff3cd, #fff3cd 10px, #ffe8a3 10px, #ffe8a3 20px); color: #5c4400; border: 1px solid #e8c766; border-radius: var(--radius-s); padding: 8px 14px; font-size: 13px; margin-bottom: 14px; }

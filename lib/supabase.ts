@@ -1,8 +1,18 @@
 "use client";
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+/**
+ * 예비 사이트(preview 브랜치) 전용: 실제 사이트 DB 대신 테스트 전용 DB에 붙는다.
+ * Vercel 환경 변수를 안 바꿔도 실제 학생 기록·랭킹에 섞이지 않게 여기서 고정.
+ * (공개용 publishable 키라 코드에 있어도 괜찮음. 실제 사이트에 반영할 때는 이 부분을 빼야 함)
+ */
+export const IS_PREVIEW = true;
+const PREVIEW_URL = "https://ewmorkxmxancrplgxtwf.supabase.co";
+const PREVIEW_KEY = "sb_publishable_8grVuWord6ZHGSW-gMosrQ_Cxw9B0Ar";
+const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const demo = envUrl.includes("demo.supabase.co"); // 화면 확인용 빌드
+const url = demo ? envUrl : PREVIEW_URL;
+const key = demo ? (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "") : PREVIEW_KEY;
 
 export const isConfigured = url.startsWith("https://") && key.length > 10;
 
