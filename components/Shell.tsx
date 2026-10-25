@@ -8,8 +8,7 @@ import { useEffect, useState } from "react";
 import Icon from "@/components/Icon";
 import { useQnaUnread } from "@/components/Qna";
 import { BanScreen, WarningModal } from "@/components/FairPlay";
-import LoginGate from "@/components/LoginGate";
-import NicknameCard, { GoogleButton } from "@/components/NicknameCard";
+import NicknameCard from "@/components/NicknameCard";
 import SchoolCard from "@/components/SchoolCard";
 import { levelOf } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
@@ -35,10 +34,26 @@ export function Avatar({ name, className = "" }: { name?: string | null; classNa
   return <span className={`avatar ${className}`} aria-hidden="true">{(name ?? "?").trim().slice(0, 1) || "?"}</span>;
 }
 
+/** 게스트 안내: 한 번 닫으면 이 브라우저에서는 다시 안 보임 */
+function GuestTip({ loginHref }: { loginHref: string }) {
+  const [hide, setHide] = useState(true);
+  useEffect(() => {
+    try { setHide(localStorage.getItem("nl-guest-tip") === "1"); } catch { setHide(false); }
+  }, []);
+  if (hide) return null;
+  return (
+    <div className="guest-tip" role="status">
+      <span><b>게스트로 기록 중이야.</b> 이 브라우저에만 저장돼서 기록을 지우거나 기기를 바꾸면 못 찾아. 로그인하면 그대로 옮겨져.</span>
+      <Link href={loginHref} className="btn small-btn">로그인</Link>
+      <button type="button" className="close" aria-label="안내 닫기" onClick={() => { setHide(true); try { localStorage.setItem("nl-guest-tip", "1"); } catch {} }}><Icon name="x" /></button>
+    </div>
+  );
+}
+
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const isAdminOf = useAdmins();
-  const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, googleOn, banned, school, grade, needSchool } = useMe();
+  const { nickname, points, rank, ready, user, mustRename, isAnon, notice, saveNickname, authChecked, needLogin, banned, school, grade, needSchool } = useMe();
   const scopeLabel = school ? `${school.name.replace(/학교$/, "")} ${grade ?? ""}학년` : "중학생 내신 대비";
   const amAdmin = !!user && !user.is_anonymous && isAdminOf(user.id);
   const qnaNew = useQnaUnread(!!user && authChecked && !needLogin);
@@ -58,6 +73,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     try { localStorage.setItem("nl-theme", next); } catch {}
   };
 
+  const loginHref = `/login${path && path !== "/" ? `?next=${encodeURIComponent(path)}` : ""}`;
   const active = (href: string) =>
     href === "/" ? path === "/" : path === href || path.startsWith(href + "/") || (href === "/problems" && path.startsWith("/problem/"));
   const score = `${points}점${rank ? ` · ${rank}위` : ""}`;
@@ -88,7 +104,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         )}
       </nav>
       <div className="side-foot">
-        {ready && user && isAnon && googleOn && <GoogleButton className="side-google" />}
+        {authChecked && (!user || isAnon) && <Link href={loginHref} className="btn side-google">로그인 · 회원가입</Link>}
         <InstallButton />
         <button type="button" className="theme-btn" onClick={toggleTheme}>
           <Icon name={theme === "dark" ? "sun" : "moon"} />
@@ -96,24 +112,15 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </button>
         <Link href="/me" className="me-card">
           <FramedAvatar name={nickname} frame={frameOf(rank, points)} />
-          <span><b>{nickname ?? "별명 정하기"} <span className="lv-chip">Lv.{lv}</span><NameBadges id={user?.id} max={1} /></b><small>{isAnon ? `${score} · 게스트` : score}</small></span>
+          <span><b>{nickname ?? (user ? "별명 정하기" : "게스트")} <span className="lv-chip">Lv.{lv}</span><NameBadges id={user?.id} max={1} /></b><small>{!user ? "문제를 풀면 기록이 시작돼" : isAnon ? `${score} · 게스트` : score}</small></span>
         </Link>
       </div>
     </>
   );
 
-  // 로그인 확인 중: 잠깐 로고만 / Google 로그인 필요: 로그인 화면 (관리자 페이지는 따로 로그인)
-  if (path !== "/admin" && path !== "/privacy" && path !== "/terms") {
-    if (!authChecked) {
-      return (
-        <div className="gate gate-wait" aria-busy="true">
-          <span className="brand-mark"><Icon name="logo" /></span>
-        </div>
-      );
-    }
-    if (needLogin) return <LoginGate />;
-    if (banned) return <BanScreen />;
-  }
+  // 로그인은 선택: 처음 온 사람도 바로 둘러보고 풀 수 있다. 로그인 화면은 메뉴 없이 전체 화면으로
+  if (path === "/login") return <>{children}</>;
+  if (banned && path !== "/admin" && path !== "/privacy" && path !== "/terms") return <BanScreen />;
 
   return (
     <div className={`app ${path.startsWith("/problem/") ? "solving" : ""}`}>
@@ -124,10 +131,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <span className="brand-mark"><Icon name="logo" /></span>
             <b>내신랩</b>
           </Link>
-          <Link href="/me" className="top-me">
-            <FramedAvatar name={nickname} frame={frameOf(rank, points)} />
-            {score}
-          </Link>
+          {authChecked && (!user || isAnon) && <Link href={loginHref} className="top-login">로그인</Link>}
+          {user && (
+            <Link href="/me" className="top-me">
+              <FramedAvatar name={nickname} frame={frameOf(rank, points)} />
+              {points}점{rank ? <span className="top-rank"> · {rank}위</span> : null}
+            </Link>
+          )}
           <button type="button" className="menu-btn" aria-label="전체 메뉴" onClick={() => setOpen(true)}>
             <Icon name="menu" size={24} />
             {qnaNew > 0 && <span className="menu-dot" aria-label="질문방에 새 답변" />}
@@ -138,7 +148,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           {notice && <div className="notice warn">{notice}</div>}
           <WarningModal />
           {path === "/" && <InstallBanner />}
-          {ready && user && path !== "/admin" && (!nickname || mustRename) && (
+          {user && isAnon && path !== "/" && path !== "/me" && <GuestTip loginHref={loginHref} />}
+          {ready && user && path !== "/admin" && ((!nickname && !isAnon) || mustRename) && (
             <NicknameCard
               current={nickname}
               onSave={saveNickname}
@@ -146,7 +157,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               title={mustRename ? "지금 별명은 쓸 수 없어서 바꿔야 해. 새 별명을 정해 줘" : "랭킹에 쓸 별명을 정해 줘"}
             />
           )}
-          {ready && user && path !== "/admin" && nickname && !mustRename && needSchool && <SchoolCard />}
+          {ready && user && !isAnon && path !== "/admin" && nickname && !mustRename && needSchool && <SchoolCard />}
           {children}
         </main>
         {ready && user && <TitleCelebrate userId={user.id} />}

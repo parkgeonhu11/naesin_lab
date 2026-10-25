@@ -33,6 +33,8 @@ type MeState = {
   signOut: () => Promise<void>;
   /** 게스트(익명) 계정으로 들어가기. 이 브라우저에만 저장되고, 잃어버리면 되찾을 수 없음 */
   enterAsGuest: () => Promise<void>;
+  /** 계정이 없으면 게스트 계정을 조용히 만든다 (별명은 "게스트0000" 자동). 문제를 풀 때만 쓴다 */
+  ensureGuest: () => Promise<User | null>;
   notice: string | null;
   /** 너무 빨리 맞힌 답이 쌓여서 받은 경고 (아직 확인 안 함) */
   warned: boolean;
@@ -113,7 +115,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
         const g = await googleEnabled();
         if (!alive) return;
         setLoginRequired(g);
-        // 처음 온 사람(세션 없음)은 언제나 로그인 화면부터. 임시 계정은 만들지 않음
+        // 처음 온 사람(세션 없음)은 로그인 없이 그냥 둘러본다. 게스트 계정은 문제를 풀 때 만든다
       }
       if (!alive) return;
       setAuthChecked(true);
@@ -185,6 +187,30 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loadNick, refreshScore, logLogin]);
 
+  const ensureGuest = useCallback(async (): Promise<User | null> => {
+    try {
+      const { data } = await sb().auth.getSession();
+      if (data.session?.user) return data.session.user;
+      const u = await ensureUser();
+      setUser(u);
+      logLogin(u);
+      // 별명 정하라고 막지 않게, 처음엔 "게스트1234" 같은 별명을 붙여 둔다 (내 정보에서 바꿀 수 있음)
+      const { data: p } = await sb().from("profiles").select("nickname").eq("user_id", u.id).maybeSingle();
+      if (!p?.nickname) {
+        for (let i = 0; i < 4; i++) {
+          const n = `게스트${Math.floor(1000 + Math.random() * 9000)}${i > 1 ? Math.floor(Math.random() * 10) : ""}`;
+          const { error } = await sb().rpc("set_nickname", { p_nick: n });
+          if (!error) break;
+        }
+      }
+      await Promise.all([loadNick(u.id), refreshScore()]);
+      return u;
+    } catch (e) {
+      setNotice(friendly(e));
+      return null;
+    }
+  }, [loadNick, refreshScore, logLogin]);
+
   const signOut = useCallback(async () => {
     const u = await signOutUser(false);
     setUser(u);
@@ -200,7 +226,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
   return createElement(Ctx.Provider, { value: {
     user, nickname, mustRename, isAnon: user?.is_anonymous ?? true, email: user?.email ?? null,
     school, grade, needSchool: !!nickname && (!school || !grade), saveSchool,
-    points, rank, error, ready, authChecked, needLogin: !user, googleOn: loginRequired || (!!user && !user.is_anonymous), saveNickname, signInGoogle, signOut, enterAsGuest, notice, refreshScore,
+    points, rank, error, ready, authChecked, needLogin: !user, googleOn: loginRequired || (!!user && !user.is_anonymous), saveNickname, signInGoogle, signOut, enterAsGuest, ensureGuest, notice, refreshScore,
     warned, banned, ackWarning, refreshStatus,
   } }, children);
 }
@@ -209,4 +235,14 @@ export function useMe(): MeState {
   const v = useContext(Ctx);
   if (!v) throw new Error("MeProvider가 필요해");
   return v;
+}
+
+/** 문제 풀이 화면에서 쓴다: 로그인 안 한 사람이면 게스트 계정을 만들어서 기록이 남게 한다 */
+export function useGuestSession() {
+  const me = useMe();
+  const { authChecked, user, ensureGuest } = me;
+  useEffect(() => {
+    if (isConfigured && authChecked && !user) ensureGuest();
+  }, [authChecked, user, ensureGuest]);
+  return me;
 }

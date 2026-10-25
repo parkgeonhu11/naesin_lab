@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import AdSlot from "@/components/AdSlot";
 import { useEffect, useMemo, useState } from "react";
 import { ResultText } from "@/components/Badges";
 import Icon from "@/components/Icon";
@@ -98,7 +99,7 @@ export default function Home() {
 
       {/* 인사 배너 */}
       <section className="hero">
-        <h1>{name}, 오늘도 한 문제씩 올라가 보자</h1>
+        <h1>{ready && !user ? "어서 와! 로그인 없이 바로 풀어 봐" : `${name}, 오늘도 한 문제씩 올라가 보자`}</h1>
         <p>시험 범위 {total}문제가 준비돼 있어. 처음에 맞히면 만점, 찍으면 감점이야.</p>
         <div className="hero-meta">
           <span className="streak">
@@ -113,7 +114,7 @@ export default function Home() {
         </div>
         <div className="hero-cta">
           <Link href={nextProblem ? `/problem/${nextProblem.no}` : "/problems"} className="btn white big">
-            {nextProblem ? <>이어서 풀기 <small>{subjectName(nextProblem.subject)} {nextProblem.no}번</small></> : "문제 목록 보기"}
+            {nextProblem ? <>{ready && !user ? "첫 문제 풀기" : "이어서 풀기"} <small>{subjectName(nextProblem.subject)} {nextProblem.no}번</small></> : "문제 목록 보기"}
           </Link>
           <Link href="/mock" className="hero-link">예상 시험</Link>
           <Link href="/review" className="hero-link">오답 노트{wrongOpen ? <b>{wrongOpen}</b> : null}</Link>
@@ -127,6 +128,19 @@ export default function Home() {
 
       {/* 임시(익명) 계정이면 Google 로그인 권하기 */}
       {ready && nickname && isAnon && <AccountCard compact />}
+      {ready && !user && (
+        <section className="panel panel-body account-card compact welcome-card">
+          <div className="grow">
+            <b>회원가입 없이 바로 풀 수 있어</b>
+            <div className="small muted">
+              문제를 풀면 게스트로 기록돼. Google로 로그인하면 휴대폰·컴퓨터 어디서든 <b>같은 점수·오답 노트·성적 분석</b>이 이어지고, 게스트 기록도 그대로 옮겨져.
+            </div>
+          </div>
+          <div className="welcome-actions">
+            <Link href="/login" className="btn">로그인 · 회원가입</Link>
+          </div>
+        </section>
+      )}
 
       {/* 내 숫자 */}
       <section className="kpis" aria-label="내 기록">
@@ -326,6 +340,7 @@ export default function Home() {
           );
         })}
       </section>
+      <AdSlot placement="home" />
     </>
   );
 }

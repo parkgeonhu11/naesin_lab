@@ -93,6 +93,18 @@ export type Question = {
   /** 문제 그림 (좌표 설명). 없으면 null */
   figure?: import("./figure").FigureSpec | null;
   school_id?: string | null;
+  /** 검수 상태: pending 검수 전 / checked 정답·해설 확인 / verified 교과서·범위 대조까지 끝남 */
+  review_status?: ReviewStatus;
+  basis?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ReviewStatus = "pending" | "checked" | "verified";
+export const REVIEW: Record<ReviewStatus, { label: string; tip: string }> = {
+  pending: { label: "검수 전", tip: "아직 관리자가 정답·해설을 다시 확인하지 않은 문제야. 이상한 점이 있으면 오류 제보를 눌러 줘." },
+  checked: { label: "정답·해설 검수", tip: "관리자가 정답과 해설이 맞는지 확인한 문제야." },
+  verified: { label: "교과서 대조 완료", tip: "정답·해설 확인에 더해, 교과서와 시험 범위에 맞는지까지 대조한 문제야." },
 };
 
 export type Progress = {

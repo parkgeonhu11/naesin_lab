@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import AdSlot from "@/components/AdSlot";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { DiffBadge, DiffGuide, StateIcon, SubjBadge, TypeBadge } from "@/components/Badges";
@@ -219,6 +220,7 @@ export default function ProblemList() {
           <DiffGuide />
         </section>
       </div>
+      <AdSlot placement="list" />
     </>
   );
 }
