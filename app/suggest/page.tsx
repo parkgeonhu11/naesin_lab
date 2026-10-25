@@ -10,7 +10,7 @@ type Mine = { id: string; subject: string; body: string; status: string };
 const STATUS: Record<string, string> = { pending: "검토 중", published: "공개됨 (+5점)", rejected: "반려됨" };
 
 export default function SuggestPage() {
-  const { user, error, ensureGuest } = useMe();
+  const { user, error } = useMe();
   const [mine, setMine] = useState<Mine[]>([]);
 
   const load = useCallback(async () => {
@@ -37,7 +37,6 @@ export default function SuggestPage() {
         explainFrom={4}
         submitLabel="제안하기"
         onSubmit={async (q) => {
-          if (!(await ensureGuest())) throw new Error("계정을 만들지 못했어. 잠깐 뒤에 다시 해 줘.");
           const { error } = await sb().rpc("suggest_question", {
             p_subject: q.subject, p_unit: q.unit, p_topic: q.topic, p_qtype: q.qtype, p_difficulty: q.difficulty, p_body: q.body,
             p_choices: q.choices, p_answer: q.answer, p_answer_text: q.answerText, p_explanation: q.explanation,

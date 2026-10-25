@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { subjectName } from "@/lib/data";
 import { bonusOf, CIRC, figHtml, minsec, mmss, type MockEssay, type MockItem, type MockResult, type MockStart } from "@/lib/mock";
 import { friendly, sb } from "@/lib/supabase";
-import { useGuestSession } from "@/lib/useMe";
+import { useMe } from "@/lib/useMe";
 
 type Phase = "intro" | "taking" | "submitting" | "result";
 type Prev = { id: number; ranked: boolean; status: string; correct: number | null; total: number | null; elapsed: number | null; score: number | null; submitted_at: string | null };
@@ -158,7 +158,7 @@ function Essay({ e, idx }: { e: MockEssay; idx: number }) {
 
 export default function MockExamPage() {
   const { id } = useParams<{ id: string }>();
-  const { user, isAnon } = useGuestSession();
+  const { user, isAnon } = useMe();
   const [phase, setPhase] = useState<Phase>("intro");
   const [info, setInfo] = useState<{ title: string; subject: string; scope: string | null; time_limit: number; items: number; essays: number; takers: number } | null>(null);
   const [prev, setPrev] = useState<Prev[] | null>(null);

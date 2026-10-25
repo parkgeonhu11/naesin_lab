@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import AdSlot from "@/components/AdSlot";
 import { useRowLink } from "@/lib/useRowLink";
 import { useEffect, useState } from "react";
 import { NameBadges, FramedAvatar, TitleChip, useAdmins, useFrames } from "@/components/Framed";
@@ -105,7 +104,6 @@ export default function RankingPage() {
         </div>
       </section>
       {scope === "all" && <p className="small faint" style={{ margin: 0 }}>전체 점수에는 문제 제안 보너스(승인된 문제당 +5점)도 들어가.</p>}
-      <AdSlot placement="ranking" />
     </>
   );
 }

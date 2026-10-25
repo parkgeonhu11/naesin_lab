@@ -11,7 +11,7 @@ import Figure from "@/components/Figure";
 import MockPromo from "@/components/MockPromo";
 import { DIFF, diffOf, QTYPES, shuffle, stateOf, SUBJECTS, subjectName, type GradeResult, type Question } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
-import { useGuestSession } from "@/lib/useMe";
+import { useMe } from "@/lib/useMe";
 import { useTrace } from "@/lib/useTrace";
 import { buildTree, useProblems } from "@/lib/useProblems";
 
@@ -23,7 +23,7 @@ const COUNTS = [5, 10, 15, 20, 30];
 
 export default function Exam() {
   const params = useSearchParams();
-  const { user, refreshScore, refreshStatus } = useGuestSession();
+  const { user, refreshScore, refreshStatus } = useMe();
   const { rows, prog, cats } = useProblems();
   const tree = useMemo(() => buildTree(rows ?? [], cats), [rows, cats]);
 

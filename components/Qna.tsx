@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { NameBadges, FramedAvatar, useFrames } from "@/components/Framed";
 import { ago, rpcAll, subjectName } from "@/lib/data";
 import { friendly, sb } from "@/lib/supabase";
-import { useMe } from "@/lib/useMe";
 
 /**
  * 질문방
@@ -61,14 +60,12 @@ export function QnaThread({ id, done, onChanged }: { id: number; done: boolean; 
   const [peek, setPeek] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const frameFor = useFrames();
-  const { ensureGuest } = useMe();
 
   const load = useCallback(async () => {
-    await ensureGuest(); // 질문을 열어 보면 읽음 표시를 남겨야 해서, 로그인 안 했으면 게스트로
     const { data, error } = await sb().rpc("qna_thread", { p_thread: id });
     if (error) setErr(friendly(error));
     setT((data as Thread) ?? null);
-  }, [id, ensureGuest]);
+  }, [id]);
   useEffect(() => {
     load();
   }, [load]);

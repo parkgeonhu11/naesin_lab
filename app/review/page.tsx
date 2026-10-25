@@ -40,7 +40,7 @@ function Table({ rows, empty, showRetry }: { rows: Row[]; empty: string; showRet
 }
 
 export default function ReviewPage() {
-  const { error, user, authChecked } = useMe();
+  const { error } = useMe();
   const { rows, prog } = useProblems();
 
   const { open, fixed, revealed } = useMemo(() => {
@@ -59,9 +59,6 @@ export default function ReviewPage() {
         <h1>오답 노트</h1>
         <span className="muted small">틀린 문제를 모아 뒀어. 다시 맞히면 절반 점수를 받아. 두 번째 오답부터는 틀릴 때마다 감점되니까 신중하게!</span>
       </div>
-      {authChecked && !user && (
-        <div className="notice">아직 푼 문제가 없어. 문제를 풀다 틀리면 여기에 자동으로 모여. <Link className="link" href="/problems">문제 풀러 가기</Link></div>
-      )}
 
       <section className="panel">
         <div className="panel-head">

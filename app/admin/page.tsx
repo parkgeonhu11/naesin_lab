@@ -6,8 +6,6 @@ import { AdminGrants, GrantPanel } from "@/components/AdminGrant";
 import AdminFairplay from "@/components/AdminFairplay";
 import AdminQna from "@/components/AdminQna";
 import AdminReports from "@/components/AdminReports";
-import AdminReview from "@/components/AdminReview";
-import AdminAds from "@/components/AdminAds";
 import CategoryManager from "@/components/CategoryManager";
 import QuestionForm from "@/components/QuestionForm";
 import { ago, DIFF, subjectName } from "@/lib/data";
@@ -102,8 +100,6 @@ export default function AdminPage() {
       </div>
 
       <AdminReports />
-      <AdminReview />
-      <AdminAds />
 
       <AdminFairplay />
       <AdminQna />

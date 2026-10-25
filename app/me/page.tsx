@@ -22,7 +22,7 @@ function Meter({ value }: { value: number | null }) {
 }
 
 export default function MePage() {
-  const { user, nickname, points, rank, error, saveNickname, isAnon, authChecked } = useMe();
+  const { user, nickname, points, rank, error, saveNickname, isAnon } = useMe();
   const isAdmin = useAdmins();
   const [week, setWeek] = useState(0);
   const [stats, setStats] = useState<UnitStat[] | null>(null);
@@ -69,24 +69,6 @@ export default function MePage() {
   const totalSubs = (stats ?? []).reduce((a, s) => a + +s.submissions, 0);
   const totalOk = (stats ?? []).reduce((a, s) => a + +s.correct_submissions, 0);
   const examLink = (s: UnitStat) => `/exam?${new URLSearchParams({ subject: s.subject, unit: s.unit, topic: s.topic })}`;
-
-  if (authChecked && !user) {
-    return (
-      <>
-        <div className="page-title"><h1>내 정보</h1><span className="muted small">성적 분석</span></div>
-        <section className="panel panel-body account-card welcome-card">
-          <div className="grow">
-            <b>아직 기록이 없어</b>
-            <div className="small muted">문제를 풀면 게스트로 기록이 시작되고, 여기서 과목·단원별 정답률과 약점 유형을 볼 수 있어. Google로 로그인하면 어느 기기에서든 이어져.</div>
-          </div>
-          <div className="welcome-actions">
-            <Link href="/problems" className="btn line">문제 풀러 가기</Link>
-            <Link href="/login?next=%2Fme" className="btn">로그인 · 회원가입</Link>
-          </div>
-        </section>
-      </>
-    );
-  }
 
   return (
     <>
