@@ -42,7 +42,7 @@ export default function SchoolCard({ title = "학교와 학년을 골라 줘", c
         setBusy(true);
         try {
           await saveSchool(full, g);
-          setMsg("저장했어. 이제 우리 학교·학년 문제와 랭킹이 보여.");
+          setMsg("저장했어. 이제 우리 학교 랭킹과 우리 학교 문제 표시가 보여.");
           setOpen(false);
         } catch (err) {
           setMsg(friendly(err));
@@ -52,13 +52,13 @@ export default function SchoolCard({ title = "학교와 학년을 골라 줘", c
     >
       <div>
         <b>{title}</b>
-        <div className="small muted">학교·학년에 맞는 시험 범위 문제와 우리 학교 랭킹을 보여 줄게. 나중에 내 정보에서 바꿀 수 있어.</div>
+        <div className="small muted">같은 학년 문제와 우리 학교 랭킹을 보여 줄게. 나중에 내 정보에서 바꿀 수 있어.</div>
       </div>
       <div className="school-row">
         <div className="school-pick">
           <label className="small muted" htmlFor="school-q">학교</label>
           <input
-            id="school-q" className="input" value={q} maxLength={20} autoComplete="off" placeholder="예: 서연중학교"
+            id="school-q" className="input" value={q} maxLength={20} autoComplete="off" placeholder="예: ○○중학교"
             onChange={(e) => { setQ(e.target.value); setOpen(true); setMsg(""); }}
             onFocus={() => setOpen(true)}
             aria-autocomplete="list" aria-controls="school-list"

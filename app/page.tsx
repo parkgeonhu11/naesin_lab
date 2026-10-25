@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { ResultText } from "@/components/Badges";
 import Icon from "@/components/Icon";
 import AccountCard from "@/components/AccountCard";
-import ExamDday from "@/components/ExamDday";
 import MockPromo from "@/components/MockPromo";
 import { NameBadges, FramedAvatar, frameOf, useAdmins, useFrames } from "@/components/Framed";
 import { ADMIN_ACC, ago, levelOf, stateOf, SUBJECTS, subjectLetter, subjectName, type BoardRow, type MySummary, type Submission, type UnitStat } from "@/lib/data";
@@ -122,7 +121,6 @@ export default function Home() {
       </section>
 
       {/* 시험 D-day */}
-      <ExamDday counts={bySubject} />
 
       {/* 예상 시험 안내 */}
       <MockPromo />

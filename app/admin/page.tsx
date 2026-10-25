@@ -33,7 +33,7 @@ export default function AdminPage() {
   const [kind, setKind] = useState("bad");
   const [wordMsg, setWordMsg] = useState("");
   const [qGrade, setQGrade] = useState(3);
-  const [qSchool, setQSchool] = useState("seoyeon");
+  const [qSchool, setQSchool] = useState("");
   const [schools, setSchools] = useState<{ id: string; name: string; students: number }[]>([]);
   useEffect(() => { sb().rpc("school_search", { p_q: "" }).then(({ data }) => setSchools((data as { id: string; name: string; students: number }[]) ?? [])); }, []);
 
