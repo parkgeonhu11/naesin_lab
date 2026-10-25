@@ -32,7 +32,7 @@ export default function Home() {
     let alive = true;
     const load = async () => {
       const [board, recent, me, my, us] = await Promise.all([
-        sb().rpc("leaderboard_v2", { p_subject: "all", p_period: "all", p_limit: 5, p_scope: "school" }),
+        sb().rpc("leaderboard_v2", { p_subject: "all", p_period: "all", p_limit: 5, p_scope: "all" }),
         sb().rpc("recent_submissions", { p_limit: 6, p_only_me: false }),
         user ? sb().rpc("my_summary") : Promise.resolve({ data: null }),
         user ? sb().rpc("recent_submissions", { p_limit: 5, p_only_me: true }) : Promise.resolve({ data: [] }),

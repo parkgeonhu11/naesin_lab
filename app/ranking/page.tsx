@@ -14,7 +14,7 @@ export default function RankingPage() {
   const frameFor = useFrames();
   const [scope, setScope] = useState("all");
   const [period, setPeriod] = useState<"all" | "week">("all");
-  const [area, setArea] = useState<"school" | "grade" | "all">("school");
+  const [area, setArea] = useState<"school" | "grade" | "all">("all");
   const [rows, setRows] = useState<BoardRow[] | null>(null);
 
   useEffect(() => {
@@ -41,9 +41,9 @@ export default function RankingPage() {
       </div>
       <section className="panel">
         <div className="tabs">
-          <button aria-pressed={area === "school"} onClick={() => setArea("school")}>{school ? `${school.name.replace(/학교$/, "")} ${grade ?? ""}학년` : "우리 학교"}</button>
-          <button aria-pressed={area === "grade"} onClick={() => setArea("grade")}>{grade ? `전국 ${grade}학년` : "같은 학년"}</button>
           <button aria-pressed={area === "all"} onClick={() => setArea("all")}>전체</button>
+          <button aria-pressed={area === "grade"} onClick={() => setArea("grade")}>{grade ? `전국 ${grade}학년` : "같은 학년"}</button>
+          <button aria-pressed={area === "school"} onClick={() => setArea("school")}>{school ? `${school.name.replace(/학교$/, "")} ${grade ?? ""}학년` : "우리 학교"}</button>
         </div>
         <div className="tabs">
           <button aria-pressed={period === "all"} onClick={() => setPeriod("all")}>누적</button>

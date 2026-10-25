@@ -32,7 +32,7 @@ export default function MePage() {
     if (!user) return;
     (async () => {
       const [{ data: wk }, { data: us }] = await Promise.all([
-        sb().rpc("leaderboard_v2", { p_subject: "all", p_period: "week", p_limit: 500, p_scope: "school" }),
+        sb().rpc("leaderboard_v2", { p_subject: "all", p_period: "week", p_limit: 500, p_scope: "all" }),
         sb().rpc("my_unit_stats"),
       ]);
       setWeek(((wk as BoardRow[]) ?? []).find((r) => r.user_id === user.id)?.points ?? 0);

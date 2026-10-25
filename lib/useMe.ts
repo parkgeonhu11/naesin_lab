@@ -65,7 +65,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
 
   const refreshScore = useCallback(async () => {
     // 머리글의 순위는 우리 학교·학년 안에서
-    const { data } = await sb().rpc("leaderboard_v2", { p_subject: "all", p_period: "all", p_limit: 500, p_scope: "school" });
+    const { data } = await sb().rpc("leaderboard_v2", { p_subject: "all", p_period: "all", p_limit: 500, p_scope: "all" });
     const { data: s } = await sb().auth.getSession();
     const uid = s.session?.user.id;
     const mine = ((data as { user_id: string; points: number; rank: number }[]) ?? []).find((r) => r.user_id === uid);
