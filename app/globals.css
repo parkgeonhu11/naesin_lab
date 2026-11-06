@@ -1883,3 +1883,11 @@ html[data-theme="dark"] .cols-tbl td.flip { background: #4a3b0a; }
   .viz { padding: 12px; }
   .runner-actions .btn.grow { flex-basis: 100%; order: -1; }
 }
+.sum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sum-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px; display: grid; gap: 8px; font-size: 15px; line-height: 1.7; }
+.sum-head { display: flex; align-items: center; gap: 10px; }
+.sum-head b { flex: 1; font-size: 16px; }
+.sum-head .lesson-no { width: 28px; height: 28px; border-radius: 8px; font-size: 13px; }
+.unit-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.unit-links a { color: #fff; font-weight: 600; font-size: 13.5px; opacity: .9; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) { .sum-grid { grid-template-columns: 1fr; } }

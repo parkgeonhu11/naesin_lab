@@ -173,7 +173,6 @@ function SyntheticVisual() {
       <div className="syn-grid" style={{ gridTemplateColumns: `48px repeat(${cs.length}, 1fr)` }}>
         <div className="syn-r">{r}</div>
         {cs.map((c, i) => <div key={`c${i}`} className="syn-c">{c}</div>)}
-        <div />
         {cs.map((_, i) => <div key={`m${i}`} className={`syn-m${shownMid(i) ? " on" : ""}`}>{shownMid(i) ? mid[i] : ""}</div>)}
         <div />
         {cs.map((_, i) => (
