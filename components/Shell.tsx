@@ -17,6 +17,7 @@ import { IS_PREVIEW } from "@/lib/supabase";
 
 const NAV = [
   { href: "/", label: "홈", icon: "home" },
+  ...(IS_PREVIEW ? [{ href: "/learn", label: "수학 학습", icon: "learn" }] : []),
   { href: "/problems", label: "문제", icon: "book" },
   { href: "/exam", label: "시험지", icon: "paper" },
   { href: "/mock", label: "예상 시험", icon: "timer" },
@@ -90,7 +91,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <nav className="side-nav" aria-label="메뉴">
         {NAV.map((n, i) => (
           <span key={n.href} style={{ display: "contents" }}>
-            {i === 7 && <span className="side-sep" />}
+            {n.href === "/status" && <span className="side-sep" />}
             <Link href={n.href} aria-current={active(n.href) ? "page" : undefined}>
               <Icon name={n.icon} />
               {n.label}

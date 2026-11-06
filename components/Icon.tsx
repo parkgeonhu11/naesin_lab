@@ -24,6 +24,12 @@ const P: Record<string, string> = {
   share: "M12 15V3m0 0-4 4m4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1",
   plusbox: "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM12 8v8M8 12h8",
   dots: "M12 5h.01M12 12h.01M12 19h.01",
+  learn: "M2 9.5 12 4l10 5.5-10 5.5zM6 11.7V16c0 1.6 2.7 3.2 6 3.2s6-1.6 6-3.2v-4.3M22 9.5V15",
+  lock: "M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5zM12 15v2",
+  bulb: "M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z",
+  arrow: "M5 12h14M13 6l6 6-6 6",
+  back: "M19 12H5M11 6l-6 6 6 6",
+  repeat: "M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5",
 };
 
 export default function Icon({ name, size }: { name: keyof typeof P | string; size?: number }) {
