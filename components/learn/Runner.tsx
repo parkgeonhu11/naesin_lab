@@ -9,7 +9,7 @@ import type { Item } from "@/lib/learn/types";
 const CIRCLE = ["①", "②", "③", "④", "⑤"];
 const HINT_WAIT = 10; // 다음 힌트까지 기다리는 초 (바로 풀이로 넘어가지 않게)
 
-export type RunResult = { key: string; credited: boolean; hints: number };
+export type RunResult = { key: string; credited: boolean; hints: number; points: number };
 
 function useTick(on: boolean) {
   const [, set] = useState(0);
@@ -34,7 +34,7 @@ export default function Runner({
   compact?: boolean;
   typeTitle?: (tag: string) => string | undefined;
 }) {
-  const { ensureGuest } = useMe();
+  const { ensureGuest, refreshScore } = useMe();
   const [idx, setIdx] = useState(0);
   const [choice, setChoice] = useState<number | null>(null);
   const [text, setText] = useState("");
@@ -67,7 +67,8 @@ export default function Runner({
       const r = await submitLearn(item.key, item.qtype === "mc" ? choice : null, item.qtype === "short" ? text : null, reveal ? 4 : hints, mode);
       setRes(r);
       setRevealed(reveal);
-      setResults((rs) => [...rs, { key: item.key, credited: r.credited, hints: reveal ? 4 : hints }]);
+      setResults((rs) => [...rs, { key: item.key, credited: r.credited, hints: reveal ? 4 : hints, points: r.points ?? 0 }]);
+      if (r.points) refreshScore();
     } catch (e) {
       setErr(friendly(e));
     }
@@ -150,7 +151,14 @@ export default function Runner({
           <b className="runner-verdict">
             {res.correct ? (res.credited ? "맞았어!" : "맞았어! (힌트 3개를 써서 통과 계산에서는 빠져)") : revealed ? "풀이를 확인했어 (오답으로 기록하고 복습에 넣을게)" : "아깝다, 틀렸어"}
           </b>
-          {!res.correct && res.answer_text && <div className="small">정답: <RichLine text={/\$/.test(res.answer_text) ? res.answer_text : `$${res.answer_text}$`} /></div>}
+          {(res.points ?? 0) > 0 && (
+            <div className="earn">
+              <span className="earn-pts">+{res.points}점</span>
+              {(res.bonus ?? []).map((b) => <span key={b.label} className="earn-bonus">🎉 {b.label} +{b.points}</span>)}
+            </div>
+          )}
+          {res.credited && !res.points && mode !== "review" && <div className="small faint">이미 점수를 받은 문제야. 문제마다 처음 맞힐 때만 점수가 들어가.</div>}
+                    {!res.correct && res.answer_text && <div className="small">정답: <RichLine text={/\$/.test(res.answer_text) ? res.answer_text : `$${res.answer_text}$`} /></div>}
           <Rich text={res.explanation} className="runner-expl" />
           {res.review === "queued" && <p className="small review-note">이 유형은 <b>내일 복습</b>에 새 문제로 다시 나와. 1일 → 3일 → 7일 동안 맞히면 완전히 내 것!</p>}
           {res.review === "next" && <p className="small review-note">복습 성공! 다음 복습은 며칠 뒤에 다시 나와.</p>}

@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import Icon from "@/components/Icon";
 import { itemsOf, unitBySlug } from "@/lib/learn/units";
-import { PASS, summarize, useLearn } from "@/lib/learn/useLearn";
+import { LEARN_POINTS, PASS, summarize, useLearn } from "@/lib/learn/useLearn";
 import { STAGES, type Stage } from "@/lib/learn/types";
 
 const when = (iso: string) => {
@@ -53,7 +53,17 @@ export default function UnitPage() {
           <p>{u.summary}</p>
           {cont && <Link className="btn big" href={cont.href}>이어서 하기 · {cont.label} <Icon name="arrow" /></Link>}
           {s && !s.current && <p className="unit-done">🎉 다항식 단원을 모두 통과했어! 복습만 이어 가면 돼.</p>}
-          <div className="unit-links"><Link href={`/learn/${u.slug}/summary`}>한 장 요약 보기</Link></div>
+          <div className="unit-links">
+            <Link href={`/learn/${u.slug}/summary`}>한 장 요약 보기</Link>
+            <details className="pts-rule">
+              <summary>이 단원에서 모은 점수 <b>{status?.points ?? 0}점</b></summary>
+              <div>
+                문제마다 처음 맞히면 개념 확인 {LEARN_POINTS.concept} · 기본 {LEARN_POINTS.basic} · 유형 {LEARN_POINTS.type} · 실전 {LEARN_POINTS.practical}점,
+                레슨 통과 +{LEARN_POINTS.lesson}, 단계 통과 +{LEARN_POINTS.stage.concept}/{LEARN_POINTS.stage.basic}/{LEARN_POINTS.stage.type}/{LEARN_POINTS.stage.practical}, 복습 성공 +{LEARN_POINTS.review}.
+                틀려도 감점은 없고, 힌트를 3개 다 보거나 풀이를 보면 0점이야. 학습 점수는 수학 점수로 총점·랭킹에 들어가.
+              </div>
+            </details>
+          </div>
         </div>
         <div className="unit-ring" aria-label={`진행률 ${pct}%`}>
           <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" className="ring-bg" /><circle cx="60" cy="60" r="50" className="ring-fg" style={{ strokeDasharray: `${pct * 3.1416} 314.16` }} /></svg>

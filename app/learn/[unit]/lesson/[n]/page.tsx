@@ -137,10 +137,12 @@ export default function LessonPage() {
 
       {quiz && (() => {
         const ok = quiz.filter((r) => r.credited).length;
+        const pts = quiz.reduce((t, r) => t + r.points, 0);
         const pass = ok >= PASS.conceptOk;
         return (
           <article className={`lcard result ${pass ? "pass" : "fail"}`}>
             <div className="result-big">{pass ? "통과!" : "조금만 더!"}</div>
+            {pts > 0 && <div className="earn"><span className="earn-pts">+{pts}점</span></div>}
             <p><b>{quiz.length}문제 중 {ok}문제</b>를 맞혔어. {pass ? "이 레슨은 끝!" : `${PASS.conceptOk}문제 이상이면 통과야.`}</p>
             <div className="lcard-actions">
               {!pass && <button type="button" className="btn line" onClick={() => { setStep(0); setQuiz(null); }}>카드 다시 보기</button>}

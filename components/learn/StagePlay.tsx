@@ -69,11 +69,13 @@ export default function StagePlay({ u, mode }: { u: Unit; mode: Mode }) {
       )}
       {result && status && (() => {
         const ok = result.filter((r) => r.credited).length;
+        const pts = result.reduce((t, r) => t + r.points, 0);
         const s = summarize(u, status);
         const passedNow = mode.kind === "basic" ? s.passed.basic : mode.kind === "type" ? s.typeDone(mode.tag) : mode.kind === "practical" ? s.passed.practical : false;
         return (
           <section className={`panel panel-body lcard result ${passedNow ? "pass" : ""}`}>
             <div className="result-big">{result.length}문제 중 {ok}개</div>
+            {pts > 0 && <div className="earn"><span className="earn-pts">+{pts}점</span><span className="small faint">학습 점수는 총점·랭킹에 그대로 들어가</span></div>}
             <p>{passedNow ? "이 단계를 통과했어! 👏" : mode.kind === "review" ? "복습 끝! 맞힌 유형은 다음 복습 날짜로 넘어갔어." : "틀린 유형은 내일 복습에 새 문제로 다시 나와. 한 번 더 도전해도 좋아."}</p>
             <div className="lcard-actions">
               <Link className="btn line" href={`/learn/${u.slug}`}>단원으로</Link>

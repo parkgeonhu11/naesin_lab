@@ -13,8 +13,9 @@ export type LearnStatus = {
   seen: Record<string, boolean>;
   reviews: Review[];
   mastered: number;
+  points: number;
 };
-const EMPTY: LearnStatus = { concept: {}, basic: { ok: 0, n: 0 }, types: {}, practical: { ok: 0, n: 0 }, seen: {}, reviews: [], mastered: 0 };
+const EMPTY: LearnStatus = { concept: {}, basic: { ok: 0, n: 0 }, types: {}, practical: { ok: 0, n: 0 }, seen: {}, reviews: [], mastered: 0, points: 0 };
 
 /** 통과 조건 (기획서 3장) */
 export const PASS = { conceptOk: 4, basicOk: 8, typeOk: 3, practicalRate: 0.7 };
@@ -52,15 +53,26 @@ export function useLearn(u: Unit | null) {
   const load = useCallback(async () => {
     if (!u) return;
     if (!user) { setStatus(EMPTY); return; }
-    const { data, error } = await sb().rpc("learn_status", { p_unit: u.id });
+    const [{ data, error }, pts] = await Promise.all([
+      sb().rpc("learn_status", { p_unit: u.id }),
+      sb().rpc("learn_points", { p_unit: u.id }),
+    ]);
     if (error) { setErr(error.message); setStatus(EMPTY); return; }
-    setStatus({ ...EMPTY, ...(data as LearnStatus) });
+    setStatus({ ...EMPTY, ...(data as LearnStatus), points: typeof pts.data === "number" ? pts.data : 0 });
   }, [u, user]);
   useEffect(() => { if (authChecked) load(); }, [authChecked, load]);
   return { status, reload: load, err };
 }
 
-export type Graded = { correct: boolean; credited: boolean; answer: number | null; answer_text: string; explanation: string; review: string | null };
+export type Graded = {
+  correct: boolean; credited: boolean; answer: number | null; answer_text: string; explanation: string; review: string | null;
+  /** 이번에 받은 점수 (문제 점수 + 보너스) */
+  points?: number;
+  bonus?: { label: string; points: number }[];
+};
+
+/** 점수 규칙 (34_learn_points.sql 과 같게) */
+export const LEARN_POINTS = { concept: 2, basic: 5, type: 8, practical: 12, review: 3, lesson: 10, stage: { concept: 20, basic: 20, type: 30, practical: 50 } };
 
 export async function submitLearn(key: string, choice: number | null, text: string | null, hints: number, mode: "learn" | "review" | "practical") {
   const { data, error } = await sb().rpc("learn_submit", { p_key: key, p_choice: choice, p_text: text, p_hints: hints, p_mode: mode });
