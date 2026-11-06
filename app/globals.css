@@ -1855,6 +1855,13 @@ html[data-theme="dark"] .cols-tbl td.flip { background: #4a3b0a; }
 .runner-result.ok .runner-verdict { color: var(--ac); }
 .runner-result.no .runner-verdict { color: var(--wa); }
 .runner-expl { background: var(--surface); border-radius: 10px; padding: 12px 14px; font-size: 15.5px; }
+.rich .rk { border-radius: 8px; padding: 8px 10px; line-height: 1.65; }
+.rich .rk-core { background: var(--ac-soft); }
+.rich .rk-trap { background: var(--wa-soft); }
+.rich .rk-tag { display: inline-block; font-size: 12px; font-weight: 700; border-radius: 6px; padding: 1px 7px; margin-right: 8px; vertical-align: 1px; }
+.rich .rk-core .rk-tag { background: var(--ac); color: #fff; }
+.rich .rk-trap .rk-tag { background: var(--wa); color: #fff; }
+.rich .rk-head { font-size: 13px; font-weight: 700; color: var(--faint); margin-bottom: -4px; }
 .review-note { margin: 0; background: var(--surface); border-radius: 10px; padding: 8px 12px; }
 .runner.compact .runner-body { font-size: 16px; }
 

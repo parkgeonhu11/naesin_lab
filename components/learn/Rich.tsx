@@ -63,6 +63,14 @@ export default function Rich({ text, className = "" }: { text: string; className
             </div>
           );
         }
+        // 해설 머리말: **핵심** … / **풀이** / **주의** …
+        const tag = /^\*\*(핵심|풀이|주의)\*\*\s*/.exec(b);
+        if (tag) {
+          const rest = b.slice(tag[0].length);
+          const k = tag[1] === "핵심" ? "core" : tag[1] === "주의" ? "trap" : "step";
+          if (!rest) return <p key={i} className="rk-head">{tag[1]}</p>;
+          return <p key={i} className={`rk rk-${k}`}><span className="rk-tag">{tag[1]}</span><Inline text={rest} /></p>;
+        }
         return <p key={i}>{lines.map((l, k) => <Fragment key={k}>{k > 0 && <br />}<Inline text={l} /></Fragment>)}</p>;
       })}
     </div>
