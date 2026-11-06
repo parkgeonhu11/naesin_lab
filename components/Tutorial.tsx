@@ -10,27 +10,38 @@ import { useMe } from "@/lib/useMe";
  * 처음 온 사람용 튜토리얼 (게임 튜토리얼처럼 1분짜리)
  *  1. 환영  2. 학교·학년 고르기  3. 화면 둘러보기(메뉴를 하나씩 비춰 줌)  4. 첫 문제 같이 풀기  → '첫걸음' 배지
  * 진행 상태는 이 브라우저(localStorage)에 저장하고, 끝내면 계정에도 기록한다(finish_tutorial).
+ * 휴대폰에서는 화면 아래에서 올라오는 짧은 카드로, 글자 수를 줄여서 보여 준다.
  */
 const KEY = "nl-tour-v1";
 const START_EVENT = "nl-tour-start";
 const SKIP_PATHS = ["/login", "/admin", "/privacy", "/terms", "/account-delete"];
 /** 이미 이만큼 푼 사람은 자동으로 튜토리얼을 띄우지 않는다 (내 정보에서 다시 볼 수 있음) */
 const AUTO_MAX_SOLVED = 3;
+const MOBILE = "(max-width: 1000px)";
 
 type Step = "welcome" | "school" | "tour" | "problem" | "done";
 type Saved = { step: Step; stop: number; no?: number | null; done?: boolean };
 type Graded = { correct?: boolean; points?: number; penalty?: number; already?: boolean; reveal?: boolean };
+type Stop = { sel: string; title: string; text: string };
 
-const STEPS: Step[] = ["welcome", "school", "tour", "problem", "done"];
-const STEP_NAME: Record<Step, string> = { welcome: "시작", school: "학교·학년", tour: "화면 둘러보기", problem: "첫 문제", done: "끝" };
+const STEPS: Step[] = ["welcome", "school", "tour", "problem"];
 
-const STOPS: { sel: string; fallback?: string; title: string; text: string }[] = [
-  { sel: '.side-nav a[href="/problems"], .tabbar a[href="/problems"]', title: "문제", text: "과목·단원별 문제가 전부 여기 있어. 맞히면 난이도에 따라 5~20점을 받아." },
-  { sel: '.side-nav a[href="/exam"], .tabbar a[href="/exam"]', title: "시험지", text: "범위를 고르면 실제 시험처럼 여러 문제를 한 번에 풀 수 있어." },
-  { sel: '.side-nav a[href="/review"], .tabbar a[href="/review"]', title: "오답 노트", text: "틀린 문제만 모아서 다시 풀 수 있어. 시험 전에 여기부터 보면 좋아." },
-  { sel: '.side-nav a[href="/ranking"], .tabbar a[href="/ranking"]', title: "랭킹", text: "모은 점수로 전체·우리 학교 순위를 볼 수 있어. 참여는 자유야." },
-  { sel: '.side-nav a[href="/mock"]', fallback: ".menu-btn", title: "예상 시험", text: "시간을 재고 보는 모의 시험이야. 휴대폰에서는 오른쪽 위 메뉴(☰) 안에 있어." },
-  { sel: ".side .me-card, .top-me", title: "내 정보", text: "내 점수·레벨·약점 단원을 보는 곳이야. 학교·학년도 여기서 바꿀 수 있어." },
+/** 컴퓨터: 왼쪽 메뉴를 하나씩 */
+const PC_STOPS: Stop[] = [
+  { sel: '.side-nav a[href="/problems"]', title: "문제", text: "과목·단원별 문제가 여기 다 있어. 맞히면 5~20점." },
+  { sel: '.side-nav a[href="/exam"]', title: "시험지", text: "범위를 골라 시험처럼 한 번에 풀어." },
+  { sel: '.side-nav a[href="/review"]', title: "오답 노트", text: "틀린 문제만 모아서 다시 풀어." },
+  { sel: '.side-nav a[href="/ranking"]', title: "랭킹", text: "모은 점수로 순위를 겨뤄." },
+  { sel: '.side-nav a[href="/mock"]', title: "예상 시험", text: "시간 재고 보는 모의 시험이야." },
+  { sel: ".side .me-card", title: "내 정보", text: "점수·레벨·약점 단원을 봐." },
+];
+/** 휴대폰: 아래 탭 4개 + 오른쪽 위 메뉴 */
+const M_STOPS: Stop[] = [
+  { sel: '.tabbar a[href="/problems"]', title: "문제", text: "여기서 문제를 풀고 점수를 모아." },
+  { sel: '.tabbar a[href="/exam"]', title: "시험지", text: "시험처럼 한 번에 풀어." },
+  { sel: '.tabbar a[href="/review"]', title: "오답 노트", text: "틀린 문제만 다시 풀어." },
+  { sel: '.tabbar a[href="/ranking"]', title: "랭킹", text: "점수로 순위를 겨뤄." },
+  { sel: ".menu-btn", title: "전체 메뉴", text: "예상 시험·내 정보는 여기 있어." },
 ];
 
 function load(): Saved | null {
@@ -55,12 +66,24 @@ function visible(sel: string): HTMLElement | null {
   return null;
 }
 
-function Progress({ step }: { step: Step }) {
+function useMobile() {
+  const [m, setM] = useState(false);
+  useEffect(() => {
+    const mq = matchMedia(MOBILE);
+    const on = () => setM(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return m;
+}
+
+/** 진행 막대 (4칸) */
+function Dots({ step }: { step: Step }) {
   const i = STEPS.indexOf(step);
   return (
-    <div className="tour-progress" aria-label={`튜토리얼 ${Math.min(i + 1, 4)} / 4 단계`}>
-      {STEPS.slice(0, 4).map((s, k) => <span key={s} className={k < i ? "on" : k === i ? "now" : ""} title={STEP_NAME[s]} />)}
-      <small>{Math.min(i + 1, 4)} / 4 · {STEP_NAME[step]}</small>
+    <div className="tour-progress" aria-label={`튜토리얼 ${i + 1} / 4 단계`}>
+      {STEPS.map((s, k) => <span key={s} className={k < i ? "on" : k === i ? "now" : ""} />)}
     </div>
   );
 }
@@ -68,15 +91,17 @@ function Progress({ step }: { step: Step }) {
 export default function Tutorial() {
   const path = usePathname();
   const router = useRouter();
+  const mobile = useMobile();
   const { ready, user, isAnon, nickname, school, grade } = useMe();
   const [st, setSt] = useState<Saved | null>(null);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [graded, setGraded] = useState<Graded | null>(null);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
-  const [mini, setMini] = useState(false);
+  const [rules, setRules] = useState(false);
 
   const go = useCallback((next: Saved | null) => { setSt(next); save(next); }, []);
+  const STOPS = mobile ? M_STOPS : PC_STOPS;
 
   // 처음 켤 때: 저장된 진행 상태 이어가기, 없으면 계정 상태를 보고 자동 시작
   useEffect(() => {
@@ -96,7 +121,7 @@ export default function Tutorial() {
 
   // '다시 보기'
   useEffect(() => {
-    const on = () => { setGraded(null); setMsg(""); setSt(load()); };
+    const on = () => { setGraded(null); setMsg(""); setRules(false); setSt(load()); };
     window.addEventListener(START_EVENT, on);
     return () => window.removeEventListener(START_EVENT, on);
   }, []);
@@ -112,16 +137,17 @@ export default function Tutorial() {
   // 첫 문제 안내 카드가 문제(제출 버튼)를 가리지 않게 아래 여백을 준다
   const docked = st?.step === "problem" && !st.done;
   useEffect(() => {
-    document.body.classList.toggle("tour-docked", docked && !mini);
+    document.body.classList.toggle("tour-docked", docked);
     return () => document.body.classList.remove("tour-docked");
-  }, [docked, mini]);
+  }, [docked]);
 
-  // 둘러보기: 비출 메뉴 위치 따라가기
-  const stop = st?.step === "tour" ? STOPS[st.stop] : null;
+  // 둘러보기: 비출 메뉴 위치 따라가기 (휴대폰↔컴퓨터 전환으로 칸 수가 줄면 마지막 칸으로)
+  const stopIdx = st?.step === "tour" ? Math.min(st.stop, STOPS.length - 1) : -1;
+  const stop = stopIdx >= 0 ? STOPS[stopIdx] : null;
   useLayoutEffect(() => {
     if (!stop) { setRect(null); return; }
     const find = () => {
-      const el = visible(stop.sel) ?? (stop.fallback ? visible(stop.fallback) : null);
+      const el = visible(stop.sel);
       setRect(el ? el.getBoundingClientRect() : null);
     };
     find();
@@ -148,6 +174,7 @@ export default function Tutorial() {
     if (error) { setMsg(friendly(error)); return; }
     const no = (data as number | null) ?? null;
     setGraded(null);
+    setRules(false);
     if (!no) { go({ step: "done", stop: 0 }); await finish(true); return; }
     go({ step: "problem", stop: 0, no });
     router.push(`/problem/${no}`);
@@ -157,141 +184,136 @@ export default function Tutorial() {
     await finish(true);
   };
   const skipBtn = <button type="button" className="tour-skip" onClick={skip}>건너뛰기</button>;
+  /** 휴대폰은 아래에서 올라오는 카드, 컴퓨터는 가운데 카드 */
+  const modal = (children: React.ReactNode, extra = "") => (
+    <div className={`tour-bg${mobile ? " sheet" : ""}`} role="dialog" aria-modal="true" aria-labelledby="tour-title">
+      <div className={`tour-card ${extra}`}>{children}</div>
+    </div>
+  );
 
   // ---------- 1. 환영 ----------
   if (st.step === "welcome") {
-    return (
-      <div className="tour-bg" role="dialog" aria-modal="true" aria-labelledby="tour-title">
-        <div className="tour-card center">
-          <Progress step="welcome" />
-          <div className="tour-hero" aria-hidden="true">👋</div>
-          <h2 id="tour-title">내신랩에 온 걸 환영해!</h2>
-          <p>학교 시험 대비 문제를 풀고, 점수를 모아서 친구들과 랭킹을 겨루는 곳이야. <b>1분</b>이면 사용법을 다 알 수 있어.</p>
-          <ul className="tour-list">
-            <li>학교·학년 고르기</li>
-            <li>어디에 뭐가 있는지 둘러보기</li>
-            <li>쉬운 문제 하나 같이 풀어 보기</li>
-          </ul>
-          <div className="tour-actions">
-            {skipBtn}
-            <button type="button" className="btn big" onClick={() => go({ step: "school", stop: 0 })}>튜토리얼 시작</button>
-          </div>
+    return modal(
+      <>
+        <Dots step="welcome" />
+        <h2 id="tour-title">내신랩에 온 걸 환영해!</h2>
+        {mobile
+          ? <p>문제 풀고 점수 모으는 곳이야. <b>1분</b>만 같이 둘러보자.</p>
+          : <>
+              <p>학교 시험 대비 문제를 풀고, 점수를 모아서 친구들과 랭킹을 겨루는 곳이야. <b>1분</b>이면 사용법을 다 알 수 있어.</p>
+              <ul className="tour-list">
+                <li>학교·학년 고르기</li>
+                <li>어디에 뭐가 있는지 둘러보기</li>
+                <li>쉬운 문제 하나 같이 풀어 보기</li>
+              </ul>
+            </>}
+        <div className="tour-actions">
+          {skipBtn}
+          <button type="button" className="btn big" onClick={() => go({ step: "school", stop: 0 })}>시작하기</button>
         </div>
-      </div>
+      </>,
+      "center",
     );
   }
 
   // ---------- 2. 학교·학년 ----------
   if (st.step === "school") {
     const set = !!school && !!grade;
-    return (
-      <div className="tour-bg" role="dialog" aria-modal="true" aria-labelledby="tour-title">
-        <div className="tour-card wide">
-          <Progress step="school" />
-          <h2 id="tour-title">어느 학교 몇 학년이야?</h2>
-          <p>내 학년 문제를 먼저 보여 주고, 우리 학교 랭킹도 따로 볼 수 있어. 모르는 사람에게 보이는 건 학교 이름과 학년뿐이야.</p>
-          <SchoolCard title={set ? "저장됐어. 바꾸려면 다시 골라" : "학교와 학년을 골라 줘"} compact />
-          <div className="tour-actions">
-            <button type="button" className="tour-skip" onClick={() => go({ step: "tour", stop: 0 })}>나중에 할게</button>
-            <button type="button" className="btn big" disabled={!set} onClick={() => go({ step: "tour", stop: 0 })}>다음</button>
-          </div>
+    return modal(
+      <>
+        <Dots step="school" />
+        <h2 id="tour-title">어느 학교 몇 학년이야?</h2>
+        {!mobile && <p>내 학년 문제를 먼저 보여 주고, 우리 학교 랭킹도 볼 수 있어. 다른 사람에게는 학교 이름과 학년만 보여.</p>}
+        <SchoolCard title="" compact />
+        <div className="tour-actions">
+          <button type="button" className="tour-skip" onClick={() => go({ step: "tour", stop: 0 })}>나중에</button>
+          <button type="button" className="btn big" disabled={!set} onClick={() => go({ step: "tour", stop: 0 })}>다음</button>
         </div>
-      </div>
+      </>,
+      mobile ? "" : "wide",
     );
   }
 
   // ---------- 3. 화면 둘러보기 ----------
   if (st.step === "tour" && stop) {
-    const pad = 6;
-    const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
-    const vh = typeof window !== "undefined" ? window.innerHeight : 768;
-    const cardW = Math.min(320, vw - 32);
-    let tipStyle: React.CSSProperties = { left: (vw - cardW) / 2, top: vh / 2 - 100, width: cardW };
-    if (rect) {
-      const below = rect.bottom + 14 + 190 < vh;
-      const sideRoom = rect.right + 16 + cardW < vw && rect.left < vw / 3;
-      if (sideRoom) tipStyle = { left: rect.right + 16, top: Math.max(16, Math.min(rect.top - 10, vh - 220)), width: cardW };
-      else tipStyle = {
-        left: Math.max(16, Math.min(rect.left + rect.width / 2 - cardW / 2, vw - cardW - 16)),
-        ...(below ? { top: rect.bottom + 14 } : { bottom: vh - rect.top + 14 }),
-        width: cardW,
-      };
+    const last = stopIdx === STOPS.length - 1;
+    const pad = mobile ? 3 : 6;
+    let tipStyle: React.CSSProperties | undefined;
+    if (!mobile) {
+      const vw = window.innerWidth, vh = window.innerHeight, cardW = 300;
+      tipStyle = rect
+        ? { left: rect.right + 16, top: Math.max(16, Math.min(rect.top - 10, vh - 200)), width: cardW }
+        : { left: (vw - cardW) / 2, top: vh / 2 - 90, width: cardW };
+    } else if (rect && rect.top < window.innerHeight / 2) {
+      // 위쪽(메뉴 버튼)을 비출 때는 카드를 그 아래에
+      tipStyle = { top: rect.bottom + 12, bottom: "auto" };
     }
-    const last = st.stop === STOPS.length - 1;
+    const nav = (
+      <div className="tour-actions">
+        {stopIdx > 0
+          ? <button type="button" className="tour-skip" onClick={() => go({ ...st, stop: stopIdx - 1 })}>이전</button>
+          : skipBtn}
+        {last
+          ? <button type="button" className="btn" disabled={busy} onClick={toProblem}>{busy ? "찾는 중…" : "첫 문제 풀기"}</button>
+          : <button type="button" className="btn" onClick={() => go({ ...st, stop: stopIdx + 1 })}>다음</button>}
+      </div>
+    );
     return (
       <div className="tour-layer" role="dialog" aria-modal="true" aria-labelledby="tour-title">
         <div className="tour-block" />
         {rect
           ? <div className="tour-spot" style={{ left: rect.left - pad, top: rect.top - pad, width: rect.width + pad * 2, height: rect.height + pad * 2 }} />
           : <div className="tour-dim" />}
-        <div className="tour-card tip" style={tipStyle}>
-          <Progress step="tour" />
-          <h2 id="tour-title">{stop.title} <small className="faint">{st.stop + 1}/{STOPS.length}</small></h2>
-          <p>{stop.text}</p>
-          <div className="tour-actions">
-            {st.stop > 0
-              ? <button type="button" className="tour-skip" onClick={() => go({ ...st, stop: st.stop - 1 })}>이전</button>
-              : skipBtn}
-            {last
-              ? <button type="button" className="btn" disabled={busy} onClick={toProblem}>{busy ? "문제 찾는 중…" : "첫 문제 풀러 가기"}</button>
-              : <button type="button" className="btn" onClick={() => go({ ...st, stop: st.stop + 1 })}>다음</button>}
+        <div className={`tour-card tip${mobile ? " m" : ""}`} style={tipStyle}>
+          <div className="tour-tip-head">
+            <Dots step="tour" />
+            <small className="faint">{stopIdx + 1}/{STOPS.length}</small>
           </div>
+          <h2 id="tour-title">{stop.title}</h2>
+          <p>{stop.text}</p>
+          {nav}
           {msg && <div className="small no">{msg}</div>}
         </div>
       </div>
     );
   }
 
-  // ---------- 4. 첫 문제 같이 풀기 (화면 아래 안내 카드, 문제는 그대로 풀 수 있음) ----------
+  // ---------- 4. 첫 문제 같이 풀기 (화면 아래 작은 안내, 문제는 그대로 풀 수 있음) ----------
   if (st.step === "problem") {
     const here = st.no != null && path === `/problem/${st.no}`;
     const ok = graded?.correct;
     const finished = ok || graded?.reveal || graded?.already;
+    let line: React.ReactNode;
+    let action: React.ReactNode = skipBtn;
+    if (!here && !finished) {
+      line = "첫 문제가 기다리고 있어";
+      action = <>{skipBtn}{st.no != null && <Link className="btn" href={`/problem/${st.no}`}>문제로</Link>}</>;
+    } else if (finished) {
+      line = ok ? (graded?.points ? <>맞았어! <b>+{graded.points}점</b></> : "맞았어!") : graded?.reveal ? "정답 보기는 0점이야" : "이미 푼 문제였어";
+      action = <button type="button" className="btn" onClick={toDone}>마치기</button>;
+    } else if (graded) {
+      line = graded.penalty ? <>아깝다! <b>{graded.penalty}점</b> 깎였어. 다시 골라 봐</> : "아깝다! 첫 오답은 감점 없어. 다시 골라 봐";
+    } else {
+      line = <>보기를 고르고 <b>제출</b>! 맞히면 <b>+5점</b></>;
+    }
     return (
-      <aside className={`tour-dock${mini ? " mini" : ""}`} aria-live="polite" aria-label="튜토리얼 안내">
-        <div className="tour-dock-head">
-          <Progress step="problem" />
-          <button type="button" className="tour-skip" onClick={() => setMini(!mini)} aria-expanded={!mini}>{mini ? "안내 펼치기" : "접기"}</button>
+      <aside className="tour-dock" aria-live="polite" aria-label="튜토리얼 안내">
+        <div className="tour-dock-row">
+          <Dots step="problem" />
+          {here && !finished && (
+            <button type="button" className="tour-skip" onClick={() => setRules(!rules)} aria-expanded={rules}>{rules ? "규칙 닫기" : "점수 규칙"}</button>
+          )}
         </div>
-        {!mini && <>
-        {!here && !finished && (
-          <>
-            <b>첫 문제가 기다리고 있어</b>
-            <div className="tour-actions">
-              {skipBtn}
-              {st.no != null && <Link className="btn" href={`/problem/${st.no}`}>문제로 돌아가기</Link>}
-            </div>
-          </>
+        <div className="tour-dock-line">{line}</div>
+        {rules && here && !finished && (
+          <ul className="tour-list small">
+            <li>첫 오답은 감점 없음, 두 번째부터 배점의 25% 감점</li>
+            <li>한 번 틀린 뒤 맞히면 점수 절반</li>
+            <li>정답 보기 = 0점</li>
+          </ul>
         )}
-        {here && !graded && (
-          <>
-            <b>쉬운 문제 하나 같이 풀어 보자</b>
-            <ul className="tour-list small">
-              <li>보기를 고르고 <b>제출</b>을 눌러. 이 문제는 <b>기초</b>라서 맞히면 <b>+5점</b>이야.</li>
-              <li>틀려도 괜찮아. <b>첫 오답은 감점이 없고</b>, 두 번째 오답부터 배점의 25%가 깎여.</li>
-              <li>한 번이라도 틀린 뒤 맞히면 점수는 절반이야.</li>
-              <li>정말 모르겠으면 <b>정답 보기</b>로 넘어가도 돼 (0점).</li>
-            </ul>
-            <div className="tour-actions">{skipBtn}</div>
-          </>
-        )}
-        {graded && !finished && (
-          <>
-            <b>아깝다! {graded.penalty ? `${graded.penalty}점 깎였어.` : "첫 오답이라 감점은 없어."}</b>
-            <div className="small muted">다른 보기를 골라서 다시 제출해 봐. 모르겠으면 정답 보기를 눌러도 돼.</div>
-            <div className="tour-actions">{skipBtn}</div>
-          </>
-        )}
-        {finished && (
-          <>
-            <b>{ok ? (graded?.points ? `맞았어! +${graded.points}점 받았어` : "맞았어!") : graded?.reveal ? "정답을 확인했어. 이렇게 넘기면 0점이야" : "이미 끝낸 문제였어"}</b>
-            <div className="small muted">아래 해설까지 읽으면 완벽해. 이렇게 하나씩 풀면서 점수를 모으면 돼.</div>
-            <div className="tour-actions">
-              <button type="button" className="btn" onClick={toDone}>튜토리얼 마치기</button>
-            </div>
-          </>
-        )}
-        </>}
+        <div className="tour-actions">{action}</div>
+        {finished && <div className="small muted">해설까지 읽으면 완벽해.</div>}
       </aside>
     );
   }
@@ -299,28 +321,28 @@ export default function Tutorial() {
   // ---------- 끝: 첫걸음 배지 ----------
   if (st.step === "done") {
     const close = () => go({ step: "done", stop: 0, done: true });
-    return (
-      <div className="tour-bg" role="dialog" aria-modal="true" aria-labelledby="tour-title">
-        <div className="tour-card center">
-          <div className="first-step-badge big" aria-hidden="true">첫걸음</div>
-          <h2 id="tour-title">튜토리얼 끝! 첫걸음 배지를 받았어</h2>
-          <p>배지는 내 정보에서 볼 수 있어. 사용법이 헷갈리면 내 정보 맨 아래에서 튜토리얼을 다시 볼 수 있어.</p>
-          {user && isAnon ? (
-            <>
-              <p className="small muted">지금은 게스트라 기록이 이 브라우저에만 저장돼. 로그인하면 기록을 그대로 옮겨서 어느 기기에서든 이어 할 수 있어.</p>
-              <div className="tour-actions">
-                <button type="button" className="tour-skip" onClick={close}>게스트로 계속하기</button>
-                <Link className="btn" href="/login" onClick={close}>로그인하고 기록 지키기</Link>
-              </div>
-            </>
-          ) : (
-            <div className="tour-actions">
-              <button type="button" className="tour-skip" onClick={close}>닫기</button>
-              <Link className="btn" href="/problems" onClick={close}>문제 풀러 가기</Link>
-            </div>
-          )}
-        </div>
-      </div>
+    return modal(
+      <>
+        <div className="first-step-badge big" aria-hidden="true">첫걸음</div>
+        <h2 id="tour-title">첫걸음 배지를 받았어!</h2>
+        <p className={mobile ? "small muted" : ""}>
+          {user && isAnon
+            ? "지금은 게스트라 이 기기에만 기록돼. 로그인하면 어디서든 이어져."
+            : "튜토리얼은 내 정보에서 다시 볼 수 있어."}
+        </p>
+        {user && isAnon ? (
+          <div className="tour-actions">
+            <button type="button" className="tour-skip" onClick={close}>게스트로 계속</button>
+            <Link className="btn" href="/login" onClick={close}>로그인하기</Link>
+          </div>
+        ) : (
+          <div className="tour-actions">
+            <button type="button" className="tour-skip" onClick={close}>닫기</button>
+            <Link className="btn" href="/problems" onClick={close}>문제 풀러 가기</Link>
+          </div>
+        )}
+      </>,
+      "center",
     );
   }
   return null;

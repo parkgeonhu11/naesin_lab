@@ -1592,12 +1592,12 @@ a.side-google { display: flex; justify-content: center; }
 .tour-card { background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 18px 50px rgba(8, 14, 30, .35); padding: 20px; display: grid; gap: 12px; width: min(440px, 100%); }
 .tour-card.wide { width: min(620px, 100%); }
 .tour-card.center { text-align: center; justify-items: center; }
-.tour-card.tip { position: fixed; padding: 16px; gap: 10px; }
+.tour-card.tip { position: fixed; padding: 16px; gap: 8px; }
 .tour-card h2 { margin: 0; font-size: 19px; }
-.tour-card.tip h2 { font-size: 17px; display: flex; align-items: baseline; gap: 8px; }
+.tour-card.tip h2 { font-size: 17px; }
 .tour-card p { margin: 0; line-height: 1.6; }
-.tour-card .school-card { box-shadow: none; text-align: left; order: 0; }
-.tour-hero { font-size: 40px; line-height: 1; }
+.tour-card .school-card { box-shadow: none; text-align: left; order: 0; border: 0; padding: 0; }
+.tour-card .school-card > div:first-child { display: none; }
 .tour-list { margin: 0; padding-left: 20px; display: grid; gap: 4px; text-align: left; }
 .tour-actions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; width: 100%; }
 .tour-card.center .tour-actions { justify-content: center; }
@@ -1607,13 +1607,28 @@ a.side-google { display: flex; justify-content: center; }
 .tour-progress span { width: 22px; height: 5px; border-radius: 3px; background: var(--line); }
 .tour-progress span.on { background: var(--brand); opacity: .45; }
 .tour-progress span.now { background: var(--brand); }
-.tour-progress small { margin-left: 6px; color: var(--faint); font-size: 12px; }
-.tour-dock { position: fixed; z-index: 150; right: 20px; bottom: 20px; width: min(380px, calc(100vw - 32px)); background: var(--surface); color: var(--text); border: 2px solid var(--brand); border-radius: var(--radius); box-shadow: 0 14px 40px rgba(8, 14, 30, .28); padding: 14px 16px; display: grid; gap: 8px; }
-@media (max-width: 1000px) { .tour-dock { left: 16px; right: 16px; width: auto; bottom: calc(68px + env(safe-area-inset-bottom, 0px)); } }
+.tour-tip-head, .tour-dock-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tour-dock-row .tour-skip { margin-right: 0; padding: 2px; font-size: 13px; }
+.tour-dock { position: fixed; z-index: 150; right: 20px; bottom: 20px; width: min(360px, calc(100vw - 32px)); background: var(--surface); color: var(--text); border: 2px solid var(--brand); border-radius: var(--radius); box-shadow: 0 14px 40px rgba(8, 14, 30, .28); padding: 14px 16px; display: grid; gap: 8px; }
+.tour-dock-line { font-size: 15.5px; font-weight: 600; line-height: 1.45; }
+.tour-dock .tour-actions { flex-wrap: nowrap; }
+body.tour-docked .content { padding-bottom: 220px; }
 .first-step-badge { display: inline-grid; place-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; color: #7a4a00; background: linear-gradient(180deg, #ffe7a8, #ffcf5c); border: 1px solid #e8b13c; white-space: nowrap; }
 .first-step-badge.big { font-size: 18px; padding: 14px 22px; border-radius: 16px; }
 .tour-me { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.tour-dock-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.tour-dock-head .tour-skip { margin-right: 0; padding: 4px 2px; font-size: 13px; }
-.tour-dock.mini { padding: 8px 14px; }
-body.tour-docked .content { padding-bottom: 300px; }
+@keyframes tour-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (max-width: 1000px) {
+  /* 휴대폰: 아래에서 올라오는 짧은 카드 */
+  .tour-bg.sheet { place-items: end stretch; padding: 0; }
+  .tour-bg.sheet .tour-card { width: 100%; max-height: 88vh; overflow-y: auto; border-radius: 20px 20px 0 0; border-bottom: 0; padding: 18px 18px calc(16px + env(safe-area-inset-bottom, 0px)); gap: 10px; animation: tour-up .22s ease-out; }
+  .tour-bg.sheet .tour-card h2 { font-size: 18px; }
+  .tour-bg.sheet .tour-actions, .tour-card.tip.m .tour-actions { flex-wrap: nowrap; }
+  .tour-bg.sheet .tour-actions .btn { flex: 1; justify-content: center; }
+  .tour-card.tip.m { left: 12px; right: 12px; width: auto; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); padding: 12px 14px; gap: 4px; border-radius: 16px; animation: tour-up .2s ease-out; }
+  .tour-card.tip.m h2 { font-size: 16px; }
+  .tour-card.tip.m p { font-size: 14.5px; line-height: 1.5; }
+  .tour-card.tip.m .tour-actions .btn { padding-left: 22px; padding-right: 22px; }
+  .tour-dock { left: 12px; right: 12px; width: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); padding: 10px 14px; gap: 6px; border-radius: 16px; }
+  .app:not(.solving) .tour-dock { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  body.tour-docked .content { padding-bottom: 170px; }
+}
