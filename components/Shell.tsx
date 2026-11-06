@@ -10,6 +10,7 @@ import { useQnaUnread } from "@/components/Qna";
 import { BanScreen, WarningModal } from "@/components/FairPlay";
 import NicknameCard from "@/components/NicknameCard";
 import SchoolCard from "@/components/SchoolCard";
+import Tutorial from "@/components/Tutorial";
 import { levelOf } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 import { IS_PREVIEW } from "@/lib/supabase";
@@ -164,6 +165,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </main>
         {ready && user && <TitleCelebrate userId={user.id} />}
         {ready && user && <GrantNotice />}
+        <Tutorial />
         <footer className="site-foot">
           <span>내신랩 · 중학생 내신 시험 대비</span>
           <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요. · <a className="link" href="/terms">이용약관</a> · <a className="link" href="/privacy">개인정보처리방침</a></span>

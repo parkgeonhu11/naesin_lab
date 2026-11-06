@@ -116,6 +116,7 @@ export default function ProblemPage() {
     if (error) return setErr(friendly(error));
     const r = data as GradeResult;
     trace.submit(!!r.correct, q.qtype === "mc" ? (val.choice ?? -1) + 1 : val.text.slice(0, 20));
+    window.dispatchEvent(new CustomEvent("nl-graded", { detail: { correct: !!r.correct, points: r.points ?? 0, penalty: r.penalty ?? 0, already: !!r.already } }));
     if (r.correct) {
       setVerdict({ kind: "ac", points: r.points, lost: r.lost ?? 0, answer: r.answer ?? null, answerText: r.answer_text ?? null, explanation: r.explanation ?? "", already: r.already });
       if (!r.already && r.points > 0) setBurst((b) => b + 1);
@@ -138,6 +139,7 @@ export default function ProblemPage() {
     if (error) return setErr(friendly(error));
     const r = data as GradeResult;
     trace.reveal();
+    window.dispatchEvent(new CustomEvent("nl-graded", { detail: { reveal: true } }));
     if (q.qtype === "mc") setVal({ ...val, choice: r.answer ?? null });
     setVerdict({ kind: "reveal", answer: r.answer ?? null, answerText: r.answer_text ?? null, explanation: r.explanation ?? "" });
     requestAnimationFrame(() => { if (window.innerWidth <= 1000) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); });

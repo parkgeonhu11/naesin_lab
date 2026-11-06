@@ -15,10 +15,10 @@ export const subjectName = (code: string) => SUBJECTS.find((s) => s.code === cod
 /** 난이도 1~5 → 이름, 점수 (서버의 points_for 함수와 같아야 함) */
 export const DIFF = [
   { level: 1, label: "기초", points: 5, desc: "용어·뜻·공식 하나만 알면 바로 풀리는 문제" },
-  { level: 2, label: "쉬움", points: 10, desc: "개념 하나를 예문이나 간단한 계산(1~2단계)에 그대로 적용" },
-  { level: 3, label: "보통", points: 20, desc: "개념 두 개를 연결하거나, 헷갈리는 보기 사이에서 골라야 하는 문제" },
-  { level: 4, label: "어려움", points: 35, desc: "ㄱㄴㄷ 종합·순서 나열·함정 보기, 3단계 이상 풀이" },
-  { level: 5, label: "최상위", points: 50, desc: "여러 단원을 엮은 학교 시험 마지막 문제 수준 (수학 21번급)" },
+  { level: 2, label: "쉬움", points: 8, desc: "개념 하나를 예문이나 간단한 계산(1~2단계)에 그대로 적용" },
+  { level: 3, label: "보통", points: 12, desc: "개념 두 개를 연결하거나, 헷갈리는 보기 사이에서 골라야 하는 문제" },
+  { level: 4, label: "어려움", points: 16, desc: "ㄱㄴㄷ 종합·순서 나열·함정 보기, 3단계 이상 풀이" },
+  { level: 5, label: "최상위", points: 20, desc: "여러 단원을 엮은 학교 시험 마지막 문제 수준 (수학 21번급)" },
 ];
 export const diffOf = (d: number) => DIFF[Math.min(Math.max(d, 1), 5) - 1];
 
@@ -225,8 +225,8 @@ export type MySummary = {
   daily: { d: string; n: number }[] | null;
 };
 
-/** 레벨 k가 되는 점수 = LV_STEP × k × (k − 1). Lv.2 70점 · Lv.5 700점 · Lv.10 3150점 · Lv.15 7350점 */
-export const LV_STEP = 35;
+/** 레벨 k가 되는 점수 = LV_STEP × k × (k − 1). Lv.2 40점 · Lv.5 400점 · Lv.10 1800점 · Lv.15 4200점 */
+export const LV_STEP = 20;
 export function levelOf(points: number) {
   const p = Math.max(0, points);
   let lv = 1;

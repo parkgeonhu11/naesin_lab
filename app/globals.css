@@ -1582,3 +1582,38 @@ a.side-google { display: flex; justify-content: center; }
 .ad-thanks { margin: 6px 0 0; }
 
 .preview-bar { background: repeating-linear-gradient(-45deg, #fff3cd, #fff3cd 10px, #ffe8a3 10px, #ffe8a3 20px); color: #5c4400; border: 1px solid #e8c766; border-radius: var(--radius-s); padding: 8px 14px; font-size: 13px; margin-bottom: 14px; }
+
+/* ---------- 튜토리얼 (처음 온 사람) ---------- */
+.tour-bg { position: fixed; inset: 0; z-index: 200; background: rgba(8, 14, 30, .55); display: grid; place-items: center; padding: 16px; overflow-y: auto; }
+.tour-layer { position: fixed; inset: 0; z-index: 200; }
+.tour-block { position: absolute; inset: 0; }
+.tour-dim { position: absolute; inset: 0; background: rgba(8, 14, 30, .55); }
+.tour-spot { position: fixed; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(8, 14, 30, .58); outline: 2px solid var(--brand); outline-offset: 2px; pointer-events: none; transition: left .2s, top .2s, width .2s, height .2s; }
+.tour-card { background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 18px 50px rgba(8, 14, 30, .35); padding: 20px; display: grid; gap: 12px; width: min(440px, 100%); }
+.tour-card.wide { width: min(620px, 100%); }
+.tour-card.center { text-align: center; justify-items: center; }
+.tour-card.tip { position: fixed; padding: 16px; gap: 10px; }
+.tour-card h2 { margin: 0; font-size: 19px; }
+.tour-card.tip h2 { font-size: 17px; display: flex; align-items: baseline; gap: 8px; }
+.tour-card p { margin: 0; line-height: 1.6; }
+.tour-card .school-card { box-shadow: none; text-align: left; order: 0; }
+.tour-hero { font-size: 40px; line-height: 1; }
+.tour-list { margin: 0; padding-left: 20px; display: grid; gap: 4px; text-align: left; }
+.tour-actions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; width: 100%; }
+.tour-card.center .tour-actions { justify-content: center; }
+.tour-skip { background: none; border: 0; color: var(--faint); font-weight: 600; padding: 8px 6px; cursor: pointer; margin-right: auto; }
+.tour-card.center .tour-skip { margin-right: 0; }
+.tour-progress { display: flex; align-items: center; gap: 5px; }
+.tour-progress span { width: 22px; height: 5px; border-radius: 3px; background: var(--line); }
+.tour-progress span.on { background: var(--brand); opacity: .45; }
+.tour-progress span.now { background: var(--brand); }
+.tour-progress small { margin-left: 6px; color: var(--faint); font-size: 12px; }
+.tour-dock { position: fixed; z-index: 150; right: 20px; bottom: 20px; width: min(380px, calc(100vw - 32px)); background: var(--surface); color: var(--text); border: 2px solid var(--brand); border-radius: var(--radius); box-shadow: 0 14px 40px rgba(8, 14, 30, .28); padding: 14px 16px; display: grid; gap: 8px; }
+@media (max-width: 1000px) { .tour-dock { left: 16px; right: 16px; width: auto; bottom: calc(68px + env(safe-area-inset-bottom, 0px)); } }
+.first-step-badge { display: inline-grid; place-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; color: #7a4a00; background: linear-gradient(180deg, #ffe7a8, #ffcf5c); border: 1px solid #e8b13c; white-space: nowrap; }
+.first-step-badge.big { font-size: 18px; padding: 14px 22px; border-radius: 16px; }
+.tour-me { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.tour-dock-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tour-dock-head .tour-skip { margin-right: 0; padding: 4px 2px; font-size: 13px; }
+.tour-dock.mini { padding: 8px 14px; }
+body.tour-docked .content { padding-bottom: 300px; }

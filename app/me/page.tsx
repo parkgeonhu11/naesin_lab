@@ -6,6 +6,7 @@ import SchoolCard from "@/components/SchoolCard";
 import AccountCard from "@/components/AccountCard";
 import DeleteAccount from "@/components/DeleteAccount";
 import NicknameCard from "@/components/NicknameCard";
+import { TutorialCard } from "@/components/Tutorial";
 import { SUBJECTS, subjectName, type BoardRow, type UnitStat, ADMIN_ACC } from "@/lib/data";
 import { sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -167,6 +168,7 @@ export default function MePage() {
       {isAnon && <p className="small faint" style={{ margin: 0 }}>
         기록은 이 브라우저의 익명 계정에 저장돼. 브라우저 기록(쿠키·사이트 데이터)을 지우거나 다른 기기로 열면 새 계정으로 시작돼.
       </p>}
+      <TutorialCard />
       <DeleteAccount />
     </>
   );
