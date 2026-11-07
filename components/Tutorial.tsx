@@ -30,7 +30,7 @@ const STEPS: Step[] = ["welcome", "school", "tour", "problem"];
 /** 컴퓨터: 왼쪽 메뉴를 하나씩 */
 const PC_STOPS: Stop[] = [
   { sel: '.side-nav a.side-main[href="/"]', title: "홈", text: "오늘 할 것만 모아 둔 곳이야. 5문제면 오늘 분량 끝." },
-  { sel: '.side-nav a[href="/learn"]', title: "공부", text: "개념 카드부터 차근차근 배우는 곳이야." },
+  { sel: '.side .space-switch a[href="/learn"]', title: "공부", text: "개념부터 배우는 곳은 따로 있어. 누르면 공부 화면으로 넘어가." },
   { sel: '.side-sub a[href="/problems"]', title: "문제", text: "과목·단원별 문제가 여기 다 있어. 맞히면 5~20점." },
   { sel: '.side-sub a[href="/review"]', title: "오답 노트", text: "틀린 문제만 모아서 다시 풀어." },
   { sel: '.side-nav a.side-main[href="/ranking"]', title: "랭킹", text: "이번 주 점수로 순위를 겨뤄. 매주 월요일에 새로 시작해." },
@@ -39,8 +39,8 @@ const PC_STOPS: Stop[] = [
 /** 휴대폰: 아래 탭 위주로 */
 const M_STOPS: Stop[] = [
   { sel: '.tabbar a[href="/"]', title: "홈", text: "오늘 할 것만 모아 둔 곳이야." },
-  { sel: '.tabbar a[href="/learn"]', title: "공부", text: "개념부터 차근차근 배우는 곳이야." },
-  { sel: '.tabbar a[href="/problems"]', title: "시험 대비", text: "문제·시험지·오답 노트가 여기 다 있어." },
+  { sel: '.topbar .space-switch a[href="/learn"]', title: "공부", text: "개념부터 배우는 곳은 따로 있어. 누르면 공부 화면으로 넘어가." },
+  { sel: '.tabbar a[href="/problems"]', title: "문제 풀기", text: "문제·시험지·오답 노트가 여기 다 있어." },
   { sel: '.tabbar a[href="/ranking"]', title: "랭킹", text: "이번 주 점수로 순위를 겨뤄." },
   { sel: ".menu-btn", title: "전체 메뉴", text: "내 정보와 설정은 여기 있어." },
 ];

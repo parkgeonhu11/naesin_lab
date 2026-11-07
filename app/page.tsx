@@ -4,7 +4,6 @@ import AdSlot from "@/components/AdSlot";
 import { useEffect, useMemo, useState } from "react";
 import { ResultText } from "@/components/Badges";
 import AccountCard from "@/components/AccountCard";
-import { IS_PREVIEW } from "@/lib/supabase";
 import { ago, stateOf, subjectName, SUBJECTS, type BoardRow, type MySummary, type Submission } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -69,7 +68,6 @@ export default function Home() {
       const n = Math.min(wrongOpen, 2);
       t.push({ key: "again", href: "/review", title: "틀렸던 문제 다시 풀기", note: wrongOpen > n ? `오답 노트에서 ${n}문제만. 나머지는 내일 해도 돼` : "오답 노트에 있는 문제", count: `${n}문제` });
     }
-    if (IS_PREVIEW) t.push({ key: "learn", href: "/learn/poly", title: "다항식 이어서 공부하기", note: "고1 수학 미리 시작", count: "카드 몇 장" });
     if (nextProblem) t.push({ key: "next", href: `/problem/${nextProblem.no}`, title: `${subjectName(nextProblem.subject)} ${nextProblem.no}번 풀기`, note: [nextProblem.unit, nextProblem.topic].filter(Boolean).join(" · ") || "시험 범위 문제", count: "1문제" });
     if (!t.length) t.push({ key: "list", href: "/problems", title: "문제 고르기", note: "시험 범위 문제가 과목별로 있어" });
     return t.slice(0, 3);

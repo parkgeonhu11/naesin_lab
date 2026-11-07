@@ -15,17 +15,15 @@ import { levelOf } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 import { IS_PREVIEW } from "@/lib/supabase";
 
-/** 큰 메뉴 4개(예비 사이트가 아니면 3개). 각 메뉴 아래 작은 메뉴가 붙는다 */
+/** 문제 풀이 쪽 큰 메뉴 3개. 공부는 아예 다른 공간(/learn, LearnShell)이라 여기 없다 */
 type NavItem = { href: string; label: string; icon: string; sub?: { href: string; label: string }[]; also?: string[] };
 const NAV: NavItem[] = [
   { href: "/", label: "홈", icon: "home" },
-  ...(IS_PREVIEW ? [{ href: "/learn", label: "공부", icon: "learn" }] : []),
   {
-    href: "/problems", label: "시험 대비", icon: "paper", also: ["/problem"],
+    href: "/problems", label: "문제 풀기", icon: "paper", also: ["/problem"],
     sub: [
       { href: "/problems", label: "문제" },
       { href: "/exam", label: "시험지" },
-      { href: "/mock", label: "예상 시험" },
       { href: "/review", label: "오답 노트" },
       { href: "/qna", label: "질문방" },
       { href: "/suggest", label: "문제 제안" },
@@ -35,6 +33,17 @@ const NAV: NavItem[] = [
 ];
 
 type Theme = "light" | "dark";
+
+/** 문제 풀이 ↔ 공부: 두 공간을 오가는 스위치. 공부는 아직 예비 사이트에만 */
+function SpaceSwitch({ here }: { here: "solve" | "learn" }) {
+  if (!IS_PREVIEW) return null;
+  return (
+    <nav className="space-switch" aria-label="공간 바꾸기">
+      <Link href="/" aria-current={here === "solve" ? "page" : undefined}>문제 풀이</Link>
+      <Link href="/learn" aria-current={here === "learn" ? "page" : undefined}>공부</Link>
+    </nav>
+  );
+}
 
 export function Avatar({ name, className = "" }: { name?: string | null; className?: string }) {
   return <span className={`avatar ${className}`} aria-hidden="true">{(name ?? "?").trim().slice(0, 1) || "?"}</span>;
@@ -94,6 +103,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <Link href="/" className="brand" aria-label="내신랩 홈">
         <b>내신랩</b><small>{scopeLabel}</small>
       </Link>
+      <SpaceSwitch here="solve" />
       <nav className="side-nav" aria-label="메뉴">
         {NAV.map((n) => (
           <div key={n.href} className="side-group">
@@ -138,6 +148,36 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   if (path === "/login" || path === "/welcome") return <>{children}</>;
   if (banned && path !== "/admin" && path !== "/privacy" && path !== "/terms") return <BanScreen />;
 
+  // 공부는 문제 풀이와 완전히 다른 화면: 왼쪽 메뉴·아래 탭 없이 공부 전용 머리만
+  if (path.startsWith("/learn")) {
+    const learnOn = (h: string) => (h === "/learn" ? path === "/learn" || /^\/learn\/[^/]+$/.test(path) : path.startsWith(h));
+    return (
+      <div className="lsp">
+        <header className="lsp-top">
+          <Link href="/learn" className="lsp-brand" aria-label="공부 처음 화면"><b>내신랩</b><span>공부</span></Link>
+          <nav className="lsp-nav" aria-label="공부 메뉴">
+            <Link href="/learn" aria-current={learnOn("/learn") ? "page" : undefined}>단원</Link>
+            <Link href="/learn/poly/review" aria-current={learnOn("/learn/poly/review") ? "page" : undefined}>복습</Link>
+            <Link href="/learn/poly/summary" aria-current={learnOn("/learn/poly/summary") ? "page" : undefined}>요약</Link>
+          </nav>
+          <span className="lsp-right">
+            <SpaceSwitch here="learn" />
+            <Link href="/me" className="lsp-me" aria-label="내 정보"><FramedAvatar name={nickname} frame={frameOf(rank, points)} /></Link>
+          </span>
+        </header>
+        <main className="lsp-main">
+          {IS_PREVIEW && amAdmin && <div className="preview-bar" role="note"><b>예비 사이트</b> 테스트 전용 DB라 여기서 푼 기록은 실제 랭킹에 안 들어가.</div>}
+          {children}
+        </main>
+        <footer className="site-foot lsp-foot">
+          <span>내신랩 공부</span>
+          <span>모든 설명과 문제는 내신랩이 직접 만든 거예요.</span>
+          <span><a className="link" href="/terms">이용약관</a> <a className="link" href="/privacy">개인정보처리방침</a></span>
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className={`app ${path.startsWith("/problem/") ? "solving" : ""}`}>
       <aside className="side">{side}</aside>
@@ -146,6 +186,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <Link href="/" className="brand" aria-label="내신랩 홈">
             <b>내신랩</b>
           </Link>
+          <SpaceSwitch here="solve" />
           {authChecked && (!user || isAnon) && <Link href={loginHref} className="top-login">로그인</Link>}
           {user && (
             <Link href="/me" className="top-me">
