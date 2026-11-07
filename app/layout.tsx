@@ -1,6 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import Shell from "@/components/Shell";
 import { MeProvider } from "@/lib/useMe";
+import "@fontsource/ibm-plex-sans-kr/400.css";
+import "@fontsource/ibm-plex-sans-kr/500.css";
+import "@fontsource/ibm-plex-sans-kr/600.css";
+import "@fontsource/ibm-plex-sans-kr/700.css";
+import "@fontsource/nanum-pen-script/400.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +19,7 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0f1d44" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: [{ media: "(prefers-color-scheme: light)", color: "#ffffff" }, { media: "(prefers-color-scheme: dark)", color: "#1d2128" }] };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -22,7 +27,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* 저장해 둔 밝은/어두운 화면 설정을 그리기 전에 적용 (깜빡임 방지) */}
         <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem("nl-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}` }} />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
       </head>
       <body>
         <MeProvider>

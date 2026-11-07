@@ -317,7 +317,7 @@ export default function ProblemPage() {
               )}
               {shown !== null && (
                 <div className="result-actions">
-                  {next ? <Link className="btn" href={`/problem/${next}`}>다음 문제 ({next}번) →</Link> : <Link className="btn" href={`/problems?subject=${q.subject}&unit=${encodeURIComponent(q.unit)}`}>단원 목록으로</Link>}
+                  {next ? <Link className="btn" href={`/problem/${next}`}>다음 문제 ({next}번)</Link> : <Link className="btn" href={`/problems?subject=${q.subject}&unit=${encodeURIComponent(q.unit)}`}>단원 목록으로</Link>}
                   {verdict?.kind === "ac" && !verdict.already && <span className="small muted">잘했어. 이 기세로 하나 더.</span>}
                 </div>
               )}

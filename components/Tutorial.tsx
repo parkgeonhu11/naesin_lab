@@ -5,6 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import SchoolCard from "@/components/SchoolCard";
 import { friendly, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
+import { IS_PREVIEW } from "@/lib/supabase";
 
 /**
  * 처음 온 사람용 튜토리얼 (게임 튜토리얼처럼 1분짜리)
@@ -28,20 +29,20 @@ const STEPS: Step[] = ["welcome", "school", "tour", "problem"];
 
 /** 컴퓨터: 왼쪽 메뉴를 하나씩 */
 const PC_STOPS: Stop[] = [
-  { sel: '.side-nav a[href="/problems"]', title: "문제", text: "과목·단원별 문제가 여기 다 있어. 맞히면 5~20점." },
-  { sel: '.side-nav a[href="/exam"]', title: "시험지", text: "범위를 골라 시험처럼 한 번에 풀어." },
-  { sel: '.side-nav a[href="/review"]', title: "오답 노트", text: "틀린 문제만 모아서 다시 풀어." },
-  { sel: '.side-nav a[href="/ranking"]', title: "랭킹", text: "모은 점수로 순위를 겨뤄." },
-  { sel: '.side-nav a[href="/mock"]', title: "예상 시험", text: "시간 재고 보는 모의 시험이야." },
-  { sel: ".side .me-card", title: "내 정보", text: "점수·레벨·약점 단원을 봐." },
+  { sel: '.side-nav a.side-main[href="/"]', title: "홈", text: "오늘 할 것만 모아 둔 곳이야. 5문제면 오늘 분량 끝." },
+  { sel: '.side-nav a[href="/learn"]', title: "공부", text: "개념 카드부터 차근차근 배우는 곳이야." },
+  { sel: '.side-sub a[href="/problems"]', title: "문제", text: "과목·단원별 문제가 여기 다 있어. 맞히면 5~20점." },
+  { sel: '.side-sub a[href="/review"]', title: "오답 노트", text: "틀린 문제만 모아서 다시 풀어." },
+  { sel: '.side-nav a.side-main[href="/ranking"]', title: "랭킹", text: "이번 주 점수로 순위를 겨뤄. 매주 월요일에 새로 시작해." },
+  { sel: ".side .me-card", title: "내 정보", text: "점수와 약한 단원을 봐." },
 ];
-/** 휴대폰: 아래 탭 4개 + 오른쪽 위 메뉴 */
+/** 휴대폰: 아래 탭 위주로 */
 const M_STOPS: Stop[] = [
-  { sel: '.tabbar a[href="/problems"]', title: "문제", text: "여기서 문제를 풀고 점수를 모아." },
-  { sel: '.tabbar a[href="/exam"]', title: "시험지", text: "시험처럼 한 번에 풀어." },
-  { sel: '.tabbar a[href="/review"]', title: "오답 노트", text: "틀린 문제만 다시 풀어." },
-  { sel: '.tabbar a[href="/ranking"]', title: "랭킹", text: "점수로 순위를 겨뤄." },
-  { sel: ".menu-btn", title: "전체 메뉴", text: "예상 시험·내 정보는 여기 있어." },
+  { sel: '.tabbar a[href="/"]', title: "홈", text: "오늘 할 것만 모아 둔 곳이야." },
+  { sel: '.tabbar a[href="/learn"]', title: "공부", text: "개념부터 차근차근 배우는 곳이야." },
+  { sel: '.tabbar a[href="/problems"]', title: "시험 대비", text: "문제·시험지·오답 노트가 여기 다 있어." },
+  { sel: '.tabbar a[href="/ranking"]', title: "랭킹", text: "이번 주 점수로 순위를 겨뤄." },
+  { sel: ".menu-btn", title: "전체 메뉴", text: "내 정보와 설정은 여기 있어." },
 ];
 
 function load(): Saved | null {
@@ -101,7 +102,7 @@ export default function Tutorial() {
   const [rules, setRules] = useState(false);
 
   const go = useCallback((next: Saved | null) => { setSt(next); save(next); }, []);
-  const STOPS = mobile ? M_STOPS : PC_STOPS;
+  const STOPS = (mobile ? M_STOPS : PC_STOPS).filter((x) => IS_PREVIEW || !x.sel.includes("/learn"));
 
   // 처음 켤 때: 저장된 진행 상태 이어가기, 없으면 계정 상태를 보고 자동 시작
   useEffect(() => {

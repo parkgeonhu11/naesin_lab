@@ -15,21 +15,24 @@ import { levelOf } from "@/lib/data";
 import { useMe } from "@/lib/useMe";
 import { IS_PREVIEW } from "@/lib/supabase";
 
-const NAV = [
+/** 큰 메뉴 4개(예비 사이트가 아니면 3개). 각 메뉴 아래 작은 메뉴가 붙는다 */
+type NavItem = { href: string; label: string; icon: string; sub?: { href: string; label: string }[]; also?: string[] };
+const NAV: NavItem[] = [
   { href: "/", label: "홈", icon: "home" },
-  ...(IS_PREVIEW ? [{ href: "/learn", label: "수학 학습", icon: "learn" }] : []),
-  { href: "/problems", label: "문제", icon: "book" },
-  { href: "/exam", label: "시험지", icon: "paper" },
-  { href: "/mock", label: "예상 시험", icon: "timer" },
-  { href: "/review", label: "오답 노트", icon: "note" },
-  { href: "/qna", label: "질문방", icon: "chat" },
-  { href: "/ranking", label: "랭킹", icon: "trophy" },
-  { href: "/status", label: "채점 현황", icon: "pulse" },
-  { href: "/me", label: "성적 분석", icon: "chart" },
-  { href: "/suggest", label: "문제 제안", icon: "idea" },
+  ...(IS_PREVIEW ? [{ href: "/learn", label: "공부", icon: "learn" }] : []),
+  {
+    href: "/problems", label: "시험 대비", icon: "paper", also: ["/problem"],
+    sub: [
+      { href: "/problems", label: "문제" },
+      { href: "/exam", label: "시험지" },
+      { href: "/mock", label: "예상 시험" },
+      { href: "/review", label: "오답 노트" },
+      { href: "/qna", label: "질문방" },
+      { href: "/suggest", label: "문제 제안" },
+    ],
+  },
+  { href: "/ranking", label: "랭킹", icon: "trophy", sub: [{ href: "/ranking", label: "랭킹" }, { href: "/status", label: "채점 현황" }] },
 ];
-/** 휴대폰 아래 탭에 보이는 5개 */
-const TABS = ["/", "/problems", "/exam", "/review", "/ranking"];
 
 type Theme = "light" | "dark";
 
@@ -77,31 +80,39 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   };
 
   const loginHref = `/login${path && path !== "/" ? `?next=${encodeURIComponent(path)}` : ""}`;
-  const active = (href: string) =>
-    href === "/" ? path === "/" : path === href || path.startsWith(href + "/") || (href === "/problems" && path.startsWith("/problem/"));
+  const on = (href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(href + "/"));
+  const group = NAV.find((n) => n.href !== "/" && (on(n.href) || n.sub?.some((x) => on(x.href)) || n.also?.some((a) => on(a))));
+  const active = (href: string) => (href === "/" ? path === "/" : group?.href === href);
+  const subNav = group?.sub && !path.startsWith("/problem/") ? group.sub : null;
   const score = `${points}점${rank ? ` · ${rank}위` : ""}`;
   const lv = levelOf(points).lv;
 
   const side = (
     <>
       <Link href="/" className="brand" aria-label="내신랩 홈">
-        <span className="brand-mark"><Icon name="logo" /></span>
-        <span><b>내신랩</b><small>{scopeLabel}</small></span>
+        <b>내신랩</b><small>{scopeLabel}</small>
       </Link>
       <nav className="side-nav" aria-label="메뉴">
-        {NAV.map((n, i) => (
-          <span key={n.href} style={{ display: "contents" }}>
-            {n.href === "/status" && <span className="side-sep" />}
-            <Link href={n.href} aria-current={active(n.href) ? "page" : undefined}>
+        {NAV.map((n) => (
+          <div key={n.href} className="side-group">
+            <Link href={n.href} className="side-main" aria-current={active(n.href) ? "page" : undefined}>
               <Icon name={n.icon} />
-              {n.label}
-              {n.href === "/qna" && qnaNew > 0 && <span className="nav-badge" aria-label={`새 답변 ${qnaNew}개`}>{qnaNew}</span>}
+              <span className="lbl">{n.label}</span>
             </Link>
-          </span>
+            {n.sub && (
+              <div className="side-sub">
+                {n.sub.map((x) => (
+                  <Link key={x.href} href={x.href} aria-current={on(x.href) || (x.href === "/problems" && path.startsWith("/problem/")) ? "page" : undefined}>
+                    {x.label}
+                    {x.href === "/qna" && qnaNew > 0 && <span className="nav-badge" aria-label={`새 답변 ${qnaNew}개`}>{qnaNew}</span>}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         ))}
         {amAdmin && (
-          <Link href="/admin/allback" aria-current={path === "/admin/allback" ? "page" : undefined}>
-            <Icon name="target" />
+          <Link href="/admin/allback" className="side-admin" aria-current={path === "/admin/allback" ? "page" : undefined}>
             올백 문제 모음
           </Link>
         )}
@@ -131,7 +142,6 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <div className="main">
         <header className="topbar">
           <Link href="/" className="brand" aria-label="내신랩 홈">
-            <span className="brand-mark"><Icon name="logo" /></span>
             <b>내신랩</b>
           </Link>
           {authChecked && (!user || isAnon) && <Link href={loginHref} className="top-login">로그인</Link>}
@@ -148,7 +158,17 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className="content">
-          {IS_PREVIEW && <div className="preview-bar" role="note"><b>예비 사이트</b> · 테스트 전용 DB라 여기서 푼 기록은 실제 랭킹에 안 들어가.</div>}
+          {IS_PREVIEW && <div className="preview-bar" role="note"><b>예비 사이트</b> 테스트 전용 DB라 여기서 푼 기록은 실제 랭킹에 안 들어가.</div>}
+          {subNav && (
+            <nav className="sub-nav" aria-label={`${group!.label} 메뉴`}>
+              {subNav.map((x) => (
+                <Link key={x.href} href={x.href} aria-current={on(x.href) ? "page" : undefined}>
+                  {x.label}
+                  {x.href === "/qna" && qnaNew > 0 && <span className="nav-badge" aria-label={`새 답변 ${qnaNew}개`}>{qnaNew}</span>}
+                </Link>
+              ))}
+            </nav>
+          )}
           {notice && <div className="notice warn">{notice}</div>}
           <WarningModal />
           {path === "/" && <InstallBanner />}
@@ -168,20 +188,18 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         {ready && user && <GrantNotice />}
         <Tutorial />
         <footer className="site-foot">
-          <span>내신랩 · 중학생 내신 시험 대비</span>
-          <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요. · <a className="link" href="/terms">이용약관</a> · <a className="link" href="/privacy">개인정보처리방침</a></span>
+          <span>내신랩</span>
+          <span>문제는 직접 만든 것만 올려 주세요. 학교 기출문제의 저작권은 학교와 출제 선생님께 있어요.</span>
+          <span><a className="link" href="/terms">이용약관</a> <a className="link" href="/privacy">개인정보처리방침</a></span>
         </footer>
 
-        <nav className="tabbar" aria-label="빠른 메뉴">
-          {TABS.map((h) => {
-            const n = NAV.find((x) => x.href === h)!;
-            return (
-              <Link key={h} href={h} aria-current={active(h) ? "page" : undefined}>
-                <Icon name={n.icon} />
-                {n.label}
-              </Link>
-            );
-          })}
+        <nav className="tabbar" aria-label="메뉴" style={{ ["--n" as string]: NAV.length }}>
+          {NAV.map((n) => (
+            <Link key={n.href} href={n.href} aria-current={active(n.href) ? "page" : undefined}>
+              <Icon name={n.icon} />
+              {n.label}
+            </Link>
+          ))}
         </nav>
       </div>
 

@@ -141,7 +141,7 @@ export default function Runner({
               {busy ? "채점 중…" : "제출"}
             </button>
           </div>
-          {hints === 3 && <p className="small faint" style={{ margin: 0 }}>힌트를 3개 다 보고 맞히면 맞은 걸로 보여 주지만, 단계 통과 계산에는 넣지 않아.</p>}
+          <p className="hint-ok" style={{ margin: 0 }}>{hints < 3 ? "힌트 2개까지는 점수 그대로야." : "힌트를 3개 다 보고 맞히면 맞은 걸로 보여 주지만, 단계 통과 계산에는 넣지 않아."}</p>
         </>
       )}
       {err && <div className="notice warn">{err}</div>}

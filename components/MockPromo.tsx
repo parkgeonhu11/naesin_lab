@@ -21,7 +21,7 @@ export default function MockPromo({ compact = false }: { compact?: boolean }) {
           </span>
         )}
       </span>
-      <span className="mock-promo-go">시험 보러 가기 <span aria-hidden="true">→</span></span>
+      <span className="mock-promo-go">시험 보러 가기</span>
     </Link>
   );
 }
