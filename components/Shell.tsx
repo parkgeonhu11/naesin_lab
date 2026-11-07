@@ -133,7 +133,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   );
 
   // 로그인은 선택: 처음 온 사람도 바로 둘러보고 풀 수 있다. 로그인 화면은 메뉴 없이 전체 화면으로
-  if (path === "/login") return <>{children}</>;
+  if (path === "/login" || path === "/welcome") return <>{children}</>;
   if (banned && path !== "/admin" && path !== "/privacy" && path !== "/terms") return <BanScreen />;
 
   return (

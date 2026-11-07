@@ -105,9 +105,9 @@ export default function Home() {
             <div className="today-sheet">
               {enough ? (
                 <div className="today-enough">
-                  <span className="pen-note">오늘은 여기까지 충분해</span>
-                  <p id="today-title">오늘 {sum?.today_solved}문제를 맞혔어. 더 풀고 싶으면 풀어도 되지만, 안 해도 괜찮아.</p>
-                  <Link href="/problems" className="btn line">더 풀어 보기</Link>
+                  <h1 id="today-title">오늘은 여기까지 충분해</h1>
+                  <p>오늘 {sum?.today_solved}문제를 맞혔어. 더 풀고 싶으면 풀어도 되지만, 안 해도 괜찮아.</p>
+                  <Link href="/problems" className="btn line">문제 더 풀기</Link>
                 </div>
               ) : (
                 <>
@@ -121,7 +121,7 @@ export default function Home() {
                     {todos.map((t) => (
                       <li key={t.key} className={t.done ? "done" : ""}>
                         <Link href={t.href}>
-                          <span className="todo-box">{t.done && <Check />}</span>
+                          <span className="todo-box">{t.done ? <Check /> : todos.indexOf(t) + 1}</span>
                           <span className="todo-t">{t.title}<small>{t.note}</small></span>
                           {t.count && <span className="todo-n">{t.count}</span>}
                         </Link>
@@ -129,8 +129,7 @@ export default function Home() {
                     ))}
                   </ul>
                   <div className="today-go">
-                    <Link href={todos[0].href} className="btn big">시작하기</Link>
-                    <small>위에서부터 하나씩</small>
+                    <Link href={todos[0].href} className="btn big">1번부터 시작하기</Link>
                   </div>
                 </>
               )}

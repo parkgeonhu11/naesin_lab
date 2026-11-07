@@ -1,11 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Shell from "@/components/Shell";
 import { MeProvider } from "@/lib/useMe";
-import "@fontsource/ibm-plex-sans-kr/400.css";
-import "@fontsource/ibm-plex-sans-kr/500.css";
-import "@fontsource/ibm-plex-sans-kr/600.css";
-import "@fontsource/ibm-plex-sans-kr/700.css";
-import "@fontsource/nanum-pen-script/400.css";
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

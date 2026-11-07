@@ -1,0 +1,64 @@
+/* 소개 페이지 전용 Tailwind (기본 리셋 없이 유틸리티만: 앱의 다른 화면에 영향 없음) */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+@source "./";
+
+@theme {
+  --color-paper: #f8f8f8;
+  --color-alt: #eeeeee;
+  --color-ink: #0a0a0a;
+  --color-muted: #6a6a6a;
+  --color-sub: #3d3d3d;
+  --color-action: #1f6b3a;
+  --color-action-deep: #174f2b;
+  --color-mark: #d93025;
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", system-ui, sans-serif;
+}
+
+@layer base {
+.wl { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); word-break: keep-all; }
+.wl * { box-sizing: border-box; }
+.wl h1, .wl h2, .wl h3, .wl p { margin: 0; }
+.wl a { color: inherit; text-decoration: none; }
+.wl ul, .wl ol { margin: 0; padding: 0; list-style: none; }
+.wl section[id] { scroll-margin-top: 72px; }
+
+}
+
+@layer components {
+/* 버튼: 채운 주 버튼 하나, 테두리 보조 버튼 하나. 올라갔다 눌리는 움직임만 */
+.wl-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px; border-radius: 12px; font-size: 16px; font-weight: 500; border: 1px solid transparent;
+  transition: background-color 200ms cubic-bezier(.2,.8,.2,1), border-color 200ms cubic-bezier(.2,.8,.2,1), transform 200ms cubic-bezier(.2,.8,.2,1); }
+.wl-btn--primary { background: var(--color-action); color: #fff !important; }
+.wl-btn--primary:hover { background: color-mix(in srgb, var(--color-action) 86%, var(--color-ink)); }
+.wl-btn--secondary { border-color: rgba(10,10,10,.24); color: var(--color-ink); }
+.wl-btn--secondary:hover { background: var(--color-alt); border-color: var(--color-ink); }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .wl-btn:hover { transform: translateY(-1px); transition-duration: 140ms; }
+  .wl-btn:active { transform: translateY(1px) scale(.985); transition-duration: 90ms; }
+  .wl-lift { transition: transform 180ms cubic-bezier(.2,.8,.2,1), border-color 200ms; }
+  .wl-lift:hover { transform: translateY(-2px); border-color: rgba(10,10,10,.24); }
+}
+.wl :focus-visible { outline: 2px solid var(--color-action); outline-offset: 2px; }
+
+/* 링크: 가는 밑줄 → 진한 밑줄 */
+.wl-link { text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: rgba(10,10,10,.24); text-underline-offset: 5px; transition: text-decoration-color 200ms; }
+.wl-link:hover { text-decoration-color: currentColor; }
+.wl-nav a.wl-word { color: var(--color-sub); transition: color 140ms; }
+.wl-nav a.wl-word:hover { color: var(--color-ink); }
+
+/* 채점 표시 (실제 사이트와 같은 모양) */
+.wl-mark { position: relative; }
+.wl-mark::after { content: ""; position: absolute; inset: -9px -10px -8px -9px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 56'%3E%3Cpath d='M33 6c-14-2-28 8-27 22 1 14 14 23 27 21 13-1 22-11 21-23C53 14 43 5 30 5c-6 0-11 2-14 4' fill='none' stroke='%23d93025' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.wl-slash { position: relative; }
+.wl-slash::after { content: ""; position: absolute; inset: -4px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M8 34 33 5' fill='none' stroke='%236a6a6a' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+/* 첫 화면에서 한 번만: 동그라미가 그려진다 */
+@media (prefers-reduced-motion: no-preference) {
+  .wl-mark--draw::after { animation: wl-draw .6s cubic-bezier(.2,.8,.2,1) .5s both; }
+  @keyframes wl-draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+}
+.wl .katex { font-size: 1.08em; }
+}
