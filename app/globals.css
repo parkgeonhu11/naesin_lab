@@ -2288,3 +2288,116 @@ body { font-size: 17px; line-height: 1.65; }
 .mini-list { border-top: 0; }
 .mini-list li { border-bottom-color: var(--rule-2); }
 .side-foot .side-google { justify-content: flex-start !important; width: auto; align-self: flex-start; }
+
+/* =====================================================================
+   B. 흑백 지면 + 빨간 채점 펜 (2026-11 확정)
+   종이 위 검정 글자가 주인공. 색은 빨강 하나: 채점(○, 정답)과 D-day에만.
+   큰 행동은 검정 버튼, 노랑·초록·파랑 강조는 쓰지 않는다. 큰 숫자는 홈에서만.
+   ===================================================================== */
+:root, :root[data-hall="middle"], :root[data-hall="high"] {
+  --paper: #FBFBF9; --paper-2: #FFFFFF; --ink: #121212; --ink-2: #5C5C58;
+  --rule: #DADAD5; --rule-2: #ECECE8;
+  --pen: #E8432E;
+  --hl: var(--ink); --hl-ink: var(--paper);
+  --accent: var(--ink); --accent-soft: #EFEFEB;
+  --ok: var(--pen); --ok-soft: #FCEBE8; --warn: var(--ink); --warn-soft: #EFEFEB;
+  --mark: var(--pen);
+  --r-s: 4px; --r-l: 4px;
+  --bg: var(--paper); --surface: var(--paper-2); --surface-2: var(--rule-2); --head: var(--rule-2);
+  --text: var(--ink); --sub: #3F3F3C; --faint: var(--ink-2); --line: var(--rule-2); --line-strong: var(--rule);
+  --brand: var(--ink); --brand-ink: var(--ink); --brand-soft: var(--accent-soft);
+  --ac: var(--pen); --ac-soft: var(--ok-soft); --wa: var(--ink); --wa-soft: var(--warn-soft); --gray-soft: var(--rule-2);
+  --r-sm: 4px; --r-md: 4px; --r-lg: 4px; --r-btn: 4px;
+}
+:root[data-theme="dark"], :root[data-theme="dark"][data-hall="middle"], :root[data-theme="dark"][data-hall="high"] {
+  --paper: #141413; --paper-2: #1B1B1A; --ink: #F2F2EE; --ink-2: #A3A39E; --rule: #3A3A37; --rule-2: #262624;
+  --pen: #FF6A55; --accent-soft: #262624; --ok-soft: #3A1E1A; --warn-soft: #262624;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]), :root:not([data-theme="light"])[data-hall="middle"], :root:not([data-theme="light"])[data-hall="high"] {
+    --paper: #141413; --paper-2: #1B1B1A; --ink: #F2F2EE; --ink-2: #A3A39E; --rule: #3A3A37; --rule-2: #262624;
+    --pen: #FF6A55; --accent-soft: #262624; --ok-soft: #3A1E1A; --warn-soft: #262624;
+  }
+}
+:root[data-theme="dark"] { --sub: #D6D6D1; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sub: #D6D6D1; } }
+
+h1, h2, h3, .page-title h1 { font-weight: 800; letter-spacing: -.04em; }
+.brand b, .topbar .brand b, .logo { font-weight: 800; letter-spacing: -.05em; }
+
+/* 지면: 목록은 굵은 검정 선으로 시작, 줄은 가는 선 */
+.panel { border-top: 2px solid var(--ink); }
+.panel-head h2 { font-weight: 800; }
+.topbar { border-bottom: 1px solid var(--ink) !important; }
+.tabbar { border-top: 1px solid var(--ink) !important; }
+.side { border-right: 1px solid var(--rule); }
+
+/* 버튼: 검정 하나, 보조는 선 */
+.btn { background: var(--ink); border-color: var(--ink); color: var(--paper) !important; font-weight: 700; }
+.btn:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 82%, var(--paper)); border-color: color-mix(in srgb, var(--ink) 82%, var(--paper)); }
+.btn.line, .btn.white, .btn.ghost, .btn.danger { background: transparent; color: var(--ink) !important; border-color: var(--ink); }
+.btn.line:hover:not(:disabled) { background: var(--rule-2); }
+.link, a.more, .link-btn, .mini h2 a, .side-google, .top-login { color: var(--ink) !important; }
+
+/* 정답·오답 글자: 정답은 빨간 펜, 오답은 검정 */
+.res-ac { color: var(--pen) !important; }
+.res-wa { color: var(--ink-2) !important; }
+.result.ok { border-top: 2px solid var(--pen) !important; }
+.runner-result.ok { border-left-color: var(--pen) !important; }
+.today-meter i.on { background: var(--ink); border-color: var(--ink); }
+
+/* 홈: 큰 숫자는 여기 한 곳만 */
+.today-big { display: flex; align-items: flex-end; gap: var(--s-3); margin-top: var(--s-2); }
+.today-big b { font-size: 112px; line-height: .82; font-weight: 800; letter-spacing: -.07em; font-variant-numeric: tabular-nums; }
+.today-big span { font-size: 22px; font-weight: 800; line-height: 1.3; letter-spacing: -.03em; padding-bottom: 6px; }
+.today-sheet .lead { margin-top: var(--s-4); }
+.todo { border-top: 2px solid var(--ink); }
+.todo a { border-bottom: 1px solid var(--rule); grid-template-columns: 40px minmax(0, 1fr) auto; }
+.todo-box { border: 0; width: auto; height: auto; font-size: 16px; font-weight: 800; justify-content: start; }
+.todo-t { font-weight: 700; }
+.today-go .btn { max-width: none; justify-content: space-between; padding: 0 22px; }
+.today-go .btn::after { content: ""; width: 10px; height: 10px; border-right: 2px solid currentColor; border-top: 2px solid currentColor; transform: rotate(45deg); }
+.mini { border-top: 2px solid var(--ink); }
+.mini h2 { font-weight: 800; }
+.mini-list li.me { color: var(--ink); }
+.subj-row { display: flex; flex-wrap: wrap; gap: 0; border-top: 2px solid var(--ink); }
+.subj-row a { flex: 1 1 33%; padding: 14px 0; border-bottom: 1px solid var(--rule); font-size: 16px; font-weight: 700; display: flex; justify-content: space-between; padding-right: 16px; }
+.subj-row a small { font-weight: 500; color: var(--ink-2); font-size: 14px; }
+.subj-row a:hover { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 640px) { .today-big b { font-size: 92px; } .subj-row a { flex-basis: 50%; } }
+
+/* 학습 화면 머리도 지면으로 */
+.unit-hero, .learn-hero { background: transparent !important; border: 0 !important; border-top: 2px solid var(--ink) !important; border-radius: 0; padding-left: 0; padding-right: 0; }
+.unit-hero .btn.big, .learn-hero .btn.white { background: var(--ink); color: var(--paper) !important; border-color: var(--ink); }
+.ring-fg { stroke: var(--ink); }
+.stage-path li.done .sp-dot, .lesson-row.done .lesson-no { background: var(--ink) !important; color: var(--paper) !important; }
+.lesson-row.done .lesson-meta .ok, .ok { color: var(--ink); }
+
+/* B 보강: 어두운 화면에서도 강조는 잉크 하나 */
+:root[data-theme="dark"], :root[data-theme="dark"][data-hall="middle"], :root[data-theme="dark"][data-hall="high"] {
+  --hl: var(--ink); --hl-ink: var(--paper); --accent: var(--ink); --ok: var(--pen); --warn: var(--ink); --mark: var(--pen); --brand: var(--ink); --brand-ink: var(--ink); --ac: var(--pen); --wa: var(--ink);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]), :root:not([data-theme="light"])[data-hall="middle"], :root:not([data-theme="light"])[data-hall="high"] {
+    --hl: var(--ink); --hl-ink: var(--paper); --accent: var(--ink); --ok: var(--pen); --warn: var(--ink); --mark: var(--pen); --brand: var(--ink); --brand-ink: var(--ink); --ac: var(--pen); --wa: var(--ink);
+  }
+}
+.side-nav a.side-main[aria-current="page"]::before { background: var(--ink); }
+.pts-rule summary b { color: var(--ink); }
+.stage-path li.done .sp-bar span, .stage-path .sp-bar span { background: var(--ink); }
+
+/* 랭킹: 금·은·동 대신 잉크 농도로. 획득한 테두리(fr-*)는 그대로 둔다 */
+.medal { background: transparent; color: var(--ink-2); border: 1px solid var(--rule); }
+.medal.m1 { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.medal.m2, .medal.m3 { background: transparent; color: var(--ink); border-color: var(--ink); }
+.pod.p1 .avatar, .pod.p2 .avatar, .pod.p3 .avatar { box-shadow: 0 0 0 2px var(--ink); }
+.pod .step { border-radius: 0; color: var(--paper); background: var(--ink) !important; }
+.pod.p2 .step, .pod.p3 .step { background: color-mix(in srgb, var(--ink) 70%, var(--paper)) !important; }
+.rank-table thead th, table thead th { background: transparent; border-bottom: 2px solid var(--ink); }
+/* B 보강: 문제 화면의 상태 표시는 색 대신 선과 굵기로 */
+.badge.lv1, .badge.lv2, .badge.lv3, .badge.lv4, .badge.lv5,
+:root[data-theme="dark"] .badge.lv1, :root[data-theme="dark"] .badge.lv2, :root[data-theme="dark"] .badge.lv3, :root[data-theme="dark"] .badge.lv4, :root[data-theme="dark"] .badge.lv5 { background: var(--rule-2); color: var(--ink); }
+.badge.lv4, .badge.lv5, :root[data-theme="dark"] .badge.lv4, :root[data-theme="dark"] .badge.lv5 { background: var(--ink); color: var(--paper); }
+.review-tag.rv-checked, .review-tag.rv-verified { color: var(--ink); border-color: var(--ink); background: transparent; }
+.pad-clear { color: var(--ink-2); }
+@media (max-width: 760px) { .install-banner { background: var(--paper) !important; border: 0 !important; border-top: 2px solid var(--ink) !important; border-radius: 0 !important; box-shadow: none !important; padding-left: 0; padding-right: 0; } }

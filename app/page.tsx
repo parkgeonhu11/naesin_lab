@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ResultText } from "@/components/Badges";
 import AccountCard from "@/components/AccountCard";
 import { IS_PREVIEW } from "@/lib/supabase";
-import { ago, stateOf, subjectName, type BoardRow, type MySummary, type Submission } from "@/lib/data";
+import { ago, stateOf, subjectName, SUBJECTS, type BoardRow, type MySummary, type Submission } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 import { useProblems } from "@/lib/useProblems";
@@ -106,8 +106,8 @@ export default function Home() {
                 </div>
               ) : (
                 <>
-                  <h1 id="today-title">{ready && user && name ? `${name}, 오늘은 이것만 하자` : "오늘은 이것만 해 보자"}</h1>
-                  <p className="lead">5문제 맞히면 오늘 분량 끝. 10분이면 돼.</p>
+                  <h1 id="today-title" className="today-big"><b>{todos.length}</b><span>{ready && user && name ? `${name}, 오늘 할 것` : "오늘 할 것"}<br />10분이면 끝</span></h1>
+                  <p className="lead">5문제 맞히면 오늘 분량 끝.{today ? ` 지금 ${today}문제 맞혔어.` : ""}</p>
                   <div className="today-meter" aria-label={`오늘 ${today}문제 맞힘, 목표 ${DAILY}문제`}>
                     {Array.from({ length: DAILY }, (_, i) => <i key={i} className={i < today ? "on" : ""} />)}
                     <span>{today ? `${today}문제 맞힘` : "아직 시작 전"}</span>
@@ -116,7 +116,7 @@ export default function Home() {
                     {todos.map((t) => (
                       <li key={t.key} className={t.done ? "done" : ""}>
                         <Link href={t.href}>
-                          <span className="todo-box">{t.done ? <Check /> : todos.indexOf(t) + 1}</span>
+                          <span className="todo-box">{t.done ? <Check /> : String(todos.indexOf(t) + 1).padStart(2, "0")}</span>
                           <span className="todo-t">{t.title}<small>{t.note}</small></span>
                           {t.count && <span className="todo-n">{t.count}</span>}
                         </Link>
@@ -146,6 +146,12 @@ export default function Home() {
             </section>
           )}
 
+          <nav className="subj-row" aria-label="과목별로 풀기">
+            {SUBJECTS.filter((x) => x.code !== "hm").map((x) => {
+              const n = (rows ?? []).filter((r) => r.subject === x.code).length;
+              return <Link key={x.code} href={`/problems?subject=${x.code}`}>{x.name}{n > 0 && <small>{n}문제</small>}</Link>;
+            })}
+          </nav>
         </div>
 
         <aside className="today-side" aria-label="내 기록과 랭킹">
