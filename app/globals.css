@@ -1907,3 +1907,15 @@ html[data-theme="dark"] .cols-tbl td.flip { background: #4a3b0a; }
 .pts-rule summary b { color: #ffd76a; }
 .pts-rule div { margin-top: 6px; background: rgba(255, 255, 255, .12); border-radius: 10px; padding: 10px 12px; line-height: 1.6; max-width: 560px; }
 .lcard.result .earn { justify-content: center; }
+
+/* 유형 대표 예제 */
+.type-ex { margin-bottom: 14px; overflow: hidden; }
+.type-ex-head { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; font-weight: 600; }
+.type-ex-head:focus-visible { outline: 2px solid var(--ac); outline-offset: -2px; }
+.type-ex-badge { background: var(--brand); color: #fff; font-size: 12px; font-weight: 700; border-radius: 6px; padding: 2px 8px; }
+.type-ex-arrow { color: var(--faint); }
+.type-ex-body { padding: 0 16px 16px; display: grid; gap: 10px; }
+.type-ex-q { font-size: 16.5px; font-weight: 600; }
+.type-ex-signal { margin: 0; font-size: 14.5px; background: var(--surface); border-radius: 8px; padding: 8px 10px; }
+.type-ex-signal b { margin-right: 6px; }
+.type-ex-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }

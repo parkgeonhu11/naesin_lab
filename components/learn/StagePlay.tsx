@@ -2,10 +2,38 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import Icon from "@/components/Icon";
+import Rich, { RichLine } from "@/components/learn/Rich";
 import Runner, { type RunResult } from "@/components/learn/Runner";
+import { TYPE_EXAMPLES, exampleText, type TypeExample } from "@/lib/learn/typeExamples";
 import { itemsOf } from "@/lib/learn/units";
 import { PASS, summarize, useLearn, type LearnStatus } from "@/lib/learn/useLearn";
 import type { Item, Unit } from "@/lib/learn/types";
+
+/** 유형 대표 예제: 먼저 생각의 순서를 보고 → 직접 풀기 */
+function ExampleCard({ e }: { e: TypeExample }) {
+  const [open, setOpen] = useState(true);
+  const [ans, setAns] = useState(false);
+  return (
+    <section className={`panel type-ex${open ? " open" : ""}`}>
+      <button type="button" className="type-ex-head" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <span className="type-ex-badge">대표 예제</span>
+        <span className="grow">{open ? "풀이 흐름을 먼저 보고 문제로 넘어가자" : "대표 예제 다시 보기"}</span>
+        <span className="type-ex-arrow" aria-hidden="true">{open ? "▴" : "▾"}</span>
+      </button>
+      {open && (
+        <div className="type-ex-body">
+          <Rich text={e.q} className="type-ex-q" />
+          <p className="type-ex-signal"><b>이럴 때 이 유형</b> <RichLine text={e.signal} /></p>
+          <Rich text={exampleText(e)} className="runner-expl" />
+          <div className="type-ex-foot">
+            {ans ? <span>답: <RichLine text={e.answer} /></span> : <button type="button" className="link-btn" onClick={() => setAns(true)}>답 보기</button>}
+            <button type="button" className="btn" onClick={() => setOpen(false)}>이해했어, 문제 풀기</button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
 
 type Mode = { kind: "basic" } | { kind: "type"; tag: string } | { kind: "practical" } | { kind: "review" };
 
@@ -62,6 +90,7 @@ export default function StagePlay({ u, mode }: { u: Unit; mode: Mode }) {
           <Link className="btn" href={`/learn/${u.slug}`}>단원으로</Link>
         </section>
       )}
+      {mode.kind === "type" && TYPE_EXAMPLES[mode.tag] && !result && <ExampleCard e={TYPE_EXAMPLES[mode.tag]} />}
       {items && items.length > 0 && !result && (
         <section className="panel panel-body">
           <Runner key={run} items={items} mode={mode.kind === "review" ? "review" : mode.kind === "practical" ? "practical" : "learn"} typeTitle={typeTitle} onDone={(r) => { setResult(r); reload(); }} />
