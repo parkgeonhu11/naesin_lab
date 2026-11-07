@@ -2204,3 +2204,87 @@ b, strong { font-weight: 600; }
 .tbl tr.mine td { background: var(--surface-2) !important; font-weight: 600; }
 .subj-icon, .subject-badge { background: var(--surface-2) !important; color: var(--text) !important; border: 0; box-shadow: none !important; }
 .tile { background: var(--surface) !important; border-color: var(--line) !important; }
+
+/* =====================================================================
+   종이·잉크·괘선·형광펜 (2026-11 3차)
+   바탕은 살짝 차가운 회백색 종이, 어두운 화면은 칠판색. 카드 대신 괘선 줄.
+   형광펜 노랑은 화면의 큰 행동 하나에만, 관 강조색(중등 파랑·고등 청록)은 링크·진행·선택에.
+   ===================================================================== */
+:root {
+  --paper: #F4F5F2; --paper-2: #FFFFFF; --ink: #1A1C1A; --ink-2: #5E625D;
+  --rule: #D6D9D3; --rule-2: #EBEDE8;
+  --hl: #F3E35F; --hl-ink: #1A1C1A;
+  --accent: #1C6D62; --accent-soft: #DCEEE9;
+  --ok: #2E7D4F; --ok-soft: #E1F0E6; --warn: #B5452F; --warn-soft: #F6E4DF;
+  --r-s: 6px; --r-l: 14px;
+
+  --bg: var(--paper); --surface: var(--paper-2); --surface-2: var(--rule-2); --head: var(--rule-2);
+  --text: var(--ink); --sub: var(--ink-2); --faint: var(--ink-2);
+  --line: var(--rule-2); --line-strong: var(--rule);
+  --brand: var(--accent); --brand-ink: var(--accent); --brand-soft: var(--accent-soft);
+  --ac: var(--ok); --ac-soft: var(--ok-soft); --wa: var(--warn); --wa-soft: var(--warn-soft);
+  --gray-soft: var(--rule-2);
+  --r-sm: var(--r-s); --r-md: var(--r-s); --r-lg: var(--r-l); --r-btn: var(--r-l);
+}
+:root[data-hall="middle"] { --accent: #2457B5; --accent-soft: #DFE8F7; }
+:root[data-theme="dark"] {
+  --paper: #1B1E1C; --paper-2: #242826; --ink: #ECEDE8; --ink-2: #A4A8A2; --rule: #3A3F3B; --rule-2: #2C302E;
+  --hl: #D9C94A; --hl-ink: #1A1C1A; --accent: #6FC3B4; --accent-soft: #1F3934;
+  --ok: #7CC79A; --ok-soft: #1F3328; --warn: #E39682; --warn-soft: #3B2622;
+  --bg: var(--paper); --surface: var(--paper-2); --surface-2: var(--rule-2); --head: var(--rule-2);
+  --text: var(--ink); --sub: var(--ink-2); --faint: var(--ink-2); --line: var(--rule-2); --line-strong: var(--rule);
+  --brand: var(--accent); --brand-ink: var(--accent); --brand-soft: var(--accent-soft);
+  --ac: var(--ok); --ac-soft: var(--ok-soft); --wa: var(--warn); --wa-soft: var(--warn-soft); --gray-soft: var(--rule-2);
+}
+:root[data-theme="dark"][data-hall="middle"] { --accent: #8DB1F2; --accent-soft: #1F2D48; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1B1E1C; --paper-2: #242826; --ink: #ECEDE8; --ink-2: #A4A8A2; --rule: #3A3F3B; --rule-2: #2C302E;
+    --hl: #D9C94A; --hl-ink: #1A1C1A; --accent: #6FC3B4; --accent-soft: #1F3934;
+    --ok: #7CC79A; --ok-soft: #1F3328; --warn: #E39682; --warn-soft: #3B2622;
+    --bg: var(--paper); --surface: var(--paper-2); --surface-2: var(--rule-2); --head: var(--rule-2);
+    --text: var(--ink); --sub: var(--ink-2); --faint: var(--ink-2); --line: var(--rule-2); --line-strong: var(--rule);
+    --brand: var(--accent); --brand-ink: var(--accent); --brand-soft: var(--accent-soft);
+    --ac: var(--ok); --ac-soft: var(--ok-soft); --wa: var(--warn); --wa-soft: var(--warn-soft); --gray-soft: var(--rule-2);
+  }
+  :root:not([data-theme="light"])[data-hall="middle"] { --accent: #8DB1F2; --accent-soft: #1F2D48; }
+}
+body { font-size: 17px; line-height: 1.65; }
+
+/* 카드 → 괘선 줄: 상자 대신 위에 선 한 줄 */
+.panel { background: transparent; border: 0; border-top: 1px solid var(--rule); border-radius: 0; }
+.panel-head { padding: var(--s-4) 0; border-bottom: 1px solid var(--rule-2); }
+.panel-body { padding: var(--s-5) 0; }
+.panel > .table-wrap:last-child, .panel > table:last-child { border-radius: 0; }
+
+/* 버튼: 큰 행동 하나 = 형광펜, 나머지 = 괘선 테두리 */
+.btn { background: var(--hl); border-color: var(--hl); color: var(--hl-ink) !important; font-weight: 700; border-radius: var(--r-l); }
+.btn:hover:not(:disabled) { background: color-mix(in srgb, var(--hl) 90%, var(--ink)); border-color: color-mix(in srgb, var(--hl) 90%, var(--ink)); }
+.btn.line, .btn.white, .btn.ghost, .btn.danger { background: transparent; border-color: var(--rule); color: var(--ink) !important; font-weight: 500; }
+.btn.line:hover:not(:disabled) { background: var(--rule-2); border-color: var(--ink); }
+.btn.big { min-height: 56px; font-size: 19px; }
+.link, a.more, .link-btn { color: var(--accent); }
+.choice[aria-pressed="true"], .rc.on { border-color: var(--accent) !important; box-shadow: inset 0 0 0 1px var(--accent) !important; }
+.choice[aria-pressed="true"] .cn, .rc.on .rc-n { background: var(--accent) !important; border-color: var(--accent) !important; color: var(--paper-2) !important; }
+:focus-visible { outline-color: var(--accent); }
+
+/* 사이드바: 로그인은 글자 링크 */
+.side-google { background: transparent !important; border: 0 !important; color: var(--accent) !important; justify-content: flex-start; padding: var(--s-2) var(--s-1) !important; min-height: 0; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+.top-login { border: 0 !important; color: var(--accent) !important; text-decoration: underline; text-underline-offset: 4px; padding: 0 var(--s-2) !important; }
+.side-nav a.side-main[aria-current="page"]::before { background: var(--accent); }
+.tabbar a[aria-current="page"]::after, .sub-nav a[aria-current="page"]::after { background: var(--accent); }
+
+/* 홈: 상자 없이 종이 위에 바로 */
+.today-sheet { background: transparent; border: 0; border-radius: 0; padding: 0; }
+.todo { border-top: 1px solid var(--rule); }
+.todo a { border-bottom: 1px solid var(--rule); }
+.todo-box { border-color: var(--ink); }
+.today-meter i.on { background: var(--accent); border-color: var(--accent); }
+.today-go .btn { width: 100%; max-width: 420px; }
+.mini { border-top: 1px solid var(--rule); padding-top: var(--s-3); }
+.mini h2 a { color: var(--accent); }
+.mini-say { margin: 0; font-size: 17px; line-height: 1.6; color: var(--ink); }
+.mini-say small { display: block; margin-top: var(--s-1); font-size: 15px; color: var(--ink-2); }
+.mini-list { border-top: 0; }
+.mini-list li { border-bottom-color: var(--rule-2); }
+.side-foot .side-google { justify-content: flex-start !important; width: auto; align-self: flex-start; }

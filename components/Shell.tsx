@@ -71,6 +71,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     setTheme(t ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
   }, []);
   useEffect(() => setOpen(false), [path]);
+  // 관 강조색: 공부(고등 개념 학습)는 청록, 나머지 내신은 파랑
+  useEffect(() => { document.documentElement.dataset.hall = path.startsWith("/learn") ? "high" : "middle"; }, [path]);
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
@@ -158,7 +160,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className="content">
-          {IS_PREVIEW && <div className="preview-bar" role="note"><b>예비 사이트</b> 테스트 전용 DB라 여기서 푼 기록은 실제 랭킹에 안 들어가.</div>}
+          {IS_PREVIEW && amAdmin && <div className="preview-bar" role="note"><b>예비 사이트</b> 테스트 전용 DB라 여기서 푼 기록은 실제 랭킹에 안 들어가.</div>}
           {subNav && (
             <nav className="sub-nav" aria-label={`${group!.label} 메뉴`}>
               {subNav.map((x) => (

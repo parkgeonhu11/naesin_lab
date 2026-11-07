@@ -4,11 +4,9 @@ import AdSlot from "@/components/AdSlot";
 import { useEffect, useMemo, useState } from "react";
 import { ResultText } from "@/components/Badges";
 import AccountCard from "@/components/AccountCard";
-import MockPromo from "@/components/MockPromo";
 import { IS_PREVIEW } from "@/lib/supabase";
-import { ADMIN_ACC, ago, stateOf, subjectName, type BoardRow, type MySummary, type Submission } from "@/lib/data";
+import { ago, stateOf, subjectName, type BoardRow, type MySummary, type Submission } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
-import { useAdmins } from "@/components/Framed";
 import { useMe } from "@/lib/useMe";
 import { useProblems } from "@/lib/useProblems";
 
@@ -24,7 +22,6 @@ function Check() {
 type Todo = { key: string; href: string; title: string; note: string; count?: string; done?: boolean };
 
 export default function Home() {
-  const isAdmin = useAdmins();
   const { user, nickname, error, isAnon, ready } = useMe();
   const { rows, prog } = useProblems();
   const [sum, setSum] = useState<MySummary | null>(null);
@@ -62,8 +59,6 @@ export default function Home() {
   const wrongOpen = (rows ?? []).filter((r) => stateOf(prog[r.id]) === "tried").length;
   const today = Math.min(sum?.today_solved ?? 0, DAILY);
   const enough = today >= DAILY;
-  const meAdmin = isAdmin(user?.id, nickname);
-  const acc = sum ? (meAdmin ? ADMIN_ACC : pct(sum.correct_submissions, sum.submissions)) : 0;
   const weekAcc = sum ? pct(sum.week_ok, sum.week_subs) : 0;
   const growth = sum?.week_subs && sum?.last_subs ? weekAcc - pct(sum.last_ok, sum.last_subs) : null;
 
@@ -75,7 +70,7 @@ export default function Home() {
       t.push({ key: "again", href: "/review", title: "틀렸던 문제 다시 풀기", note: wrongOpen > n ? `오답 노트에서 ${n}문제만. 나머지는 내일 해도 돼` : "오답 노트에 있는 문제", count: `${n}문제` });
     }
     if (IS_PREVIEW) t.push({ key: "learn", href: "/learn/poly", title: "다항식 이어서 공부하기", note: "고1 수학 미리 시작", count: "카드 몇 장" });
-    if (nextProblem) t.push({ key: "next", href: `/problem/${nextProblem.no}`, title: `${subjectName(nextProblem.subject)} ${nextProblem.no}번 풀기`, note: nextProblem.title, count: "1문제" });
+    if (nextProblem) t.push({ key: "next", href: `/problem/${nextProblem.no}`, title: `${subjectName(nextProblem.subject)} ${nextProblem.no}번 풀기`, note: [nextProblem.unit, nextProblem.topic].filter(Boolean).join(" · ") || "시험 범위 문제", count: "1문제" });
     if (!t.length) t.push({ key: "list", href: "/problems", title: "문제 고르기", note: "시험 범위 문제가 과목별로 있어" });
     return t.slice(0, 3);
   }, [wrongOpen, nextProblem]);
@@ -146,36 +141,24 @@ export default function Home() {
                 </div>
               </div>
               <div className="welcome-actions">
-                <Link href="/login" className="btn">로그인</Link>
+                <Link href="/login" className="link">로그인하기</Link>
               </div>
             </section>
           )}
 
-          <nav className="shortcuts" aria-label="바로 가기">
-            {IS_PREVIEW && <Link href="/learn"><b>공부</b><small>개념부터 차근차근</small></Link>}
-            <Link href="/problems"><b>문제</b><small>과목·단원별로 골라 풀기</small></Link>
-            <Link href="/exam"><b>시험지</b><small>범위를 골라 한 번에</small></Link>
-            <Link href="/mock"><b>예상 시험</b><small>시간 재고 실전처럼</small></Link>
-            <Link href="/review"><b>오답 노트</b><small>{wrongOpen ? `다시 풀 문제 ${wrongOpen}개` : "틀린 문제가 모이는 곳"}</small></Link>
-            <Link href="/qna"><b>질문방</b><small>막힌 문제 물어보기</small></Link>
-            {!IS_PREVIEW && <Link href="/suggest"><b>문제 제안</b><small>내가 만든 문제 올리기</small></Link>}
-          </nav>
-          <MockPromo compact />
         </div>
 
         <aside className="today-side" aria-label="내 기록과 랭킹">
           <section className="mini">
             <h2>내 기록 <Link href="/me">성적 분석</Link></h2>
-            <div className="mini-stats">
-              <div><b>{sum?.points ?? 0}<em>점</em></b><small>점수</small></div>
-              <div><b>{sum?.rank ?? "–"}<em>위</em></b><small>전체 순위</small></div>
-              <div><b>{acc}<em>%</em></b><small>정답률</small></div>
-            </div>
-            <p className="mini-week">
-              {sum?.week_subs
-                ? <>이번 주 정답률 {weekAcc}%{growth !== null && <>, 지난주보다 {growth >= 0 ? `${growth}%p 올랐어` : `${-growth}%p 낮아`}</>}</>
-                : "이번 주는 아직 기록이 없어"}
-            </p>
+            {!sum || !sum.submissions ? (
+              <p className="mini-say">아직 기록이 없어. 첫 문제를 맞히면 여기 나와.</p>
+            ) : (
+              <p className="mini-say">
+                {sum.week_subs ? <>이번 주 정답률 {weekAcc}%{growth !== null && <>, 지난주의 나보다 {growth >= 0 ? `${growth}%p 올랐어` : `${-growth}%p 낮아`}</>}.</> : "이번 주는 아직 안 풀었어."}
+                <small>지금까지 {sum.points}점{sum.rank ? `, 전체 ${sum.rank}위` : ""}</small>
+              </p>
+            )}
           </section>
 
           <section className="mini">
