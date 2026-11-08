@@ -4,6 +4,7 @@ import AdSlot from "@/components/AdSlot";
 import { useEffect, useMemo, useState } from "react";
 import { ResultText } from "@/components/Badges";
 import AccountCard from "@/components/AccountCard";
+import { IS_PREVIEW } from "@/lib/supabase";
 import { ago, stateOf, subjectName, SUBJECTS, type BoardRow, type MySummary, type Submission } from "@/lib/data";
 import { isConfigured, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
@@ -150,6 +151,12 @@ export default function Home() {
               return <Link key={x.code} href={`/problems?subject=${x.code}`}>{x.name}{n > 0 && <small>{n}문제</small>}</Link>;
             })}
           </nav>
+          {IS_PREVIEW && ready && user && (
+            <Link href="/textbook" className="tb-cta">
+              <b>우리 학교 교과서 알려 주기</b>
+              <span>출판사를 알려 주면 그 교과서 단원 순서대로 시험 범위를 묶어 줄게</span>
+            </Link>
+          )}
         </div>
 
         <aside className="today-side" aria-label="내 기록과 랭킹">

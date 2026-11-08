@@ -27,6 +27,7 @@ const NAV: NavItem[] = [
       { href: "/review", label: "오답 노트" },
       { href: "/qna", label: "질문방" },
       { href: "/suggest", label: "문제 제안" },
+      ...(IS_PREVIEW ? [{ href: "/textbook", label: "교과서" }] : []),
     ],
   },
   { href: "/ranking", label: "랭킹", icon: "trophy", sub: [{ href: "/ranking", label: "랭킹" }, { href: "/status", label: "채점 현황" }] },

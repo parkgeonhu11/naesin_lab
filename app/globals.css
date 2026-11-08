@@ -2444,3 +2444,33 @@ h1, h2, h3, .page-title h1 { font-weight: 800; letter-spacing: -.04em; }
 .lsp-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-content: start; }
 .lsp-main > .learn > .learn-hero:first-child, .lsp-main > .learn > .unit-hero:first-child { border-top: 0 !important; padding-top: 0; }
 .lsp-main > .learn > .unit-top:first-child { border-top: 0 !important; }
+
+/* ===== 우리 학교 교과서 ===== */
+.tb-lead { margin: 0; max-width: 640px; }
+.tb { display: grid; gap: 12px; }
+.tb-h { font-size: 18px; margin: 0; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
+.tb-list { list-style: none; margin: 0; padding: 0; }
+.tb-row { border-bottom: 1px solid var(--rule); padding: 14px 0; display: grid; gap: 8px; }
+.tb-main { display: grid; grid-template-columns: minmax(120px, 1.1fr) minmax(0, 1.4fr) auto; align-items: center; gap: 12px; }
+.tb-name b { font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
+.tb-name small { display: block; color: var(--ink-2); font-size: 12px; }
+.tb-now { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.tb-pub { font-weight: 700; }
+.tb-mine { margin: 0; }
+.tb-form { display: grid; gap: 10px; max-width: 520px; padding: 4px 0 6px; }
+.tb-form label { display: grid; gap: 4px; }
+.tb-notes { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid var(--rule); display: grid; gap: 10px; }
+.tb-notes p { margin: 2px 0 0; font-size: 14px; }
+.tb-reply { color: var(--ink); background: var(--rule-2); padding: 6px 8px; border-radius: 4px; }
+.tb-add { display: flex; align-items: end; gap: 8px; flex-wrap: wrap; padding-top: 6px; }
+.tb-add label { display: grid; gap: 4px; flex: 1 1 220px; max-width: 360px; }
+.tb-cta { display: grid; gap: 2px; padding: 14px 0; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); color: var(--ink); }
+.tb-cta b { font-size: 16px; font-weight: 800; }
+.tb-cta b::after { content: " →"; }
+.tb-cta span { font-size: 14px; color: var(--ink-2); }
+.tb-cta:hover b { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 640px) {
+  .tb-main { grid-template-columns: minmax(0, 1fr) auto; }
+  .tb-now { grid-column: 1 / -1; grid-row: 2; }
+}
+.tb-row .link-btn { justify-self: start; text-align: left; padding: 0; }

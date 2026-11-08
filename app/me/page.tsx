@@ -8,7 +8,7 @@ import DeleteAccount from "@/components/DeleteAccount";
 import NicknameCard from "@/components/NicknameCard";
 import { TutorialCard } from "@/components/Tutorial";
 import { SUBJECTS, subjectName, type BoardRow, type UnitStat, ADMIN_ACC } from "@/lib/data";
-import { sb } from "@/lib/supabase";
+import { IS_PREVIEW, sb } from "@/lib/supabase";
 import { useMe } from "@/lib/useMe";
 
 const pct = (a: number, b: number) => (b ? Math.round((100 * a) / b) : null);
@@ -98,6 +98,7 @@ export default function MePage() {
       </div>
       <AccountCard />
       <SchoolCard title="학교·학년" compact />
+      {IS_PREVIEW && <Link href="/textbook" className="tb-cta"><b>우리 학교 교과서</b><span>과목별 출판사를 알려 주고 친구들 의견을 봐</span></Link>}
 
       <section className="panel stat-row">
         <div className="stat"><small>누적 점수</small><b>{points}</b></div>
